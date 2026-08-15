@@ -181,6 +181,58 @@ const productCatalog = [
   },
 ]
 
+const bestsellerProducts = [
+  {
+    id: 'bestseller-sattu',
+    name: 'Ayush Sattu',
+    weight: '500g',
+    price: 65,
+    image: '/ayush/product-sattu.png',
+    alt: 'Ayush Sattu bestseller pack',
+    isBestseller: true,
+  },
+  {
+    id: 'bestseller-katarrar-matar',
+    name: 'Katarrar Matar',
+    weight: '150g',
+    price: 25,
+    image: '/ayush/product-katarr-matar.png',
+    alt: 'Ayush Katarrar Matar bestseller pack',
+  },
+  {
+    id: 'bestseller-nimbu-bhujiya',
+    name: 'Nimbu Bhujiya',
+    weight: '200g',
+    price: 30,
+    image: '/ayush/product-nimbu-bhujia.png',
+    alt: 'Ayush Nimbu Bhujiya bestseller pack',
+  },
+  {
+    id: 'bestseller-mixture',
+    name: 'Mixture',
+    weight: '400g',
+    price: 55,
+    image: '/ayush/product-mixture.png',
+    alt: 'Ayush Mixture bestseller pack',
+  },
+  {
+    id: 'bestseller-kursela-chanachur',
+    name: 'Kursela Chanachur',
+    weight: '200g',
+    price: 35,
+    image: '/ayush/product-kursela-chanachur.png',
+    alt: 'Ayush Kursela Chanachur bestseller pack',
+  },
+  {
+    id: 'bestseller-paneer-bhujiya',
+    name: 'Paneer Bhujiya',
+    weight: '200g',
+    price: 40,
+    image: '/ayush/product-paneer-bhujia.png',
+    alt: 'Ayush Paneer Bhujiya bestseller pack',
+  },
+]
+
 function Icon({ name, className = '' }) {
   switch (name) {
     case 'menu':
@@ -1009,42 +1061,137 @@ function ArtworkSection({ id, src, alt, className = '' }) {
   )
 }
 
+function HeritageSection() {
+  return (
+    <Reveal as="section" className="artwork-section artwork-section--heritage" id="heritage">
+      <div className="shell-content shell-content--wide">
+        <div className="heritage-panel">
+          <img
+            src="/ayush/heritage-scene.png"
+            alt="Bihar heritage illustration with temple and camel riders"
+            className="full-bleed-image heritage-panel__image"
+            loading="lazy"
+          />
+
+          <div className="heritage-panel__content">
+            <h2 className="heritage-panel__title">
+              <span>About Us</span>
+              <span> - Ayush Kursela</span>
+            </h2>
+
+            <p className="heritage-panel__eyebrow">Kursela ki pehchaan, Bihar ka swad</p>
+
+            <div className="heritage-panel__copy">
+              <p>Crafting authentic flavours from the heart of Bihar.</p>
+              <p>Ayush Kursela brings generations of tradition to every bite.</p>
+              <p>
+                Made with premium ingredients expertly curated to bring you the
+                true essence of Bihar, our snacks are loved across India for their
+                unmatched freshness, taste, and quality.
+              </p>
+            </div>
+
+            <div className="heritage-panel__divider" aria-hidden="true" />
+
+            <a className="heritage-panel__cta" href="#about">
+              Discover More
+            </a>
+          </div>
+        </div>
+      </div>
+    </Reveal>
+  )
+}
+
 function ModeSelection() {
   return (
     <Reveal as="section" className="mode-section" id="shopping-modes">
       <div className="shell-content">
-        <div className="mode-grid">
+        <div className="retail-wholesale-wrapper">
           <a
             className="mode-card"
-            href="#shopping-modes"
-            aria-label="Explore retail mode for individual customers"
+            href="#products"
+            aria-label="Open retail mode for individual customers"
           >
             <img
-              src="/ayush/retail-card.png"
-              alt="Retail mode card for individual customers"
+              src="/ayush/retail-mode-banner.png"
+              alt="Retail Mode banner for individual customers"
               loading="lazy"
             />
           </a>
-
-          <span className="mode-or-badge" aria-hidden="true">
-            OR
-          </span>
-
-          <div className="mode-or-badge mode-or-badge--mobile" aria-hidden="true">
-            OR
-          </div>
 
           <a
             className="mode-card"
             href="#contact"
-            aria-label="Enquire about wholesale mode for business and resellers"
+            aria-label="Open wholesale mode for business and resellers"
           >
             <img
-              src="/ayush/wholesale-card.png"
-              alt="Wholesale mode card for business and resellers"
+              src="/ayush/wholesale-mode-banner.png"
+              alt="Wholesale Mode banner for business and resellers"
               loading="lazy"
             />
           </a>
+        </div>
+      </div>
+    </Reveal>
+  )
+}
+
+function BestsellerCard({ product }) {
+  return (
+    <article className="bestseller-card">
+      <div className="bestseller-card__image-wrap">
+        <img src={product.image} alt={product.alt} loading="lazy" />
+      </div>
+
+      <div className="bestseller-card__content">
+        <span
+          className={[
+            'bestseller-card__badge',
+            product.isBestseller ? '' : 'bestseller-card__badge--ghost',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+          aria-hidden={!product.isBestseller}
+        >
+          Best Seller
+        </span>
+
+        <h3 className="bestseller-card__title">{product.name}</h3>
+        <p className="bestseller-card__weight">{product.weight}</p>
+        <p className="bestseller-card__price">{`\u20B9${product.price}`}</p>
+
+        <button type="button" className="buy-now-btn" aria-label={`Buy ${product.name}`}>
+          <Icon name="cart" className="buy-now-btn__icon" />
+          Buy Now
+        </button>
+      </div>
+    </article>
+  )
+}
+
+function BestsellersSection() {
+  return (
+    <Reveal as="section" className="bestsellers-section" id="bestsellers">
+      <div className="shell-content">
+        <div className="bestsellers-shell">
+          <div className="bestsellers-heading">
+            <h2 className="sr-only">Our Bestsellers</h2>
+            <p className="sr-only">Loved by Millions, Every Day!</p>
+            <img
+              src="/ayush/bestsellers-banner-small.png"
+              alt=""
+              aria-hidden="true"
+              className="bestsellers-heading__image"
+              loading="lazy"
+            />
+          </div>
+
+          <div className="bestseller-grid" aria-label="Our bestseller products">
+            {bestsellerProducts.map((product) => (
+              <BestsellerCard key={product.id} product={product} />
+            ))}
+          </div>
         </div>
       </div>
     </Reveal>
@@ -1055,49 +1202,13 @@ function FactoryBanner() {
   return (
     <Reveal as="section" className="factory-section" id="about">
       <div className="shell-content">
-        <div className="factory-banner">
-          <div className="factory-banner__media factory-banner__media--left">
-            <img
-              src="/ayush/factory-bowls.png"
-              alt="Bowls of Ayush namkeen varieties"
-              loading="lazy"
-            />
-          </div>
-
-          <div className="factory-banner__content">
-            <img
-              className="factory-banner__logo"
-              src="/ayush/logo.png"
-              alt="Ayush Kursela logo"
-              loading="lazy"
-            />
-            <p className="factory-banner__eyebrow">Authentic Taste</p>
-            <h2>Since Generations</h2>
-            <p className="factory-banner__copy">
-              Ayush Kursela Dalmot is made with carefully selected ingredients and
-              time-honored recipes that bring you the taste of trust, purity, and
-              quality in every bite.
-            </p>
-
-            <div className="factory-banner__benefits">
-              {factoryBenefits.map((item) => (
-                <div key={item.label} className="factory-benefit">
-                  <span className="factory-benefit__icon">
-                    <Icon name={item.icon} className="stroke-icon" />
-                  </span>
-                  <span>{item.label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="factory-banner__media factory-banner__media--right">
-            <img
-              src="/ayush/factory-building.png"
-              alt="Ayush Kursela Dalmot factory building"
-              loading="lazy"
-            />
-          </div>
+        <div className="factory-banner factory-banner--image">
+          <img
+            className="factory-banner__image"
+            src="/ayush/factory-authentic-banner-thin.png"
+            alt="Ayush Kursela banner with namkeen bowls, logo, authentic taste message, and factory building"
+            loading="lazy"
+          />
         </div>
       </div>
     </Reveal>
@@ -1108,18 +1219,12 @@ function FeaturesStrip() {
   return (
     <Reveal as="section" className="feature-strip">
       <div className="shell-content">
-        <div className="feature-strip__grid">
-          {featureItems.map((item) => (
-            <article key={item.title} className="feature-item">
-              <div className="feature-item__icon">
-                <Icon name={item.icon} className="stroke-icon" />
-              </div>
-              <div>
-                <h3>{item.title}</h3>
-                <p>{item.description}</p>
-              </div>
-            </article>
-          ))}
+        <div className="feature-strip__banner">
+          <img
+            src="/ayush/quality-strip-banner.png"
+            alt="Quality banner showing 100 percent pure ingredients, hygienically processed, no added preservatives, and pan India delivery"
+            loading="lazy"
+          />
         </div>
       </div>
     </Reveal>
@@ -1292,13 +1397,9 @@ function App() {
       <main>
         <HeroBanner />
         <BrandStorySection />
-        <ArtworkSection
-          id="heritage"
-          src="/ayush/heritage-scene.png"
-          alt="Bihar heritage illustration with temple and camel riders"
-          className="artwork-section--heritage"
-        />
+        <HeritageSection />
         <ModeSelection />
+        <BestsellersSection />
         <FactoryBanner />
         <FeaturesStrip />
       </main>

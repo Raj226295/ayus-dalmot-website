@@ -8,6 +8,18 @@ const menuLinks = [
   { label: 'Contact', href: '#contact' },
 ]
 
+const defaultNavHref = menuLinks[0].href
+
+function getCurrentNavHref() {
+  if (typeof window === 'undefined') {
+    return defaultNavHref
+  }
+
+  const currentHash = window.location.hash
+
+  return menuLinks.some((item) => item.href === currentHash) ? currentHash : defaultNavHref
+}
+
 const footerLinks = {
   quickLinks: [
     'Home',
@@ -230,6 +242,22 @@ function Icon({ name, className = '' }) {
           <circle cx="9" cy="20" r="1.5" />
           <circle cx="18" cy="20" r="1.5" />
           <path d="M3 4h2l2.4 10.5a1 1 0 0 0 1 .8h8.8a1 1 0 0 0 1-.8L20 8H7" />
+        </svg>
+      )
+    case 'search':
+      return (
+        <svg
+          aria-hidden="true"
+          className={className}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.9"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx="11" cy="11" r="6.5" />
+          <path d="m16 16 4.2 4.2" />
         </svg>
       )
     case 'truck':
@@ -512,6 +540,14 @@ function TopBar() {
 
 function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [activeHref, setActiveHref] = useState(getCurrentNavHref)
+  const [isScrolled, setIsScrolled] = useState(
+    () => typeof window !== 'undefined' && window.scrollY > 18,
+  )
+  const mobileSearchInputRef = useRef(null)
+  const cartItemCount = 2
 
   useEffect(() => {
     document.body.classList.toggle('menu-open', menuOpen)
@@ -519,23 +555,238 @@ function Navbar() {
     return () => document.body.classList.remove('menu-open')
   }, [menuOpen])
 
-  return (
-    <header className="site-header">
-      <div className="shell-content site-header__inner">
-        <a className="brand-mark" href="#home" aria-label="Ayush Kursela home">
-          <img src="/ayush/logo.png" alt="Ayush Kursela logo" />
-        </a>
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return undefined
+    }
 
-        <button
-          type="button"
-          className="menu-toggle"
-          aria-expanded={menuOpen}
-          aria-controls="site-navigation"
-          aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-          onClick={() => setMenuOpen((value) => !value)}
+    const handleHashChange = () => setActiveHref(getCurrentNavHref())
+    const handleScroll = () => setIsScrolled(window.scrollY > 18)
+
+    window.addEventListener('hashchange', handleHashChange)
+    window.addEventListener('scroll', handleScroll, { passive: true })
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange)
+      window.removeEventListener('scroll', handleScroll)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!mobileSearchOpen) {
+      return
+    }
+
+    mobileSearchInputRef.current?.focus()
+  }, [mobileSearchOpen])
+
+  const navigateToSection = (href) => {
+    setActiveHref(href)
+
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+      return
+    }
+
+    const targetId = href.replace('#', '')
+    const target = document.getElementById(targetId)
+
+    if (!target) {
+      window.location.hash = href
+      return
+    }
+
+    const headerHeight =
+      document.querySelector('.site-header')?.getBoundingClientRect().height ?? 0
+    const targetTop =
+      target.getBoundingClientRect().top + window.scrollY - headerHeight - 12
+
+    window.history.replaceState(null, '', href)
+    window.scrollTo({
+      top: Math.max(targetTop, 0),
+      behavior: 'smooth',
+    })
+  }
+
+  const handleNavLinkClick = (event, href) => {
+    event.preventDefault()
+    setMenuOpen(false)
+    setMobileSearchOpen(false)
+    navigateToSection(href)
+  }
+
+  const handleSearchSubmit = (event) => {
+    event.preventDefault()
+
+    const normalizedQuery = searchQuery.trim().toLowerCase()
+    const matchedNavItem = menuLinks.find((item) =>
+      item.label.toLowerCase().includes(normalizedQuery),
+    )
+    const matchedProduct = productCatalog.find((product) =>
+      product.name.toLowerCase().includes(normalizedQuery),
+    )
+    const targetHref =
+      matchedNavItem?.href ?? (matchedProduct || normalizedQuery ? '#products' : defaultNavHref)
+
+    setMenuOpen(false)
+    setMobileSearchOpen(false)
+    navigateToSection(targetHref)
+  }
+
+  const toggleMenu = () => {
+    setMenuOpen((value) => !value)
+    setMobileSearchOpen(false)
+  }
+
+  const toggleMobileSearch = () => {
+    setMobileSearchOpen((value) => !value)
+    setMenuOpen(false)
+  }
+
+  return (
+    <header
+      className={['site-header', isScrolled ? 'is-scrolled' : '']
+        .filter(Boolean)
+        .join(' ')}
+    >
+      <div className="shell-content site-header__inner">
+        <div className="site-header__desktop">
+          <a
+            className="brand-mark"
+            href="#home"
+            aria-label="Ayush Kursela home"
+            onClick={(event) => handleNavLinkClick(event, '#home')}
+          >
+            <img src="/ayush/logo-navbar-clean.png" alt="Ayush Kursela logo" />
+          </a>
+
+          <nav className="site-nav site-nav--desktop" aria-label="Primary">
+            {menuLinks.map((item) => (
+              <a
+                key={item.label}
+                className={activeHref === item.href ? 'is-active' : ''}
+                href={item.href}
+                aria-current={activeHref === item.href ? 'page' : undefined}
+                onClick={(event) => handleNavLinkClick(event, item.href)}
+              >
+                {item.label}
+              </a>
+            ))}
+          </nav>
+
+          <div className="site-header__actions site-header__actions--desktop">
+            <form className="site-search" role="search" onSubmit={handleSearchSubmit}>
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Search products..."
+                aria-label="Search products"
+              />
+              <button
+                type="submit"
+                className="site-search__button"
+                aria-label="Submit product search"
+              >
+                <Icon name="search" className="site-search__icon" />
+              </button>
+            </form>
+
+            <button type="button" className="icon-button" aria-label="Profile">
+              <Icon name="user" className="icon-button__icon" />
+            </button>
+            <button
+              type="button"
+              className="icon-button icon-button--cart"
+              aria-label="Shopping cart"
+            >
+              <Icon name="cart" className="icon-button__icon" />
+              {cartItemCount > 0 ? (
+                <span className="icon-button__badge" aria-hidden="true">
+                  {cartItemCount}
+                </span>
+              ) : null}
+            </button>
+          </div>
+        </div>
+
+        <div className="site-header__mobile">
+          <div className="site-header__mobile-start">
+            <button
+              type="button"
+              className="menu-toggle"
+              aria-expanded={menuOpen}
+              aria-controls="site-navigation"
+              aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              onClick={toggleMenu}
+            >
+              <Icon name={menuOpen ? 'close' : 'menu'} className="menu-toggle__icon" />
+            </button>
+          </div>
+
+          <a
+            className="brand-mark brand-mark--mobile"
+            href="#home"
+            aria-label="Ayush Kursela home"
+            onClick={(event) => handleNavLinkClick(event, '#home')}
+          >
+            <img src="/ayush/logo-navbar-clean.png" alt="Ayush Kursela logo" />
+          </a>
+
+          <div className="site-header__actions site-header__actions--mobile">
+            <button
+              type="button"
+              className={['icon-button', mobileSearchOpen ? 'is-active' : '']
+                .filter(Boolean)
+                .join(' ')}
+              aria-expanded={mobileSearchOpen}
+              aria-controls="mobile-search-panel"
+              aria-label={mobileSearchOpen ? 'Close product search' : 'Open product search'}
+              onClick={toggleMobileSearch}
+            >
+              <Icon name="search" className="icon-button__icon" />
+            </button>
+            <button type="button" className="icon-button" aria-label="Profile">
+              <Icon name="user" className="icon-button__icon" />
+            </button>
+            <button
+              type="button"
+              className="icon-button icon-button--cart"
+              aria-label="Shopping cart"
+            >
+              <Icon name="cart" className="icon-button__icon" />
+              {cartItemCount > 0 ? (
+                <span className="icon-button__badge" aria-hidden="true">
+                  {cartItemCount}
+                </span>
+              ) : null}
+            </button>
+          </div>
+        </div>
+
+        <div
+          className={['site-header__mobile-search', mobileSearchOpen ? 'is-open' : '']
+            .filter(Boolean)
+            .join(' ')}
+          id="mobile-search-panel"
         >
-          <Icon name={menuOpen ? 'close' : 'menu'} className="menu-toggle__icon" />
-        </button>
+          <form className="site-search site-search--mobile" role="search" onSubmit={handleSearchSubmit}>
+            <input
+              ref={mobileSearchInputRef}
+              type="search"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Search products..."
+              aria-label="Search products"
+            />
+            <button
+              type="submit"
+              className="site-search__button"
+              aria-label="Submit product search"
+            >
+              <Icon name="search" className="site-search__icon" />
+            </button>
+          </form>
+        </div>
 
         <div
           className={['site-header__panel', menuOpen ? 'is-open' : '']
@@ -543,27 +794,19 @@ function Navbar() {
             .join(' ')}
           id="site-navigation"
         >
-          <nav className="site-nav" aria-label="Primary">
-            {menuLinks.map((item, index) => (
+          <nav className="site-nav site-nav--mobile" aria-label="Mobile primary">
+            {menuLinks.map((item) => (
               <a
                 key={item.label}
-                className={index === 0 ? 'is-active' : ''}
+                className={activeHref === item.href ? 'is-active' : ''}
                 href={item.href}
-                onClick={() => setMenuOpen(false)}
+                aria-current={activeHref === item.href ? 'page' : undefined}
+                onClick={(event) => handleNavLinkClick(event, item.href)}
               >
                 {item.label}
               </a>
             ))}
           </nav>
-
-          <div className="site-header__actions">
-            <button type="button" className="icon-button" aria-label="Profile">
-              <Icon name="user" className="icon-button__icon" />
-            </button>
-            <button type="button" className="icon-button" aria-label="Shopping cart">
-              <Icon name="cart" className="icon-button__icon" />
-            </button>
-          </div>
         </div>
       </div>
     </header>
@@ -621,86 +864,50 @@ function ProductCard({ isWishlisted, onToggleWishlist, product }) {
 
       <button type="button" className="product-card__button">
         <Icon name="cart" className="product-card__button-icon" />
-        Buy Now
+        Add to Cart
       </button>
     </article>
   )
 }
 
 function ProductCarousel() {
-  const trackRef = useRef(null)
-  const [canScrollPrev, setCanScrollPrev] = useState(false)
-  const [canScrollNext, setCanScrollNext] = useState(true)
+  const getVisibleCards = () => {
+    if (typeof window === 'undefined') {
+      return 4
+    }
+
+    if (window.innerWidth <= 680) {
+      return 1
+    }
+
+    if (window.innerWidth <= 980) {
+      return 3
+    }
+
+    return 4
+  }
+
+  const [visibleCards, setVisibleCards] = useState(getVisibleCards)
+  const [currentIndex, setCurrentIndex] = useState(0)
   const [wishlistState, setWishlistState] = useState(() =>
     Object.fromEntries(productCatalog.map((product) => [product.id, false])),
   )
 
   useEffect(() => {
-    const track = trackRef.current
+    const syncVisibleCards = () => setVisibleCards(getVisibleCards())
 
-    if (!track) {
-      return undefined
-    }
+    window.addEventListener('resize', syncVisibleCards)
 
-    const syncScrollState = () => {
-      const maxScrollLeft = track.scrollWidth - track.clientWidth
-      setCanScrollPrev(track.scrollLeft > 4)
-      setCanScrollNext(track.scrollLeft < maxScrollLeft - 4)
-    }
-
-    const pendingImages = Array.from(track.querySelectorAll('img'))
-      .filter((image) => !image.complete)
-
-    pendingImages.forEach((image) => image.addEventListener('load', syncScrollState))
-
-    track.addEventListener('scroll', syncScrollState, { passive: true })
-    window.addEventListener('resize', syncScrollState)
-
-    let resizeObserver
-
-    if (typeof ResizeObserver !== 'undefined') {
-      resizeObserver = new ResizeObserver(syncScrollState)
-      resizeObserver.observe(track)
-    }
-
-    syncScrollState()
-
-    return () => {
-      pendingImages.forEach((image) => image.removeEventListener('load', syncScrollState))
-      track.removeEventListener('scroll', syncScrollState)
-      window.removeEventListener('resize', syncScrollState)
-
-      if (resizeObserver) {
-        resizeObserver.disconnect()
-      }
-    }
+    return () => window.removeEventListener('resize', syncVisibleCards)
   }, [])
 
-  const scrollProducts = (direction) => {
-    const track = trackRef.current
+  const maxStartIndex = Math.max(productCatalog.length - visibleCards, 0)
+  const canScrollPrev = currentIndex > 0
+  const canScrollNext = currentIndex < maxStartIndex
 
-    if (!track) {
-      return
-    }
-
-    const firstCard = track.querySelector('.product-card')
-    const gap = Number.parseFloat(window.getComputedStyle(track).gap) || 0
-    const cardWidth = firstCard
-      ? firstCard.getBoundingClientRect().width
-      : track.clientWidth
-
-    const cardsPerStep = Math.max(
-      1,
-      Math.round((track.clientWidth + gap) / Math.max(cardWidth + gap, 1)),
-    )
-
-    const scrollAmount = cardWidth * cardsPerStep + gap * cardsPerStep
-
-    track.scrollBy({
-      left: direction * scrollAmount,
-      behavior: 'smooth',
-    })
-  }
+  useEffect(() => {
+    setCurrentIndex((value) => Math.min(value, maxStartIndex))
+  }, [maxStartIndex])
 
   const toggleWishlist = (productId) => {
     setWishlistState((current) => ({
@@ -708,6 +915,16 @@ function ProductCarousel() {
       [productId]: !current[productId],
     }))
   }
+
+  const scrollProducts = (direction) => {
+    setCurrentIndex((value) => {
+      const nextIndex = value + direction
+
+      return Math.max(0, Math.min(nextIndex, maxStartIndex))
+    })
+  }
+
+  const visibleProducts = productCatalog.slice(currentIndex, currentIndex + visibleCards)
 
   return (
     <div className="product-carousel-shell">
@@ -725,9 +942,9 @@ function ProductCarousel() {
             <Icon name="chevron-left" className="product-carousel__arrow-icon" />
           </button>
 
-          <div className="product-carousel__viewport" ref={trackRef}>
+          <div className="product-carousel__viewport">
             <div className="product-carousel__track">
-              {productCatalog.map((product) => (
+              {visibleProducts.map((product) => (
                 <ProductCard
                   key={product.id}
                   product={product}
@@ -945,7 +1162,11 @@ function Footer() {
       <div className="shell-content">
         <div className="footer-top">
           <div className="footer-brand">
-            <img src="/ayush/logo.png" alt="Ayush Kursela logo" className="footer-brand__logo" />
+            <img
+              src="/ayush/logo-ayush-kursela-clean.png"
+              alt="Ayush Kursela logo"
+              className="footer-brand__logo"
+            />
             <h3>Pure Taste. Trusted Quality.</h3>
             <p>
               From our kitchen to your home, delicious snacks made with love and

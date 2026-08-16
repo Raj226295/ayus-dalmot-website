@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+﻿import { useEffect, useRef, useState } from 'react'
 import './App.css'
 
 const menuLinks = [
@@ -182,7 +182,7 @@ const footerMetaHighlights = [
     id: 'trusted',
     title: 'Trusted by',
     emphasis: 'Lakhs of Families',
-    subtitle: '★★★★★',
+    subtitle: 'â˜…â˜…â˜…â˜…â˜…',
     icon: 'badge',
   },
   {
@@ -199,6 +199,14 @@ const footerMetaHighlights = [
     subtitle: '',
     icon: 'heart',
   },
+]
+
+const paymentMethods = [
+  { label: 'UPI', tone: 'upi' },
+  { label: 'Visa', tone: 'visa' },
+  { label: 'Mastercard', tone: 'mastercard' },
+  { label: 'RuPay', tone: 'rupay' },
+  { label: 'Paytm', tone: 'paytm' },
 ]
 
 const productCatalog = [
@@ -734,7 +742,7 @@ async function shareCurrentProduct(product, sectionId = 'products') {
 
   const payload = {
     title: `Ayush Kursela - ${product.name}`,
-    text: `${product.name} ${product.weight} - ₹${product.price}`,
+    text: `${product.name} ${product.weight} - â‚¹${product.price}`,
     url: productUrl,
   }
 
@@ -772,25 +780,42 @@ function FooterLinkItem({ item }) {
   )
 }
 
-function FooterPanelSection({ panel, isOpen, onToggle }) {
+function FooterPanelSection({ panel, isCollapsible, isOpen, onToggle }) {
   const panelId = `footer-panel-${panel.id}`
+  const panelClasses = [
+    'footer-section-panel',
+    isCollapsible ? 'is-collapsible' : 'is-static',
+    isOpen ? 'is-open' : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
+  const bodyClasses = [
+    'footer-section-panel__body',
+    !isCollapsible || isOpen ? 'is-open' : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
 
   return (
-    <section
-      className={['footer-section-panel', isOpen ? 'is-open' : ''].filter(Boolean).join(' ')}
-    >
+    <section className={panelClasses}>
       <button
         type="button"
         className="footer-section-panel__toggle"
-        aria-expanded={isOpen}
+        aria-expanded={isCollapsible ? isOpen : true}
         aria-controls={panelId}
-        onClick={() => onToggle(panel.id)}
+        onClick={() => {
+          if (isCollapsible) {
+            onToggle(panel.id)
+          }
+        }}
       >
         <span>{panel.title}</span>
-        <span className="footer-section-panel__symbol" aria-hidden="true" />
+        <span className="footer-section-panel__symbol" aria-hidden="true">
+          <Icon name="chevron-right" className="footer-section-panel__symbol-icon" />
+        </span>
       </button>
 
-      <div className="footer-section-panel__body" id={panelId}>
+      <div className={bodyClasses} id={panelId}>
         <div className="footer-section-panel__body-inner">
           {panel.type === 'links' ? (
             <ul className="footer-section-panel__list">
@@ -1683,7 +1708,10 @@ function ContactRow({ icon, title, body, note }) {
 }
 
 function Footer() {
-  const [openPanel, setOpenPanel] = useState('quick-links')
+  const [openPanel, setOpenPanel] = useState(null)
+  const [isMobileFooter, setIsMobileFooter] = useState(
+    () => typeof window !== 'undefined' && window.innerWidth <= 768,
+  )
   const currentYear = new Date().getFullYear()
   const footerPanels = [
     {
@@ -1738,6 +1766,29 @@ function Footer() {
       ],
     },
   ]
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return undefined
+    }
+
+    const mediaQuery = window.matchMedia('(max-width: 768px)')
+    const syncMobileFooter = (event) => {
+      setIsMobileFooter(event.matches)
+    }
+
+    setIsMobileFooter(mediaQuery.matches)
+
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener('change', syncMobileFooter)
+
+      return () => mediaQuery.removeEventListener('change', syncMobileFooter)
+    }
+
+    mediaQuery.addListener(syncMobileFooter)
+
+    return () => mediaQuery.removeListener(syncMobileFooter)
+  }, [])
 
   const togglePanel = (panelId) => {
     setOpenPanel((current) => (current === panelId ? null : panelId))
@@ -1800,14 +1851,17 @@ function Footer() {
             </div>
           </section>
 
-          {footerPanels.map((panel) => (
-            <FooterPanelSection
-              key={panel.id}
-              panel={panel}
-              isOpen={openPanel === panel.id}
-              onToggle={togglePanel}
-            />
-          ))}
+          <div className="footer-links-grid">
+            {footerPanels.map((panel) => (
+              <FooterPanelSection
+                key={panel.id}
+                panel={panel}
+                isCollapsible={isMobileFooter}
+                isOpen={openPanel === panel.id}
+                onToggle={togglePanel}
+              />
+            ))}
+          </div>
         </div>
 
         <section className="footer-newsletter-card" id="footer-newsletter">
@@ -1853,14 +1907,39 @@ function Footer() {
         </section>
 
         <div className="footer-meta-row">
-          <div className="footer-meta-row__scroller">
-            <div className="footer-meta-row__banner-frame">
-              <img
-                src="/ayush/footer-meta-trust-strip.png"
-                alt="Trusted by Lakhs of Families, Authentic Taste Since 1989, Made with Love in Every Bite, and accepted payments UPI, Visa, Mastercard, RuPay, and Paytm."
-                className="footer-meta-row__banner"
-                loading="lazy"
-              />
+          <div className="footer-meta-row__items">
+            {footerMetaHighlights.map((item) => (
+              <article key={item.id} className="footer-meta-highlight">
+                <span className="footer-meta-highlight__icon">
+                  <Icon name={item.icon} className="stroke-icon" />
+                </span>
+                <div className="footer-meta-highlight__copy">
+                  <p className="footer-meta-highlight__title">{item.title}</p>
+                  <p className="footer-meta-highlight__emphasis">{item.emphasis}</p>
+                  {item.subtitle || item.id === 'trusted' ? (
+                    <p className="footer-meta-highlight__subtitle" aria-label="5 star rating">
+                      {item.id === 'trusted' ? '\u2605\u2605\u2605\u2605\u2605' : item.subtitle}
+                    </p>
+                  ) : null}
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <div className="footer-payments">
+            <span className="footer-payments__label">We Accept</span>
+            <div className="footer-payments__list" aria-label="Accepted payment methods">
+              {paymentMethods.map((item) => (
+                <span
+                  key={item.label}
+                  className={[
+                    'footer-payment-chip',
+                    `footer-payment-chip--${item.tone}`,
+                  ].join(' ')}
+                >
+                  {item.label}
+                </span>
+              ))}
             </div>
           </div>
         </div>
@@ -1987,3 +2066,4 @@ function App() {
 }
 
 export default App
+

@@ -8,6 +8,13 @@ const menuLinks = [
   { label: 'Contact', href: '#contact' },
 ]
 
+const announcementItems = [
+  'Pure Ingredients.',
+  'Authentic Taste.',
+  'Ayush Quality.',
+  'Delivering Happiness Across India',
+]
+
 const defaultNavHref = menuLinks[0].href
 
 function getCurrentNavHref() {
@@ -18,6 +25,14 @@ function getCurrentNavHref() {
   const currentHash = window.location.hash
 
   return menuLinks.some((item) => item.href === currentHash) ? currentHash : defaultNavHref
+}
+
+function getCurrentPageHash() {
+  if (typeof window === 'undefined') {
+    return defaultNavHref
+  }
+
+  return window.location.hash || defaultNavHref
 }
 
 const footerLinks = {
@@ -119,8 +134,6 @@ const trustItems = [
     icon: 'heart',
   },
 ]
-
-const paymentMethods = ['UPI', 'Visa', 'Mastercard', 'RuPay', 'Paytm']
 
 const footerContactInfo = {
   phone: '+91 12345 67890',
@@ -299,6 +312,8 @@ const bestsellerProducts = [
   },
 ]
 
+const baseCartItemCount = 2
+
 function Icon({ name, className = '' }) {
   switch (name) {
     case 'menu':
@@ -360,6 +375,25 @@ function Icon({ name, className = '' }) {
           <circle cx="9" cy="20" r="1.5" />
           <circle cx="18" cy="20" r="1.5" />
           <path d="M3 4h2l2.4 10.5a1 1 0 0 0 1 .8h8.8a1 1 0 0 0 1-.8L20 8H7" />
+        </svg>
+      )
+    case 'share':
+      return (
+        <svg
+          aria-hidden="true"
+          className={className}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.9"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx="18" cy="5.5" r="2.5" />
+          <circle cx="6" cy="12" r="2.5" />
+          <circle cx="18" cy="18.5" r="2.5" />
+          <path d="M8.35 10.8 15.65 6.7" />
+          <path d="M8.35 13.2 15.65 17.3" />
         </svg>
       )
     case 'search':
@@ -605,21 +639,26 @@ function Icon({ name, className = '' }) {
   }
 }
 
-function scrollToHashTarget(href) {
+function scrollToHashTarget(href, options = {}) {
+  const { behavior = 'smooth', updateUrl = true } = options
+
   if (
     typeof window === 'undefined' ||
     typeof document === 'undefined' ||
     !href.startsWith('#')
   ) {
-    return
+    return false
   }
 
   const targetId = href.replace('#', '')
   const target = document.getElementById(targetId)
 
   if (!target) {
-    window.location.hash = href
-    return
+    if (updateUrl) {
+      window.location.hash = href
+    }
+
+    return false
   }
 
   const headerHeight =
@@ -627,11 +666,92 @@ function scrollToHashTarget(href) {
   const targetTop =
     target.getBoundingClientRect().top + window.scrollY - headerHeight - 12
 
-  window.history.replaceState(null, '', href)
+  if (updateUrl) {
+    window.history.replaceState(null, '', href)
+  }
+
   window.scrollTo({
     top: Math.max(targetTop, 0),
-    behavior: 'smooth',
+    behavior,
   })
+
+  return true
+}
+
+function triggerProductCta() {
+  scrollToHashTarget('#shopping-modes')
+}
+
+function buildProductShareUrl(product, sectionId = 'products') {
+  const shareUrl = new URL(window.location.href)
+
+  shareUrl.hash = sectionId
+  shareUrl.search = ''
+  shareUrl.searchParams.set('product', product.id)
+
+  return shareUrl.toString()
+}
+
+async function copyTextToClipboard(text) {
+  if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text)
+      return true
+    } catch {
+      // Fall through to the document copy fallback below.
+    }
+  }
+
+  if (typeof document === 'undefined') {
+    return false
+  }
+
+  const hiddenField = document.createElement('textarea')
+
+  hiddenField.value = text
+  hiddenField.setAttribute('readonly', '')
+  hiddenField.style.position = 'fixed'
+  hiddenField.style.opacity = '0'
+  hiddenField.style.pointerEvents = 'none'
+
+  document.body.appendChild(hiddenField)
+  hiddenField.focus()
+  hiddenField.select()
+
+  const didCopy = document.execCommand('copy')
+
+  document.body.removeChild(hiddenField)
+
+  return didCopy
+}
+
+async function shareCurrentProduct(product, sectionId = 'products') {
+  if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+    return 'unavailable'
+  }
+
+  const productUrl = buildProductShareUrl(product, sectionId)
+
+  const payload = {
+    title: `Ayush Kursela - ${product.name}`,
+    text: `${product.name} ${product.weight} - ₹${product.price}`,
+    url: productUrl,
+  }
+
+  try {
+    if (typeof navigator.share === 'function') {
+      await navigator.share(payload)
+      return 'shared'
+    }
+  } catch (error) {
+    if (error?.name === 'AbortError') {
+      return 'cancelled'
+    }
+  }
+
+  const didCopy = await copyTextToClipboard(productUrl)
+
+  return didCopy ? 'copied' : 'unavailable'
 }
 
 function FooterLinkItem({ item }) {
@@ -746,20 +866,32 @@ function Reveal({ as: Tag = 'section', className = '', children, ...props }) {
 }
 
 function TopBar() {
+  const marqueeItems = [...announcementItems, ...announcementItems]
+
   return (
-    <div className="announcement-bar">
-      <div className="shell-content announcement-bar__inner">
-        <p>Pure Ingredients. Authentic Taste. Ayush Quality.</p>
-        <p className="announcement-bar__delivery">
-          <Icon name="truck" className="announcement-bar__icon" />
-          Delivering Happiness Across India
-        </p>
+    <div className="announcement-bar" role="region" aria-label="Store announcements">
+      <p className="sr-only">{announcementItems.join(' ')}</p>
+
+      <div className="announcement-bar__viewport" aria-hidden="true">
+        <div className="announcement-bar__track">
+          {marqueeItems.map((item, index) => (
+            <span
+              key={`${item}-${index}`}
+              className="announcement-bar__item"
+            >
+              {index % announcementItems.length === announcementItems.length - 1 ? (
+                <Icon name="truck" className="announcement-bar__icon" />
+              ) : null}
+              <span>{item}</span>
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   )
 }
 
-function Navbar() {
+function Navbar({ cartItemCount = baseCartItemCount }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -768,7 +900,6 @@ function Navbar() {
     () => typeof window !== 'undefined' && window.scrollY > 18,
   )
   const mobileSearchInputRef = useRef(null)
-  const cartItemCount = 2
 
   useEffect(() => {
     document.body.classList.toggle('menu-open', menuOpen)
@@ -1050,22 +1181,92 @@ function HeroBanner() {
   )
 }
 
-function ProductCard({ isWishlisted, onToggleWishlist, product }) {
+function AboutHeroSection() {
+  return (
+    <Reveal as="section" className="about-page__section about-page__hero" id="about">
+      <div className="shell-content shell-content--wide">
+        <div className="about-page__frame about-page__frame--hero">
+          <img
+            src="/ayush/about-hero-reference.png"
+            alt="About Us hero banner showing Kursela Dalmot pack, namkeen bowls, and legacy message"
+            className="about-page__image"
+            loading="eager"
+          />
+        </div>
+      </div>
+    </Reveal>
+  )
+}
+
+function AboutStorySection() {
+  return (
+    <Reveal as="section" className="about-page__section about-page__story">
+      <div className="shell-content shell-content--wide">
+        <div className="about-page__frame">
+          <img
+            src="/ayush/about-story-reference.png"
+            alt="Our Story section showing the tradition of quality and trust with company milestones"
+            className="about-page__image"
+            loading="lazy"
+          />
+        </div>
+      </div>
+    </Reveal>
+  )
+}
+
+function AboutChooseSection() {
+  return (
+    <Reveal as="section" className="about-page__section about-page__choose">
+      <div className="shell-content shell-content--wide">
+        <div className="about-page__frame">
+          <img
+            src="/ayush/about-choose-reference.png"
+            alt="Why Choose Us section featuring quality promises, facilities, and product range"
+            className="about-page__image"
+            loading="lazy"
+          />
+        </div>
+      </div>
+    </Reveal>
+  )
+}
+
+function AboutPage() {
+  return (
+    <main className="about-page">
+      <AboutHeroSection />
+      <AboutStorySection />
+      <AboutChooseSection />
+    </main>
+  )
+}
+
+function ProductCard({ onAddToCart, onBuyNow, onShareProduct, product }) {
+  const handleShareClick = async (event) => {
+    event.stopPropagation()
+    await onShareProduct(product, 'products')
+  }
+
+  const handleCartClick = (event) => {
+    event.stopPropagation()
+    onAddToCart(product)
+  }
+
+  const handleBuyNowClick = (event) => {
+    event.stopPropagation()
+    onBuyNow(product)
+  }
+
   return (
     <article className="product-card">
       <button
         type="button"
-        className={['product-card__wishlist', isWishlisted ? 'is-active' : '']
-          .filter(Boolean)
-          .join(' ')}
-        aria-label={isWishlisted ? `Remove ${product.name} from wishlist` : `Add ${product.name} to wishlist`}
-        aria-pressed={isWishlisted}
-        onClick={() => onToggleWishlist(product.id)}
+        className="product-card__share"
+        aria-label={`Share ${product.name}`}
+        onClick={handleShareClick}
       >
-        <Icon
-          name={isWishlisted ? 'heart-filled' : 'heart'}
-          className="product-card__wishlist-icon"
-        />
+        <Icon name="share" className="product-card__share-icon" />
       </button>
 
       <div className="product-card__image-shell">
@@ -1078,20 +1279,36 @@ function ProductCard({ isWishlisted, onToggleWishlist, product }) {
       </div>
 
       <div className="product-card__details">
-        <h3>{product.name}</h3>
+        <div className="product-card__title-row">
+          <h3 className="product-card__title">{product.name}</h3>
+
+          <button
+            type="button"
+            className="product-card__cart-action"
+            aria-label={`Add ${product.name} to cart`}
+            onClick={handleCartClick}
+          >
+            <Icon name="cart" className="product-card__cart-icon" />
+          </button>
+        </div>
+
         <p className="product-card__weight">{product.weight}</p>
         <p className="product-card__price">{`\u20B9${product.price}`}</p>
       </div>
 
-      <button type="button" className="product-card__button">
-        <Icon name="cart" className="product-card__button-icon" />
-        Add to Cart
+      <button
+        type="button"
+        className="product-card__button"
+        aria-label={`Buy ${product.name}`}
+        onClick={handleBuyNowClick}
+      >
+        BUY NOW
       </button>
     </article>
   )
 }
 
-function ProductCarousel() {
+function ProductCarousel({ onAddToCart, onBuyNow, onShareProduct }) {
   const getVisibleCards = () => {
     if (typeof window === 'undefined') {
       return 4
@@ -1110,9 +1327,6 @@ function ProductCarousel() {
 
   const [visibleCards, setVisibleCards] = useState(getVisibleCards)
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [wishlistState, setWishlistState] = useState(() =>
-    Object.fromEntries(productCatalog.map((product) => [product.id, false])),
-  )
 
   useEffect(() => {
     const syncVisibleCards = () => setVisibleCards(getVisibleCards())
@@ -1129,13 +1343,6 @@ function ProductCarousel() {
   useEffect(() => {
     setCurrentIndex((value) => Math.min(value, maxStartIndex))
   }, [maxStartIndex])
-
-  const toggleWishlist = (productId) => {
-    setWishlistState((current) => ({
-      ...current,
-      [productId]: !current[productId],
-    }))
-  }
 
   const scrollProducts = (direction) => {
     setCurrentIndex((value) => {
@@ -1169,8 +1376,9 @@ function ProductCarousel() {
                 <ProductCard
                   key={product.id}
                   product={product}
-                  isWishlisted={Boolean(wishlistState[product.id])}
-                  onToggleWishlist={toggleWishlist}
+                  onAddToCart={onAddToCart}
+                  onBuyNow={onBuyNow}
+                  onShareProduct={onShareProduct}
                 />
               ))}
             </div>
@@ -1199,7 +1407,7 @@ function ProductCarousel() {
   )
 }
 
-function BrandStorySection() {
+function BrandStorySection({ onAddToCart, onBuyNow, onShareProduct }) {
   return (
     <Reveal as="section" className="brand-story-section" id="products">
       <div className="shell-content shell-content--wide">
@@ -1212,7 +1420,11 @@ function BrandStorySection() {
           />
 
           <div className="brand-story-stage__carousel">
-            <ProductCarousel />
+            <ProductCarousel
+              onAddToCart={onAddToCart}
+              onBuyNow={onBuyNow}
+              onShareProduct={onShareProduct}
+            />
           </div>
         </div>
       </div>
@@ -1306,9 +1518,28 @@ function ModeSelection() {
   )
 }
 
-function BestsellerCard({ product }) {
+function BestsellerCard({ onAddToCart, onShareProduct, product }) {
+  const handleShareClick = async (event) => {
+    event.stopPropagation()
+    await onShareProduct(product, 'bestsellers')
+  }
+
+  const handleCartClick = (event) => {
+    event.stopPropagation()
+    onAddToCart(product)
+  }
+
   return (
     <article className="bestseller-card">
+      <button
+        type="button"
+        className="bestseller-card__share"
+        aria-label={`Share ${product.name}`}
+        onClick={handleShareClick}
+      >
+        <Icon name="share" className="bestseller-card__share-icon" />
+      </button>
+
       <div className="bestseller-card__image-wrap">
         <img src={product.image} alt={product.alt} loading="lazy" />
       </div>
@@ -1326,20 +1557,36 @@ function BestsellerCard({ product }) {
           Best Seller
         </span>
 
-        <h3 className="bestseller-card__title">{product.name}</h3>
+        <div className="bestseller-card__title-row">
+          <h3 className="bestseller-card__title">{product.name}</h3>
+
+          <button
+            type="button"
+            className="bestseller-card__cart-action"
+            aria-label={`Add ${product.name} to cart`}
+            onClick={handleCartClick}
+          >
+            <Icon name="cart" className="bestseller-card__cart-icon" />
+          </button>
+        </div>
+
         <p className="bestseller-card__weight">{product.weight}</p>
         <p className="bestseller-card__price">{`\u20B9${product.price}`}</p>
 
-        <button type="button" className="buy-now-btn" aria-label={`Buy ${product.name}`}>
-          <Icon name="cart" className="buy-now-btn__icon" />
-          Buy Now
+        <button
+          type="button"
+          className="buy-now-btn"
+          aria-label={`Buy ${product.name}`}
+          onClick={triggerProductCta}
+        >
+          BUY NOW
         </button>
       </div>
     </article>
   )
 }
 
-function BestsellersSection() {
+function BestsellersSection({ onAddToCart, onShareProduct }) {
   return (
     <Reveal as="section" className="bestsellers-section" id="bestsellers">
       <div className="shell-content">
@@ -1358,7 +1605,12 @@ function BestsellersSection() {
 
           <div className="bestseller-grid" aria-label="Our bestseller products">
             {bestsellerProducts.map((product) => (
-              <BestsellerCard key={product.id} product={product} />
+              <BestsellerCard
+                key={product.id}
+                product={product}
+                onAddToCart={onAddToCart}
+                onShareProduct={onShareProduct}
+              />
             ))}
           </div>
         </div>
@@ -1369,7 +1621,7 @@ function BestsellersSection() {
 
 function FactoryBanner() {
   return (
-    <Reveal as="section" className="factory-section" id="about">
+    <Reveal as="section" className="factory-section" id="factory">
       <div className="shell-content">
         <div className="factory-banner factory-banner--image">
           <img
@@ -1601,37 +1853,14 @@ function Footer() {
         </section>
 
         <div className="footer-meta-row">
-          <div className="footer-meta-row__items">
-            {footerMetaHighlights.map((item) => (
-              <article key={item.id} className="footer-meta-highlight">
-                <span className="footer-meta-highlight__icon">
-                  <Icon name={item.icon} className="stroke-icon" />
-                </span>
-                <div>
-                  <p className="footer-meta-highlight__title">{item.title}</p>
-                  <p className="footer-meta-highlight__emphasis">{item.emphasis}</p>
-                  {item.subtitle ? (
-                    <p className="footer-meta-highlight__subtitle">{item.subtitle}</p>
-                  ) : null}
-                </div>
-              </article>
-            ))}
-          </div>
-
-          <div className="footer-payments">
-            <span className="footer-payments__label">We Accept</span>
-            <div className="footer-payments__list" aria-label="Accepted payment methods">
-              {paymentMethods.map((item) => (
-                <span
-                  key={item}
-                  className={[
-                    'footer-payment-chip',
-                    `footer-payment-chip--${item.toLowerCase()}`,
-                  ].join(' ')}
-                >
-                  {item}
-                </span>
-              ))}
+          <div className="footer-meta-row__scroller">
+            <div className="footer-meta-row__banner-frame">
+              <img
+                src="/ayush/footer-meta-trust-strip.png"
+                alt="Trusted by Lakhs of Families, Authentic Taste Since 1989, Made with Love in Every Bite, and accepted payments UPI, Visa, Mastercard, RuPay, and Paytm."
+                className="footer-meta-row__banner"
+                loading="lazy"
+              />
             </div>
           </div>
         </div>
@@ -1644,22 +1873,115 @@ function Footer() {
   )
 }
 
+function SiteToast({ message }) {
+  if (!message) {
+    return null
+  }
+
+  return (
+    <div className="site-toast" role="status" aria-live="polite">
+      {message}
+    </div>
+  )
+}
+
 function App() {
+  const [cartItems, setCartItems] = useState({})
+  const [toastMessage, setToastMessage] = useState('')
+  const [currentHash, setCurrentHash] = useState(getCurrentPageHash)
+
+  useEffect(() => {
+    if (!toastMessage) {
+      return undefined
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setToastMessage('')
+    }, 2200)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [toastMessage])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return undefined
+    }
+
+    const syncCurrentHash = () => setCurrentHash(getCurrentPageHash())
+
+    window.addEventListener('hashchange', syncCurrentHash)
+
+    return () => window.removeEventListener('hashchange', syncCurrentHash)
+  }, [])
+
+  const isAboutPage = currentHash === '#about'
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+      return undefined
+    }
+
+    const frameId = window.requestAnimationFrame(() => {
+      scrollToHashTarget(currentHash, {
+        behavior: 'auto',
+        updateUrl: false,
+      })
+    })
+
+    return () => window.cancelAnimationFrame(frameId)
+  }, [currentHash, isAboutPage])
+
+  const cartItemCount =
+    baseCartItemCount +
+    Object.values(cartItems).reduce((total, quantity) => total + quantity, 0)
+
+  const handleAddToCart = (product) => {
+    setCartItems((current) => ({
+      ...current,
+      [product.id]: (current[product.id] ?? 0) + 1,
+    }))
+    setToastMessage(`${product.name} added to cart`)
+  }
+
+  const handleShareProduct = async (product, sectionId) => {
+    const shareResult = await shareCurrentProduct(product, sectionId)
+
+    if (shareResult === 'copied') {
+      setToastMessage('Product link copied')
+    }
+  }
+
+  const handleBuyNow = () => {
+    triggerProductCta()
+  }
+
   return (
     <div className="site-shell">
       <TopBar />
-      <Navbar />
+      <Navbar cartItemCount={cartItemCount} />
 
-      <main>
-        <HeroBanner />
-        <BrandStorySection />
-        <HeritageSection />
-        <ModeSelection />
-        <BestsellersSection />
-        <FactoryBanner />
-      </main>
+      {isAboutPage ? (
+        <AboutPage />
+      ) : (
+        <main>
+          <HeroBanner />
+          <BrandStorySection
+            onAddToCart={handleAddToCart}
+            onBuyNow={handleBuyNow}
+            onShareProduct={handleShareProduct}
+          />
+          <HeritageSection />
+          <ModeSelection />
+          <BestsellersSection
+            onAddToCart={handleAddToCart}
+            onShareProduct={handleShareProduct}
+          />
+          <FactoryBanner />
+        </main>
+      )}
 
       <Footer />
+      <SiteToast message={toastMessage} />
     </div>
   )
 }

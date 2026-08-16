@@ -122,6 +122,72 @@ const trustItems = [
 
 const paymentMethods = ['UPI', 'Visa', 'Mastercard', 'RuPay', 'Paytm']
 
+const footerContactInfo = {
+  phone: '+91 12345 67890',
+  phoneNote: 'Mon - Sat: 9AM to 6PM',
+  email: 'info@ayushkursela.com',
+  emailNote: 'We reply within 24hrs',
+  addressTitle: 'Ayush Kursela, India',
+  addressBody: 'Bihar, India - 852123',
+}
+
+const footerFeatureItems = [
+  {
+    title: '100% Pure Ingredients',
+    description: 'No artificial colors & flavors',
+    icon: 'leaf',
+  },
+  {
+    title: 'Hygienically Processed',
+    description: 'Clean & safe production',
+    icon: 'shield',
+  },
+  {
+    title: 'No Added Preservatives',
+    description: '0% maida & harmful chemicals',
+    icon: 'drop',
+  },
+  {
+    title: 'Pan India Delivery',
+    description: 'Fast & reliable shipping',
+    icon: 'truck',
+  },
+]
+
+const footerQuickLinkTargets = {
+  Home: '#home',
+  Products: '#products',
+  'About Us': '#about',
+  Quality: '#footer-usp',
+  'Retail Mode': '#shopping-modes',
+  'Wholesale Mode': '#shopping-modes',
+  'Contact Us': '#contact',
+}
+
+const footerMetaHighlights = [
+  {
+    id: 'trusted',
+    title: 'Trusted by',
+    emphasis: 'Lakhs of Families',
+    subtitle: '★★★★★',
+    icon: 'badge',
+  },
+  {
+    id: 'taste',
+    title: 'Authentic Taste',
+    emphasis: 'Since 1989',
+    subtitle: '',
+    icon: 'leaf',
+  },
+  {
+    id: 'love',
+    title: 'Made with Love',
+    emphasis: 'In Every Bite',
+    subtitle: '',
+    icon: 'heart',
+  },
+]
+
 const productCatalog = [
   {
     id: 'katarr-matar',
@@ -537,6 +603,109 @@ function Icon({ name, className = '' }) {
     default:
       return null
   }
+}
+
+function scrollToHashTarget(href) {
+  if (
+    typeof window === 'undefined' ||
+    typeof document === 'undefined' ||
+    !href.startsWith('#')
+  ) {
+    return
+  }
+
+  const targetId = href.replace('#', '')
+  const target = document.getElementById(targetId)
+
+  if (!target) {
+    window.location.hash = href
+    return
+  }
+
+  const headerHeight =
+    document.querySelector('.site-header')?.getBoundingClientRect().height ?? 0
+  const targetTop =
+    target.getBoundingClientRect().top + window.scrollY - headerHeight - 12
+
+  window.history.replaceState(null, '', href)
+  window.scrollTo({
+    top: Math.max(targetTop, 0),
+    behavior: 'smooth',
+  })
+}
+
+function FooterLinkItem({ item }) {
+  const handleClick = (event) => {
+    if (!item.href.startsWith('#')) {
+      return
+    }
+
+    event.preventDefault()
+    scrollToHashTarget(item.href)
+  }
+
+  return (
+    <a className="footer-list-link" href={item.href} onClick={handleClick}>
+      <Icon name="chevron-right" className="footer-list-link__icon" />
+      <span>{item.label}</span>
+    </a>
+  )
+}
+
+function FooterPanelSection({ panel, isOpen, onToggle }) {
+  const panelId = `footer-panel-${panel.id}`
+
+  return (
+    <section
+      className={['footer-section-panel', isOpen ? 'is-open' : ''].filter(Boolean).join(' ')}
+    >
+      <button
+        type="button"
+        className="footer-section-panel__toggle"
+        aria-expanded={isOpen}
+        aria-controls={panelId}
+        onClick={() => onToggle(panel.id)}
+      >
+        <span>{panel.title}</span>
+        <span className="footer-section-panel__symbol" aria-hidden="true" />
+      </button>
+
+      <div className="footer-section-panel__body" id={panelId}>
+        <div className="footer-section-panel__body-inner">
+          {panel.type === 'links' ? (
+            <ul className="footer-section-panel__list">
+              {panel.items.map((item) => (
+                <li key={item.label}>
+                  <FooterLinkItem item={item} />
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="footer-contact-list">
+              {panel.items.map((item) => (
+                <div key={item.title} className="footer-contact-item">
+                  <span className="footer-contact-item__icon">
+                    <Icon name={item.icon} className="stroke-icon" />
+                  </span>
+                  <div className="footer-contact-item__content">
+                    {item.href ? (
+                      <a className="footer-contact-item__title" href={item.href}>
+                        {item.title}
+                      </a>
+                    ) : (
+                      <p className="footer-contact-item__title">{item.title}</p>
+                    )}
+                    {item.note ? <p className="footer-contact-item__note">{item.note}</p> : null}
+                    {item.body ? <p className="footer-contact-item__body">{item.body}</p> : null}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  )
 }
 
 function Reveal({ as: Tag = 'section', className = '', children, ...props }) {
@@ -1221,7 +1390,7 @@ function FeaturesStrip() {
       <div className="shell-content">
         <div className="feature-strip__banner">
           <img
-            src="/ayush/quality-strip-banner.png"
+            src="/ayush/quality-strip-banner-tight.png"
             alt="Quality banner showing 100 percent pure ingredients, hygienically processed, no added preservatives, and pan India delivery"
             loading="lazy"
           />
@@ -1262,28 +1431,113 @@ function ContactRow({ icon, title, body, note }) {
 }
 
 function Footer() {
+  const [openPanel, setOpenPanel] = useState('quick-links')
+  const currentYear = new Date().getFullYear()
+  const footerPanels = [
+    {
+      id: 'quick-links',
+      title: 'Quick Links',
+      type: 'links',
+      items: footerLinks.quickLinks.map((label) => ({
+        label,
+        href: footerQuickLinkTargets[label] ?? '#home',
+      })),
+    },
+    {
+      id: 'our-products',
+      title: 'Our Products',
+      type: 'links',
+      items: footerLinks.products.map((label) => ({
+        label,
+        href: '#products',
+      })),
+    },
+    {
+      id: 'customer-care',
+      title: 'Customer Care',
+      type: 'links',
+      items: footerLinks.customerCare.map((label) => ({
+        label,
+        href: `mailto:${footerContactInfo.email}?subject=${encodeURIComponent(`Ayush Kursela - ${label}`)}`,
+      })),
+    },
+    {
+      id: 'contact-us',
+      title: 'Contact Us',
+      type: 'contact',
+      items: [
+        {
+          icon: 'phone',
+          title: footerContactInfo.phone,
+          note: footerContactInfo.phoneNote,
+          href: 'tel:+911234567890',
+        },
+        {
+          icon: 'mail',
+          title: footerContactInfo.email,
+          note: footerContactInfo.emailNote,
+          href: `mailto:${footerContactInfo.email}`,
+        },
+        {
+          icon: 'pin',
+          title: footerContactInfo.addressTitle,
+          body: footerContactInfo.addressBody,
+        },
+      ],
+    },
+  ]
+
+  const togglePanel = (panelId) => {
+    setOpenPanel((current) => (current === panelId ? null : panelId))
+  }
+
   return (
     <Reveal as="footer" className="page-footer" id="contact">
-      <div className="shell-content">
-        <div className="footer-top">
-          <div className="footer-brand">
+      <div className="shell-content footer-shell">
+        <div className="footer-usp-bar" id="footer-usp">
+          {footerFeatureItems.map((item, index) => (
+            <article key={item.title} className="footer-usp-item">
+              <span className="footer-usp-item__icon">
+                <Icon name={item.icon} className="stroke-icon" />
+              </span>
+              <div className="footer-usp-item__copy">
+                <p className="footer-usp-item__title">{item.title}</p>
+                <p className="footer-usp-item__description">{item.description}</p>
+              </div>
+              {index < footerFeatureItems.length - 1 ? (
+                <span className="footer-usp-item__separator" aria-hidden="true" />
+              ) : null}
+            </article>
+          ))}
+        </div>
+
+        <div className="footer-main-grid">
+          <section className="footer-brand-panel">
             <img
               src="/ayush/logo-ayush-kursela-clean.png"
               alt="Ayush Kursela logo"
-              className="footer-brand__logo"
+              className="footer-brand-panel__logo"
             />
-            <h3>Pure Taste. Trusted Quality.</h3>
-            <p>
-              From our kitchen to your home, delicious snacks made with love and
+
+            <h2 className="footer-brand-panel__tagline">
+              <span>Pure Taste.</span>{' '}
+              <span className="footer-brand-panel__tagline-accent">Trusted Quality.</span>
+            </h2>
+
+            <p className="footer-brand-panel__copy">
+              From our kitchen to your home - delicious snacks made with love and
               the finest ingredients since 1989.
             </p>
 
-            <div className="social-links">
+            <div className="footer-socials">
               {socialLinks.map((item) => (
                 <a
                   key={item.label}
                   href={item.href}
-                  className="social-link"
+                  className={[
+                    'footer-social',
+                    `footer-social--${item.label.toLowerCase()}`,
+                  ].join(' ')}
                   target="_blank"
                   rel="noreferrer"
                   aria-label={item.label}
@@ -1292,89 +1546,89 @@ function Footer() {
                 </a>
               ))}
             </div>
-          </div>
+          </section>
 
-          <LinkColumn title="Quick Links" items={footerLinks.quickLinks} />
-          <LinkColumn title="Our Products" items={footerLinks.products} />
-          <LinkColumn title="Customer Care" items={footerLinks.customerCare} />
-
-          <div className="footer-column footer-column--contact">
-            <h3>Contact Us</h3>
-            <div className="contact-list">
-              <ContactRow
-                icon="phone"
-                title="+91 12345 67890"
-                body="Mon - Sat: 9AM to 6PM"
-                note="Call us for orders and support"
-              />
-              <ContactRow
-                icon="mail"
-                title="info@ayushkursela.com"
-                body="We reply within 24hrs"
-                note="Reach us for product and business queries"
-              />
-              <ContactRow
-                icon="pin"
-                title="Ayush Kursela, India"
-                body="Bihar, India - 852123"
-                note="Serving premium namkeen across India"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="newsletter-panel">
-          <div className="newsletter-panel__intro">
-            <span className="newsletter-panel__icon">
-              <Icon name="mail-filled" className="stroke-icon" />
-            </span>
-            <div>
-              <h3>Stay Updated</h3>
-              <p>
-                Subscribe to get updates on new products, offers & exclusive
-                deals.
-              </p>
-            </div>
-          </div>
-
-          <form className="newsletter-form" onSubmit={(event) => event.preventDefault()}>
-            <label className="sr-only" htmlFor="newsletter-email">
-              Email address
-            </label>
-            <input
-              id="newsletter-email"
-              type="email"
-              name="email"
-              placeholder="Enter your email address"
+          {footerPanels.map((panel) => (
+            <FooterPanelSection
+              key={panel.id}
+              panel={panel}
+              isOpen={openPanel === panel.id}
+              onToggle={togglePanel}
             />
-            <button type="submit">Subscribe</button>
-          </form>
-
-          <div className="newsletter-panel__packs" aria-hidden="true">
-            <img src="/ayush/newsletter-packs.png" alt="" loading="lazy" />
-          </div>
+          ))}
         </div>
 
-        <div className="trust-strip">
-          <div className="trust-strip__items">
-            {trustItems.map((item) => (
-              <div key={item.title} className="trust-item">
-                <div className="trust-item__icon">
-                  <Icon name={item.icon} className="stroke-icon" />
-                </div>
-                <div>
-                  <p className="trust-item__title">{item.title}</p>
-                  <p className="trust-item__description">{item.description}</p>
-                </div>
+        <section className="footer-newsletter-card" id="footer-newsletter">
+          <img
+            className="footer-newsletter-card__bg"
+            src="/ayush/footer-newsletter-banner.png"
+            alt=""
+            loading="lazy"
+            aria-hidden="true"
+          />
+
+          <div className="footer-newsletter-card__content">
+            <div className="footer-newsletter-card__intro">
+              <span className="footer-newsletter-card__icon">
+                <Icon name="mail-filled" className="stroke-icon" />
+              </span>
+
+              <div className="footer-newsletter-card__copy">
+                <h3>Stay Updated</h3>
+                <p>
+                  Subscribe to get updates on new products, offers & exclusive
+                  deals.
+                </p>
               </div>
+            </div>
+
+            <form
+              className="footer-newsletter-card__form"
+              onSubmit={(event) => event.preventDefault()}
+            >
+              <label className="sr-only" htmlFor="footer-newsletter-email">
+                Email address
+              </label>
+              <input
+                id="footer-newsletter-email"
+                type="email"
+                name="email"
+                placeholder="Enter your email address"
+              />
+              <button type="submit">Subscribe</button>
+            </form>
+          </div>
+        </section>
+
+        <div className="footer-meta-row">
+          <div className="footer-meta-row__items">
+            {footerMetaHighlights.map((item) => (
+              <article key={item.id} className="footer-meta-highlight">
+                <span className="footer-meta-highlight__icon">
+                  <Icon name={item.icon} className="stroke-icon" />
+                </span>
+                <div>
+                  <p className="footer-meta-highlight__title">{item.title}</p>
+                  <p className="footer-meta-highlight__emphasis">{item.emphasis}</p>
+                  {item.subtitle ? (
+                    <p className="footer-meta-highlight__subtitle">{item.subtitle}</p>
+                  ) : null}
+                </div>
+              </article>
             ))}
           </div>
 
-          <div className="payment-methods">
-            <span className="payment-methods__label">We Accept</span>
-            <div className="payment-methods__list" aria-label="Accepted payment methods">
+          <div className="footer-payments">
+            <span className="footer-payments__label">We Accept</span>
+            <div className="footer-payments__list" aria-label="Accepted payment methods">
               {paymentMethods.map((item) => (
-                <span key={item} className="payment-chip">
+                <span
+                  key={item}
+                  className={[
+                    'footer-payment-chip',
+                    `footer-payment-chip--${item.toLowerCase()}`,
+                  ].join(' ')}
+                >
                   {item}
                 </span>
               ))}
@@ -1382,7 +1636,9 @@ function Footer() {
           </div>
         </div>
 
-        <p className="footer-copyright">(c) 2026 Ayush Kursela. All Rights Reserved.</p>
+        <p className="footer-copyright">
+          © {currentYear} Ayush Kursela. All Rights Reserved.
+        </p>
       </div>
     </Reveal>
   )
@@ -1401,7 +1657,6 @@ function App() {
         <ModeSelection />
         <BestsellersSection />
         <FactoryBanner />
-        <FeaturesStrip />
       </main>
 
       <Footer />

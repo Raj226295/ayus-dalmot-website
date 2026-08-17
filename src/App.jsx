@@ -1491,41 +1491,27 @@ function ContactPage() {
       <Reveal as="section" className="contact-page__hero" id="contact">
         <div className="shell-content shell-content--wide">
           <div className="contact-page__hero-shell">
-            <div className="contact-page__hero-copy">
-              <div className="contact-page__hero-kicker">
-                <span aria-hidden="true" />
-                <span>Get In Touch</span>
-              </div>
-
+            <div className="sr-only">
+              <p>Get In Touch</p>
               <h1>Contact Us</h1>
-              <p className="contact-page__hero-lead">We&apos;d love to hear from you!</p>
-              <p className="contact-page__hero-description">
+              <p>We&apos;d love to hear from you!</p>
+              <p>
                 Whether you have a question about our products, partnerships, or
                 anything else, our team is ready to answer all your queries.
               </p>
-
-              <div className="contact-page__hero-features" aria-label="Contact page highlights">
+              <ul>
                 {contactHeroItems.map((item) => (
-                  <article key={item.label} className="contact-page__hero-feature">
-                    <span className="contact-page__hero-feature-icon">
-                      <Icon name={item.icon} className="stroke-icon" />
-                    </span>
-                    <p>{item.label}</p>
-                  </article>
+                  <li key={item.label}>{item.label}</li>
                 ))}
-              </div>
+              </ul>
             </div>
-
-            <div className="contact-page__hero-visual">
-              <div className="contact-page__hero-image-wrap">
-                <img
-                  src="/ayush/hero-packshot.png"
-                  alt="Premium snack presentation with Kursela pack and namkeen bowl"
-                  className="contact-page__hero-image"
-                  loading="eager"
-                />
-              </div>
-            </div>
+            <img
+              src="/ayush/contact-hero-banner.png"
+              alt=""
+              className="contact-page__hero-banner"
+              loading="eager"
+              aria-hidden="true"
+            />
           </div>
         </div>
       </Reveal>
@@ -1533,13 +1519,6 @@ function ContactPage() {
       <Reveal as="section" className="contact-page__message-section">
         <div className="shell-content">
           <div className="contact-page__message-shell">
-            <img
-              src="/ayush/product-bhujia.png"
-              alt="Ayush Bhujia premium namkeen pack"
-              className="contact-page__message-pack"
-              loading="lazy"
-            />
-
             <div className="contact-page__message-grid">
               <div className="contact-page__help-column">
                 <div className="contact-page__section-heading">
@@ -1708,8 +1687,6 @@ function ContactPage() {
         </div>
       </Reveal>
 
-      <div className="contact-page__divider" aria-hidden="true" />
-
       <Reveal as="section" className="contact-page__location-section">
         <div className="shell-content">
           <div className="contact-location">
@@ -1718,7 +1695,7 @@ function ContactPage() {
                 <Icon name="pin" className="stroke-icon" />
               </span>
               <p className="contact-page__section-label">Our Location</p>
-              <h2>Visit Our Team</h2>
+              <h2>Our Location</h2>
               <p className="contact-location__address">
                 {footerContactInfo.addressTitle}
                 <br />

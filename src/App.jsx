@@ -144,6 +144,49 @@ const footerContactInfo = {
   addressBody: 'Bihar, India - 852123',
 }
 
+const contactHeroItems = [
+  { label: 'Pure Ingredients', icon: 'leaf' },
+  { label: 'Trusted Quality', icon: 'shield' },
+  { label: 'Loved by Millions', icon: 'heart' },
+]
+
+const contactFaqItems = [
+  {
+    id: 'products',
+    question: 'What products does the company offer?',
+    answer:
+      'Ayush Kursela offers a curated range of namkeen and traditional snack favourites including bhujia, mixture, matar, sattu and regional specialties prepared with premium ingredients.',
+  },
+  {
+    id: 'availability',
+    question: 'Where are your products available?',
+    answer:
+      'Our products are available across multiple retail counters, partner stores and direct business channels. For the fastest assistance, reach out to our team and we will guide you to the nearest available source.',
+  },
+  {
+    id: 'wholesale',
+    question: 'Do you offer bulk or wholesale orders?',
+    answer:
+      'Yes. We support bulk and wholesale enquiries for retailers, distributors and hospitality partners. Share your quantity requirements and city details, and our team will assist you with the next steps.',
+  },
+  {
+    id: 'bulk-order',
+    question: 'How can I place a bulk order?',
+    answer:
+      'You can use the message form on this page, email us directly, or call our support line. Please include the product name, quantity, delivery location and timeline so we can respond quickly.',
+  },
+  {
+    id: 'partnership',
+    question: 'Do you have partnership or distributorship opportunities?',
+    answer:
+      'We welcome meaningful partnership and distributorship conversations. Send us your business profile and region details, and our team will get back to you after reviewing the opportunity.',
+  },
+]
+
+const contactMapHref = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+  `${footerContactInfo.addressTitle}, ${footerContactInfo.addressBody}`,
+)}`
+
 const footerFeatureItems = [
   {
     title: '100% Pure Ingredients',
@@ -640,6 +683,22 @@ function Icon({ name, className = '' }) {
         >
           <path d="M4 6h16v12H4z" />
           <path d="M4 8l8 6 8-6" />
+        </svg>
+      )
+    case 'send':
+      return (
+        <svg
+          aria-hidden="true"
+          className={className}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M22 2 11 13" />
+          <path d="M22 2 15 22l-4-9-9-4 20-7z" />
         </svg>
       )
     default:
@@ -1206,14 +1265,14 @@ function HeroBanner() {
   )
 }
 
-function AboutHeroSection() {
+function AboutIntroSection() {
   return (
-    <Reveal as="section" className="about-page__section about-page__hero" id="about">
+    <Reveal as="section" className="about-page__section about-page__intro" id="about">
       <div className="shell-content shell-content--wide">
-        <div className="about-page__frame about-page__frame--hero">
+        <div className="about-page__frame about-page__frame--intro">
           <img
-            src="/ayush/about-hero-reference.png"
-            alt="About Us hero banner showing Kursela Dalmot pack, namkeen bowls, and legacy message"
+            src="/ayush/about-intro-composite.png"
+            alt="About Us introduction section with legacy message, brand story, and company highlights"
             className="about-page__image"
             loading="eager"
           />
@@ -1223,33 +1282,48 @@ function AboutHeroSection() {
   )
 }
 
-function AboutStorySection() {
+function AboutProductRangeSection({ onAddToCart, onBuyNow, onShareProduct }) {
   return (
-    <Reveal as="section" className="about-page__section about-page__story">
-      <div className="shell-content shell-content--wide">
-        <div className="about-page__frame">
-          <img
-            src="/ayush/about-story-reference.png"
-            alt="Our Story section showing the tradition of quality and trust with company milestones"
-            className="about-page__image"
-            loading="lazy"
-          />
-        </div>
+    <div className="about-page__product-range">
+      <div className="about-page__product-range-heading">
+        <p className="sr-only">Our Product Range</p>
+        <h2 className="sr-only">Something for Every Craving</h2>
+        <img
+          src="/ayush/about-product-range-heading.png"
+          alt=""
+          aria-hidden="true"
+          className="about-page__product-range-heading-image"
+          loading="lazy"
+        />
       </div>
-    </Reveal>
+
+      <ProductCarousel
+        onAddToCart={onAddToCart}
+        onBuyNow={onBuyNow}
+        onShareProduct={onShareProduct}
+      />
+    </div>
   )
 }
 
-function AboutChooseSection() {
+function AboutChooseSection({ onAddToCart, onBuyNow, onShareProduct }) {
   return (
     <Reveal as="section" className="about-page__section about-page__choose">
       <div className="shell-content shell-content--wide">
-        <div className="about-page__frame">
-          <img
-            src="/ayush/about-choose-reference.png"
-            alt="Why Choose Us section featuring quality promises, facilities, and product range"
-            className="about-page__image"
-            loading="lazy"
+        <div className="about-page__choose-stack">
+          <div className="about-page__frame about-page__frame--choose">
+            <img
+              src="/ayush/about-choose-top.png"
+              alt="Why Choose Us section featuring quality promises and facilities"
+              className="about-page__image"
+              loading="lazy"
+            />
+          </div>
+
+          <AboutProductRangeSection
+            onAddToCart={onAddToCart}
+            onBuyNow={onBuyNow}
+            onShareProduct={onShareProduct}
           />
         </div>
       </div>
@@ -1257,12 +1331,463 @@ function AboutChooseSection() {
   )
 }
 
-function AboutPage() {
+function AboutPage({ onAddToCart, onBuyNow, onShareProduct }) {
   return (
     <main className="about-page">
-      <AboutHeroSection />
-      <AboutStorySection />
-      <AboutChooseSection />
+      <AboutIntroSection />
+      <AboutChooseSection
+        onAddToCart={onAddToCart}
+        onBuyNow={onBuyNow}
+        onShareProduct={onShareProduct}
+      />
+    </main>
+  )
+}
+
+function validateContactFormValues(values) {
+  const errors = {}
+
+  if (!values.firstName.trim()) {
+    errors.firstName = 'Please enter your first name.'
+  }
+
+  if (!values.email.trim()) {
+    errors.email = 'Please enter your email address.'
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email.trim())) {
+    errors.email = 'Please enter a valid email address.'
+  }
+
+  if (values.phone.trim() && !/^[+\d\s()-]{8,}$/.test(values.phone.trim())) {
+    errors.phone = 'Please enter a valid phone number.'
+  }
+
+  if (!values.message.trim()) {
+    errors.message = 'Please share your message.'
+  }
+
+  return errors
+}
+
+function ContactInfoCard({ body, children, href, icon, label, note, title }) {
+  return (
+    <article className="contact-card">
+      <span className="contact-card__icon">
+        <Icon name={icon} className="stroke-icon" />
+      </span>
+
+      <div className="contact-card__content">
+        <p className="contact-card__label">{label}</p>
+        {href ? (
+          <a className="contact-card__title" href={href}>
+            {title}
+          </a>
+        ) : (
+          <p className="contact-card__title">{title}</p>
+        )}
+        {body ? <p className="contact-card__body">{body}</p> : null}
+        {note ? <p className="contact-card__note">{note}</p> : null}
+        {children}
+      </div>
+    </article>
+  )
+}
+
+function ContactFaqItem({ isOpen, item, onToggle }) {
+  return (
+    <article className={['contact-faq', isOpen ? 'is-open' : ''].filter(Boolean).join(' ')}>
+      <button
+        type="button"
+        className="contact-faq__toggle"
+        aria-expanded={isOpen}
+        onClick={onToggle}
+      >
+        <span className="contact-faq__question">{item.question}</span>
+        <span className="contact-faq__chevron" aria-hidden="true">
+          <Icon name="chevron-right" className="contact-faq__chevron-icon" />
+        </span>
+      </button>
+
+      <div className="contact-faq__answer-wrap">
+        <div className="contact-faq__answer">
+          <p>{item.answer}</p>
+        </div>
+      </div>
+    </article>
+  )
+}
+
+function ContactPage() {
+  const [formValues, setFormValues] = useState({
+    firstName: '',
+    email: '',
+    phone: '',
+    subject: '',
+    message: '',
+  })
+  const [formErrors, setFormErrors] = useState({})
+  const [submitState, setSubmitState] = useState({ type: 'idle', message: '' })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [openFaqId, setOpenFaqId] = useState(contactFaqItems[0]?.id ?? null)
+
+  const handleFieldChange = (field) => (event) => {
+    const nextValue = event.target.value
+
+    setFormValues((current) => ({
+      ...current,
+      [field]: nextValue,
+    }))
+
+    setFormErrors((current) => {
+      if (!current[field]) {
+        return current
+      }
+
+      const nextErrors = { ...current }
+      delete nextErrors[field]
+      return nextErrors
+    })
+
+    if (submitState.type !== 'idle') {
+      setSubmitState({ type: 'idle', message: '' })
+    }
+  }
+
+  const handleSubmit = async (event) => {
+    event.preventDefault()
+
+    const validationErrors = validateContactFormValues(formValues)
+
+    if (Object.keys(validationErrors).length > 0) {
+      setFormErrors(validationErrors)
+      setSubmitState({
+        type: 'error',
+        message: 'Please review the highlighted fields and try again.',
+      })
+      return
+    }
+
+    setIsSubmitting(true)
+    setSubmitState({ type: 'idle', message: '' })
+
+    await new Promise((resolve) => window.setTimeout(resolve, 650))
+
+    setIsSubmitting(false)
+    setFormValues({
+      firstName: '',
+      email: '',
+      phone: '',
+      subject: '',
+      message: '',
+    })
+    setFormErrors({})
+    setSubmitState({
+      type: 'success',
+      message: 'Thanks for reaching out. Our team will get back to you shortly.',
+    })
+  }
+
+  return (
+    <main className="contact-page">
+      <Reveal as="section" className="contact-page__hero" id="contact">
+        <div className="shell-content shell-content--wide">
+          <div className="contact-page__hero-shell">
+            <div className="contact-page__hero-copy">
+              <div className="contact-page__hero-kicker">
+                <span aria-hidden="true" />
+                <span>Get In Touch</span>
+              </div>
+
+              <h1>Contact Us</h1>
+              <p className="contact-page__hero-lead">We&apos;d love to hear from you!</p>
+              <p className="contact-page__hero-description">
+                Whether you have a question about our products, partnerships, or
+                anything else, our team is ready to answer all your queries.
+              </p>
+
+              <div className="contact-page__hero-features" aria-label="Contact page highlights">
+                {contactHeroItems.map((item) => (
+                  <article key={item.label} className="contact-page__hero-feature">
+                    <span className="contact-page__hero-feature-icon">
+                      <Icon name={item.icon} className="stroke-icon" />
+                    </span>
+                    <p>{item.label}</p>
+                  </article>
+                ))}
+              </div>
+            </div>
+
+            <div className="contact-page__hero-visual">
+              <div className="contact-page__hero-image-wrap">
+                <img
+                  src="/ayush/hero-packshot.png"
+                  alt="Premium snack presentation with Kursela pack and namkeen bowl"
+                  className="contact-page__hero-image"
+                  loading="eager"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </Reveal>
+
+      <Reveal as="section" className="contact-page__message-section">
+        <div className="shell-content">
+          <div className="contact-page__message-shell">
+            <img
+              src="/ayush/product-bhujia.png"
+              alt="Ayush Bhujia premium namkeen pack"
+              className="contact-page__message-pack"
+              loading="lazy"
+            />
+
+            <div className="contact-page__message-grid">
+              <div className="contact-page__help-column">
+                <div className="contact-page__section-heading">
+                  <p className="contact-page__section-label">Get In Touch</p>
+                  <h2>We&apos;re Here to Help</h2>
+                  <div className="contact-page__section-divider" aria-hidden="true" />
+                </div>
+
+                <div className="contact-page__help-cards">
+                  <ContactInfoCard
+                    icon="phone"
+                    label="Phone"
+                    title={footerContactInfo.phone}
+                    note="Friendly support available during business hours"
+                    body={footerContactInfo.phoneNote}
+                    href="tel:+911234567890"
+                  />
+
+                  <ContactInfoCard
+                    icon="mail"
+                    label="Email"
+                    title={footerContactInfo.email}
+                    note={footerContactInfo.emailNote}
+                    body="Share product, retail or partnership queries anytime."
+                    href={`mailto:${footerContactInfo.email}`}
+                  />
+
+                  <ContactInfoCard
+                    icon="pin"
+                    label="Address"
+                    title={footerContactInfo.addressTitle}
+                    body={footerContactInfo.addressBody}
+                    note="Visit us or connect for retailer and wholesale assistance."
+                  />
+
+                  <ContactInfoCard
+                    icon="heart"
+                    label="Follow Us"
+                    title="Join our growing snack-loving community"
+                    note="Stay updated on launches, offers and everyday moments from Ayush Kursela."
+                  >
+                    <div className="contact-card__socials" aria-label="Social media links">
+                      {socialLinks.map((item) => (
+                        <a
+                          key={item.label}
+                          href={item.href}
+                          className="contact-card__social"
+                          target="_blank"
+                          rel="noreferrer"
+                          aria-label={item.label}
+                        >
+                          <img src={item.icon} alt="" loading="lazy" />
+                        </a>
+                      ))}
+                    </div>
+                  </ContactInfoCard>
+                </div>
+              </div>
+
+              <div className="contact-page__form-column">
+                <div className="contact-page__section-heading contact-page__section-heading--form">
+                  <p className="contact-page__section-label">Send Us A Message</p>
+                  <h2>Message Us</h2>
+                  <div className="contact-page__section-divider" aria-hidden="true" />
+                </div>
+
+                <form className="contact-form" noValidate onSubmit={handleSubmit}>
+                  <div className="contact-form__grid">
+                    <label className="contact-form__field">
+                      <span>First Name *</span>
+                      <input
+                        type="text"
+                        name="firstName"
+                        value={formValues.firstName}
+                        onChange={handleFieldChange('firstName')}
+                        aria-invalid={Boolean(formErrors.firstName)}
+                        placeholder="Your first name"
+                      />
+                      {formErrors.firstName ? (
+                        <span className="contact-form__error">{formErrors.firstName}</span>
+                      ) : null}
+                    </label>
+
+                    <label className="contact-form__field">
+                      <span>Your Email *</span>
+                      <input
+                        type="email"
+                        name="email"
+                        value={formValues.email}
+                        onChange={handleFieldChange('email')}
+                        aria-invalid={Boolean(formErrors.email)}
+                        placeholder="name@example.com"
+                      />
+                      {formErrors.email ? (
+                        <span className="contact-form__error">{formErrors.email}</span>
+                      ) : null}
+                    </label>
+
+                    <label className="contact-form__field">
+                      <span>Phone Number</span>
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={formValues.phone}
+                        onChange={handleFieldChange('phone')}
+                        aria-invalid={Boolean(formErrors.phone)}
+                        placeholder="Optional"
+                      />
+                      {formErrors.phone ? (
+                        <span className="contact-form__error">{formErrors.phone}</span>
+                      ) : null}
+                    </label>
+
+                    <label className="contact-form__field">
+                      <span>Subject</span>
+                      <input
+                        type="text"
+                        name="subject"
+                        value={formValues.subject}
+                        onChange={handleFieldChange('subject')}
+                        placeholder="How can we help?"
+                      />
+                    </label>
+
+                    <label className="contact-form__field contact-form__field--full">
+                      <span>Your Message *</span>
+                      <textarea
+                        name="message"
+                        value={formValues.message}
+                        onChange={handleFieldChange('message')}
+                        aria-invalid={Boolean(formErrors.message)}
+                        placeholder="Tell us about your question, order requirement or partnership enquiry."
+                      />
+                      {formErrors.message ? (
+                        <span className="contact-form__error">{formErrors.message}</span>
+                      ) : null}
+                    </label>
+                  </div>
+
+                  <div className="contact-form__actions">
+                    <button type="submit" className="contact-form__submit" disabled={isSubmitting}>
+                      <span>{isSubmitting ? 'Sending...' : 'Send Message'}</span>
+                      <Icon name="send" className="contact-form__submit-icon" />
+                    </button>
+
+                    {submitState.type !== 'idle' ? (
+                      <p
+                        className={[
+                          'contact-form__status',
+                          submitState.type === 'success'
+                            ? 'is-success'
+                            : 'is-error',
+                        ]
+                          .filter(Boolean)
+                          .join(' ')}
+                        role="status"
+                      >
+                        {submitState.message}
+                      </p>
+                    ) : null}
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Reveal>
+
+      <div className="contact-page__divider" aria-hidden="true" />
+
+      <Reveal as="section" className="contact-page__location-section">
+        <div className="shell-content">
+          <div className="contact-location">
+            <article className="contact-location__card">
+              <span className="contact-location__icon">
+                <Icon name="pin" className="stroke-icon" />
+              </span>
+              <p className="contact-page__section-label">Our Location</p>
+              <h2>Visit Our Team</h2>
+              <p className="contact-location__address">
+                {footerContactInfo.addressTitle}
+                <br />
+                {footerContactInfo.addressBody}
+              </p>
+              <a
+                className="contact-location__link"
+                href={contactMapHref}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <span>View on Google Map</span>
+                <Icon name="chevron-right" className="contact-location__link-icon" />
+              </a>
+            </article>
+
+            <a
+              className="contact-location__map-card"
+              href={contactMapHref}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={`View ${footerContactInfo.addressTitle} on Google Maps`}
+            >
+              <div className="contact-location__map-surface">
+                <span className="contact-location__map-chip contact-location__map-chip--one">
+                  Bihar
+                </span>
+                <span className="contact-location__map-chip contact-location__map-chip--two">
+                  India
+                </span>
+                <span className="contact-location__map-road contact-location__map-road--one" />
+                <span className="contact-location__map-road contact-location__map-road--two" />
+                <span className="contact-location__map-road contact-location__map-road--three" />
+                <span className="contact-location__map-river" />
+                <span className="contact-location__map-pin">
+                  <span className="contact-location__map-pin-core" />
+                </span>
+                <div className="contact-location__map-label">
+                  <strong>{footerContactInfo.addressTitle}</strong>
+                  <span>{footerContactInfo.addressBody}</span>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </Reveal>
+
+      <Reveal as="section" className="contact-page__faq-section">
+        <div className="shell-content">
+          <div className="contact-page__faq-heading">
+            <p className="contact-page__section-label">FAQs</p>
+            <h2>Frequently Asked Questions</h2>
+            <div className="contact-page__section-divider" aria-hidden="true" />
+          </div>
+
+          <div className="contact-page__faq-list">
+            {contactFaqItems.map((item) => (
+              <ContactFaqItem
+                key={item.id}
+                item={item}
+                isOpen={openFaqId === item.id}
+                onToggle={() =>
+                  setOpenFaqId((current) => (current === item.id ? null : item.id))
+                }
+              />
+            ))}
+          </div>
+        </div>
+      </Reveal>
     </main>
   )
 }
@@ -1620,7 +2145,7 @@ function BestsellersSection({ onAddToCart, onShareProduct }) {
             <h2 className="sr-only">Our Bestsellers</h2>
             <p className="sr-only">Loved by Millions, Every Day!</p>
             <img
-              src="/ayush/bestsellers-banner-small.png"
+              src="/ayush/bestsellers-banner-custom.png"
               alt=""
               aria-hidden="true"
               className="bestsellers-heading__image"
@@ -1795,7 +2320,7 @@ function Footer() {
   }
 
   return (
-    <Reveal as="footer" className="page-footer" id="contact">
+    <Reveal as="footer" className="page-footer" id="site-footer">
       <div className="shell-content footer-shell">
         <div className="footer-usp-bar" id="footer-usp">
           {footerFeatureItems.map((item, index) => (
@@ -1994,6 +2519,7 @@ function App() {
   }, [])
 
   const isAboutPage = currentHash === '#about'
+  const isContactPage = currentHash === '#contact'
 
   useEffect(() => {
     if (typeof window === 'undefined' || typeof document === 'undefined') {
@@ -2008,7 +2534,7 @@ function App() {
     })
 
     return () => window.cancelAnimationFrame(frameId)
-  }, [currentHash, isAboutPage])
+  }, [currentHash, isAboutPage, isContactPage])
 
   const cartItemCount =
     baseCartItemCount +
@@ -2040,7 +2566,13 @@ function App() {
       <Navbar cartItemCount={cartItemCount} />
 
       {isAboutPage ? (
-        <AboutPage />
+        <AboutPage
+          onAddToCart={handleAddToCart}
+          onBuyNow={handleBuyNow}
+          onShareProduct={handleShareProduct}
+        />
+      ) : isContactPage ? (
+        <ContactPage />
       ) : (
         <main>
           <HeroBanner />

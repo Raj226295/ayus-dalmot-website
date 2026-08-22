@@ -367,6 +367,24 @@ const baseCartItemCount = 2
 
 function Icon({ name, className = '' }) {
   switch (name) {
+    case 'filter':
+      return (
+        <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+          <path d="M4 6h16M7 12h10M10 18h4" />
+          <circle cx="8" cy="6" r="1.5" fill="currentColor" stroke="none" />
+          <circle cx="15" cy="12" r="1.5" fill="currentColor" stroke="none" />
+          <circle cx="12" cy="18" r="1.5" fill="currentColor" stroke="none" />
+        </svg>
+      )
+    case 'grid':
+      return (
+        <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round">
+          <rect x="4" y="4" width="6" height="6" rx="1" />
+          <rect x="14" y="4" width="6" height="6" rx="1" />
+          <rect x="4" y="14" width="6" height="6" rx="1" />
+          <rect x="14" y="14" width="6" height="6" rx="1" />
+        </svg>
+      )
     case 'menu':
       return (
         <svg
@@ -1023,24 +1041,16 @@ function Navbar({ cartItemCount = baseCartItemCount }) {
       return
     }
 
-    const targetId = href.replace('#', '')
-    const target = document.getElementById(targetId)
-
-    if (!target) {
+    // Primary navigation changes the route first. Some home sections reuse these
+    // ids, so scrolling the currently rendered DOM would otherwise prevent the
+    // intended page from mounting (notably for #products).
+    if (window.location.hash !== href) {
       window.location.hash = href
       return
     }
 
-    const headerHeight =
-      document.querySelector('.site-header')?.getBoundingClientRect().height ?? 0
-    const targetTop =
-      target.getBoundingClientRect().top + window.scrollY - headerHeight - 12
-
-    window.history.replaceState(null, '', href)
-    window.scrollTo({
-      top: Math.max(targetTop, 0),
-      behavior: 'smooth',
-    })
+    // Re-selecting the active menu item returns the user to the top of that page.
+    scrollToHashTarget(href, { behavior: 'smooth', updateUrl: false })
   }
 
   const handleNavLinkClick = (event, href) => {
@@ -1793,24 +1803,45 @@ function ContactPage() {
   )
 }
 
-function ProductCard({ onAddToCart, onBuyNow, onShareProduct, product }) {
+function ProductCard({ onAddToCart, onBuyNow, onShareProduct, product, sectionId = 'products' }) {
+  const variants = product.variants?.length
+    ? product.variants
+    : [{ label: product.weight, price: product.price, originalPrice: product.originalPrice }]
+  const [selectedVariantIndex, setSelectedVariantIndex] = useState(0)
+  const selectedVariant = variants[selectedVariantIndex] ?? variants[0]
+  const salePrice = selectedVariant.price
+  const originalPrice = selectedVariant.originalPrice
+  const discount = originalPrice > salePrice
+    ? Math.round(((originalPrice - salePrice) / originalPrice) * 100)
+    : 0
+  const offerLabel = discount > 0 ? `${discount}% OFF` : (product.offerLabel ?? '5% OFF')
+  const selectedProduct = {
+    ...product,
+    price: salePrice,
+    weight: selectedVariant.label,
+    selectedVariant,
+  }
+
   const handleShareClick = async (event) => {
     event.stopPropagation()
-    await onShareProduct(product, 'products')
+    if (onShareProduct) {
+      await onShareProduct(product, sectionId)
+    }
   }
 
   const handleCartClick = (event) => {
     event.stopPropagation()
-    onAddToCart(product)
+    onAddToCart(selectedProduct)
   }
 
   const handleBuyNowClick = (event) => {
     event.stopPropagation()
-    onBuyNow(product)
+    onBuyNow(selectedProduct)
   }
 
   return (
     <article className="product-card">
+      <span className="product-card__offer">{offerLabel}</span>
       <button
         type="button"
         className="product-card__share"
@@ -1843,8 +1874,33 @@ function ProductCard({ onAddToCart, onBuyNow, onShareProduct, product }) {
           </button>
         </div>
 
-        <p className="product-card__weight">{product.weight}</p>
-        <p className="product-card__price">{`\u20B9${product.price}`}</p>
+        <label className="product-card__variant-label">
+          <span className="sr-only">Select weight for {product.name}</span>
+          <select
+            className="product-card__variant"
+            value={selectedVariantIndex}
+            onClick={(event) => event.stopPropagation()}
+            onChange={(event) => setSelectedVariantIndex(Number(event.target.value))}
+            aria-label={`Select weight for ${product.name}`}
+          >
+            {variants.map((variant, index) => (
+              <option key={`${variant.label}-${index}`} value={index}>{variant.label}</option>
+            ))}
+          </select>
+        </label>
+
+        {product.rating && product.reviewCount ? (
+          <p className="product-card__rating">
+            <span aria-label={`${product.rating} out of 5 stars`}>★★★★★</span>
+            <span>({product.reviewCount})</span>
+          </p>
+        ) : null}
+
+        <div className="product-card__price-row">
+          <p className="product-card__price">₹{salePrice}</p>
+          {discount > 0 ? <del className="product-card__original-price">₹{originalPrice}</del> : null}
+        </div>
+        <p className="product-card__unit-price">₹{salePrice} for {selectedVariant.label}</p>
       </div>
 
       <button
@@ -1853,9 +1909,110 @@ function ProductCard({ onAddToCart, onBuyNow, onShareProduct, product }) {
         aria-label={`Buy ${product.name}`}
         onClick={handleBuyNowClick}
       >
-        BUY NOW
+        <Icon name="cart" /> BUY NOW
       </button>
     </article>
+  )
+}
+
+function ProductsPage({ onAddToCart, onBuyNow, onShareProduct }) {
+  const availableSizes = [...new Set(productCatalog.map((product) => product.weight))]
+  const [productFilter, setProductFilter] = useState('all')
+  const [sizeFilter, setSizeFilter] = useState('all')
+  const [priceFilter, setPriceFilter] = useState('all')
+  const [shoppingMode, setShoppingMode] = useState('retail')
+  const [sortBy, setSortBy] = useState('popular')
+
+  const visibleProducts = productCatalog
+    .filter((product) => productFilter === 'all' || product.id === productFilter)
+    .filter((product) => sizeFilter === 'all' || product.weight === sizeFilter)
+    .filter((product) => {
+      if (priceFilter === 'under-30') return product.price < 30
+      if (priceFilter === '30-50') return product.price >= 30 && product.price <= 50
+      if (priceFilter === 'over-50') return product.price > 50
+      return true
+    })
+    .sort((a, b) => {
+      if (sortBy === 'price-low') return a.price - b.price
+      if (sortBy === 'price-high') return b.price - a.price
+      if (sortBy === 'name') return a.name.localeCompare(b.name)
+      return 0
+    })
+
+  return (
+    <main className="products-page-main" id="products">
+      <div className="products-page-content">
+        <section className="products-filter-bar" aria-label="Product filters">
+          <div className="products-filter-bar__label">
+            <Icon name="filter" />
+            <span>Filter By</span>
+          </div>
+
+          <label className="products-filter-control">
+            <span className="sr-only">Product</span>
+            <select value={productFilter} onChange={(event) => setProductFilter(event.target.value)}>
+              <option value="all">All Products</option>
+              {productCatalog.map((product) => <option key={product.id} value={product.id}>{product.name}</option>)}
+            </select>
+          </label>
+
+          <label className="products-filter-control">
+            <span className="sr-only">Pack size</span>
+            <select value={sizeFilter} onChange={(event) => setSizeFilter(event.target.value)}>
+              <option value="all">Size</option>
+              {availableSizes.map((size) => <option key={size} value={size}>{size}</option>)}
+            </select>
+          </label>
+
+          <label className="products-filter-control">
+            <span className="sr-only">Price range</span>
+            <select value={priceFilter} onChange={(event) => setPriceFilter(event.target.value)}>
+              <option value="all">Price</option>
+              <option value="under-30">Under ₹30</option>
+              <option value="30-50">₹30 – ₹50</option>
+              <option value="over-50">Above ₹50</option>
+            </select>
+          </label>
+
+          <div className="products-mode-toggle" aria-label="Shopping mode">
+            {['retail', 'wholesale'].map((mode) => (
+              <button key={mode} type="button" aria-pressed={shoppingMode === mode} className={shoppingMode === mode ? 'is-active' : ''} onClick={() => setShoppingMode(mode)}>
+                <span aria-hidden="true" /> {mode}
+              </button>
+            ))}
+          </div>
+
+          <div className="products-sort">
+            <span>Sort By</span>
+            <label className="products-filter-control">
+              <span className="sr-only">Sort products</span>
+              <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
+                <option value="popular">Popular</option>
+                <option value="name">Name</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+              </select>
+            </label>
+            <span className="products-grid-indicator" aria-label="Grid view"><Icon name="grid" /></span>
+          </div>
+        </section>
+
+        <p className="products-result-count">Showing {visibleProducts.length} products</p>
+
+        <section className="products-catalog-grid" aria-label="Product catalog">
+          {visibleProducts.map((product) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              onAddToCart={onAddToCart}
+              onBuyNow={onBuyNow}
+              onShareProduct={onShareProduct}
+              sectionId="products"
+            />
+          ))}
+        </section>
+      </div>
+    </main>
   )
 }
 
@@ -1904,6 +2061,7 @@ function ProductCarousel({ onAddToCart, onBuyNow, onShareProduct }) {
   }
 
   const visibleProducts = productCatalog.slice(currentIndex, currentIndex + visibleCards)
+  const renderedProducts = visibleCards === 1 ? productCatalog : visibleProducts
 
   return (
     <div className="product-carousel-shell">
@@ -1923,7 +2081,7 @@ function ProductCarousel({ onAddToCart, onBuyNow, onShareProduct }) {
 
           <div className="product-carousel__viewport">
             <div className="product-carousel__track">
-              {visibleProducts.map((product) => (
+              {renderedProducts.map((product) => (
                 <ProductCard
                   key={product.id}
                   product={product}
@@ -2069,75 +2227,7 @@ function ModeSelection() {
   )
 }
 
-function BestsellerCard({ onAddToCart, onShareProduct, product }) {
-  const handleShareClick = async (event) => {
-    event.stopPropagation()
-    await onShareProduct(product, 'bestsellers')
-  }
-
-  const handleCartClick = (event) => {
-    event.stopPropagation()
-    onAddToCart(product)
-  }
-
-  return (
-    <article className="bestseller-card">
-      <button
-        type="button"
-        className="bestseller-card__share"
-        aria-label={`Share ${product.name}`}
-        onClick={handleShareClick}
-      >
-        <Icon name="share" className="bestseller-card__share-icon" />
-      </button>
-
-      <div className="bestseller-card__image-wrap">
-        <img src={product.image} alt={product.alt} loading="lazy" />
-      </div>
-
-      <div className="bestseller-card__content">
-        <span
-          className={[
-            'bestseller-card__badge',
-            product.isBestseller ? '' : 'bestseller-card__badge--ghost',
-          ]
-            .filter(Boolean)
-            .join(' ')}
-          aria-hidden={!product.isBestseller}
-        >
-          Best Seller
-        </span>
-
-        <div className="bestseller-card__title-row">
-          <h3 className="bestseller-card__title">{product.name}</h3>
-
-          <button
-            type="button"
-            className="bestseller-card__cart-action"
-            aria-label={`Add ${product.name} to cart`}
-            onClick={handleCartClick}
-          >
-            <Icon name="cart" className="bestseller-card__cart-icon" />
-          </button>
-        </div>
-
-        <p className="bestseller-card__weight">{product.weight}</p>
-        <p className="bestseller-card__price">{`\u20B9${product.price}`}</p>
-
-        <button
-          type="button"
-          className="buy-now-btn"
-          aria-label={`Buy ${product.name}`}
-          onClick={triggerProductCta}
-        >
-          BUY NOW
-        </button>
-      </div>
-    </article>
-  )
-}
-
-function BestsellersSection({ onAddToCart, onShareProduct }) {
+function BestsellersSection({ onAddToCart, onBuyNow, onShareProduct }) {
   return (
     <Reveal as="section" className="bestsellers-section" id="bestsellers">
       <div className="shell-content">
@@ -2156,11 +2246,13 @@ function BestsellersSection({ onAddToCart, onShareProduct }) {
 
           <div className="bestseller-grid" aria-label="Our bestseller products">
             {bestsellerProducts.map((product) => (
-              <BestsellerCard
+              <ProductCard
                 key={product.id}
                 product={product}
                 onAddToCart={onAddToCart}
+                onBuyNow={onBuyNow}
                 onShareProduct={onShareProduct}
+                sectionId="bestsellers"
               />
             ))}
           </div>
@@ -2521,6 +2613,7 @@ function App() {
 
   const isAboutPage = currentHash === '#about'
   const isContactPage = currentHash === '#contact'
+  const isProductsPage = currentHash === '#products'
 
   useEffect(() => {
     if (typeof window === 'undefined' || typeof document === 'undefined') {
@@ -2535,7 +2628,7 @@ function App() {
     })
 
     return () => window.cancelAnimationFrame(frameId)
-  }, [currentHash, isAboutPage, isContactPage])
+  }, [currentHash, isAboutPage, isContactPage, isProductsPage])
 
   const cartItemCount =
     baseCartItemCount +
@@ -2574,6 +2667,8 @@ function App() {
         />
       ) : isContactPage ? (
         <ContactPage />
+      ) : isProductsPage ? (
+        <ProductsPage onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} onShareProduct={handleShareProduct} />
       ) : (
         <main>
           <HeroBanner />
@@ -2586,6 +2681,7 @@ function App() {
           <ModeSelection />
           <BestsellersSection
             onAddToCart={handleAddToCart}
+            onBuyNow={handleBuyNow}
             onShareProduct={handleShareProduct}
           />
           <FactoryBanner />

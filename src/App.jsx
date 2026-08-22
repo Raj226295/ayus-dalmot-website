@@ -140,8 +140,8 @@ const footerContactInfo = {
   phoneNote: 'Mon - Sat: 9AM to 6PM',
   email: 'info@ayushkursela.com',
   emailNote: 'We reply within 24hrs',
-  addressTitle: 'Ayush Kursela, India',
-  addressBody: 'Bihar, India - 852123',
+  addressTitle: '85 P, Barauni - Purnea Hwy',
+  addressBody: 'Maranga, Purnia, Maranga, Bihar 854301',
 }
 
 const contactHeroItems = [
@@ -1369,6 +1369,9 @@ function validateContactFormValues(values) {
 }
 
 function ContactInfoCard({ body, children, href, icon, label, note, title }) {
+  const CardTitle = href ? 'a' : 'p'
+  const titleProps = href ? { href } : {}
+
   return (
     <article className="contact-card">
       <span className="contact-card__icon">
@@ -1377,13 +1380,9 @@ function ContactInfoCard({ body, children, href, icon, label, note, title }) {
 
       <div className="contact-card__content">
         <p className="contact-card__label">{label}</p>
-        {href ? (
-          <a className="contact-card__title" href={href}>
-            {title}
-          </a>
-        ) : (
-          <p className="contact-card__title">{title}</p>
-        )}
+        <CardTitle className="contact-card__title" {...titleProps}>
+          {title}
+        </CardTitle>
         {body ? <p className="contact-card__body">{body}</p> : null}
         {note ? <p className="contact-card__note">{note}</p> : null}
         {children}
@@ -1517,8 +1516,14 @@ function ContactPage() {
       </Reveal>
 
       <Reveal as="section" className="contact-page__message-section">
-        <div className="shell-content">
+        <div className="shell-content contact-page__content-wrap">
           <div className="contact-page__message-shell">
+            <img
+              src="/ayush/contact-message-stage.png"
+              alt=""
+              className="contact-page__stage-art"
+              aria-hidden="true"
+            />
             <div className="contact-page__message-grid">
               <div className="contact-page__help-column">
                 <div className="contact-page__section-heading">
@@ -1552,6 +1557,7 @@ function ContactPage() {
                     title={footerContactInfo.addressTitle}
                     body={footerContactInfo.addressBody}
                     note="Visit us or connect for retailer and wholesale assistance."
+                    href={contactMapHref}
                   />
 
                   <ContactInfoCard
@@ -1582,13 +1588,17 @@ function ContactPage() {
                 <div className="contact-page__section-heading contact-page__section-heading--form">
                   <p className="contact-page__section-label">Send Us A Message</p>
                   <h2>Message Us</h2>
+                  <p className="contact-page__section-copy">
+                    Tell us what you need and the right Ayush Kursela team member will
+                    respond with the next steps.
+                  </p>
                   <div className="contact-page__section-divider" aria-hidden="true" />
                 </div>
 
                 <form className="contact-form" noValidate onSubmit={handleSubmit}>
                   <div className="contact-form__grid">
                     <label className="contact-form__field">
-                      <span>First Name *</span>
+                      <span>First Name <strong aria-hidden="true">*</strong></span>
                       <input
                         type="text"
                         name="firstName"
@@ -1603,7 +1613,7 @@ function ContactPage() {
                     </label>
 
                     <label className="contact-form__field">
-                      <span>Your Email *</span>
+                      <span>Your Email <strong aria-hidden="true">*</strong></span>
                       <input
                         type="email"
                         name="email"
@@ -1644,7 +1654,7 @@ function ContactPage() {
                     </label>
 
                     <label className="contact-form__field contact-form__field--full">
-                      <span>Your Message *</span>
+                      <span>Your Message <strong aria-hidden="true">*</strong></span>
                       <textarea
                         name="message"
                         value={formValues.message}
@@ -1691,54 +1701,68 @@ function ContactPage() {
         <div className="shell-content">
           <div className="contact-location">
             <article className="contact-location__card">
-              <span className="contact-location__icon">
+              <div className="contact-location__eyebrow">
                 <Icon name="pin" className="stroke-icon" />
-              </span>
-              <p className="contact-page__section-label">Our Location</p>
+                <span>Visit Our Store</span>
+              </div>
               <h2>Our Location</h2>
-              <p className="contact-location__address">
-                {footerContactInfo.addressTitle}
-                <br />
-                {footerContactInfo.addressBody}
+              <span className="contact-location__accent" aria-hidden="true" />
+              <p className="contact-location__description">
+                Come visit us and explore the authentic taste of Ayush Kursela.
               </p>
+              <div className="contact-location__address">
+                <span className="contact-location__address-icon">
+                  <Icon name="pin" className="stroke-icon" />
+                </span>
+                <div>
+                  <p className="contact-location__address-main">{footerContactInfo.addressTitle}</p>
+                  <p className="contact-location__address-sub">{footerContactInfo.addressBody}</p>
+                </div>
+              </div>
               <a
                 className="contact-location__link"
                 href={contactMapHref}
                 target="_blank"
                 rel="noreferrer"
+                aria-label="View Ayush Kursela location on Google Maps"
               >
-                <span>View on Google Map</span>
+                <Icon name="send" className="contact-location__link-icon" />
+                <span>Get Directions</span>
                 <Icon name="chevron-right" className="contact-location__link-icon" />
               </a>
+              <Icon name="pin" className="contact-location__watermark" />
             </article>
 
-            <a
-              className="contact-location__map-card"
-              href={contactMapHref}
-              target="_blank"
-              rel="noreferrer"
-              aria-label={`View ${footerContactInfo.addressTitle} on Google Maps`}
-            >
-              <div className="contact-location__map-surface">
-                <span className="contact-location__map-chip contact-location__map-chip--one">
-                  Bihar
-                </span>
-                <span className="contact-location__map-chip contact-location__map-chip--two">
-                  India
-                </span>
-                <span className="contact-location__map-road contact-location__map-road--one" />
-                <span className="contact-location__map-road contact-location__map-road--two" />
-                <span className="contact-location__map-road contact-location__map-road--three" />
-                <span className="contact-location__map-river" />
-                <span className="contact-location__map-pin">
-                  <span className="contact-location__map-pin-core" />
-                </span>
-                <div className="contact-location__map-label">
-                  <strong>{footerContactInfo.addressTitle}</strong>
-                  <span>{footerContactInfo.addressBody}</span>
+            <article className="contact-location__store-card">
+              <header className="contact-location__store-header">
+                <h2>Store Information</h2>
+                <p>Everything you need before visiting us.</p>
+              </header>
+
+              <div className="contact-location__store-list">
+                <div className="contact-location__store-row">
+                  <span className="contact-location__store-icon"><Icon name="pin" /></span>
+                  <div><span>Location</span><strong>{footerContactInfo.addressTitle}</strong><p>{footerContactInfo.addressBody}</p></div>
+                </div>
+                <div className="contact-location__store-row">
+                  <span className="contact-location__store-icon"><Icon name="badge" /></span>
+                  <div><span>Opening Hours</span><strong>Monday – Saturday</strong><p>9:00 AM – 6:00 PM</p></div>
+                </div>
+                <div className="contact-location__store-row">
+                  <span className="contact-location__store-icon"><Icon name="send" /></span>
+                  <div><span>Landmark</span><p>Maranga, Purnia</p></div>
+                </div>
+                <div className="contact-location__store-row">
+                  <span className="contact-location__store-icon"><Icon name="phone" /></span>
+                  <div><span>Contact</span><strong>{footerContactInfo.phone}</strong></div>
                 </div>
               </div>
-            </a>
+
+              <a className="contact-location__open-maps" href={contactMapHref} target="_blank" rel="noopener noreferrer">
+                <span><Icon name="send" /> Open in Google Maps</span>
+                <Icon name="chevron-right" />
+              </a>
+            </article>
           </div>
         </div>
       </Reveal>

@@ -16,6 +16,22 @@ const announcementItems = [
 ]
 
 const defaultNavHref = menuLinks[0].href
+const accountStorageKey = 'ayush-kursela-account'
+
+function readStoredAccount() {
+  if (typeof window === 'undefined') return null
+
+  try {
+    const account = JSON.parse(window.localStorage.getItem(accountStorageKey) || 'null')
+    return account?.name && account?.email ? account : null
+  } catch {
+    return null
+  }
+}
+
+function persistAccount(account) {
+  window.localStorage.setItem(accountStorageKey, JSON.stringify(account))
+}
 
 function getCurrentNavHref() {
   if (typeof window === 'undefined') {
@@ -186,6 +202,10 @@ const contactFaqItems = [
 const contactMapHref = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
   `${footerContactInfo.addressTitle}, ${footerContactInfo.addressBody}`,
 )}`
+
+const contactMapEmbedHref = `https://www.google.com/maps?q=${encodeURIComponent(
+  `${footerContactInfo.addressTitle}, ${footerContactInfo.addressBody}`,
+)}&output=embed`
 
 const footerFeatureItems = [
   {
@@ -429,6 +449,76 @@ function Icon({ name, className = '' }) {
           <circle cx="12" cy="8" r="4" />
         </svg>
       )
+    case 'lock':
+      return (
+        <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="5" y="10" width="14" height="11" rx="2" />
+          <path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3" />
+        </svg>
+      )
+    case 'bag':
+      return (
+        <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M5 8h14l-1 12H6L5 8Z" /><path d="M9 8V6a3 3 0 0 1 6 0v2M9 13h.01M15 13h.01" />
+        </svg>
+      )
+    case 'package':
+      return (
+        <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m4 7 8-4 8 4v10l-8 4-8-4V7Z" /><path d="m4 7 8 4 8-4M12 11v10" />
+        </svg>
+      )
+    case 'logout':
+      return (
+        <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M10 4H5v16h5M14 8l4 4-4 4M18 12H9" />
+        </svg>
+      )
+    case 'home':
+      return (
+        <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m3 11 9-8 9 8v9H3v-9Z" /><path d="M9 20v-6h6v6" /></svg>
+      )
+    case 'building':
+      return (
+        <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 21V4h12v17M16 9h4v12M8 8h4M8 12h4M8 16h4M10 21v-2" /></svg>
+      )
+    case 'edit':
+      return (
+        <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="m4 20 4.2-1 10.6-10.6a2.1 2.1 0 0 0-3-3L5.2 16 4 20Z" /><path d="m14.5 6.7 2.8 2.8" /></svg>
+      )
+    case 'trash':
+      return (
+        <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16M10 11v5M14 11v5M9 7l1-3h4l1 3M6 7l1 13h10l1-13" /></svg>
+      )
+    case 'more':
+      return (
+        <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.7" /><circle cx="12" cy="12" r="1.7" /><circle cx="12" cy="19" r="1.7" /></svg>
+      )
+    case 'headset':
+      return (
+        <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 14v-2a8 8 0 0 1 16 0v2" /><path d="M4 14v3a2 2 0 0 0 2 2h2v-6H6a2 2 0 0 0-2 1ZM20 14v3a2 2 0 0 1-2 2h-2v-6h2a2 2 0 0 1 2 1Z" /></svg>
+      )
+    case 'chat':
+      return (
+        <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M5 5h14v11H9l-4 3V5Z" /><path d="M9 10h6M9 13h4" /></svg>
+      )
+    case 'return':
+      return (
+        <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m8 7-4 4 4 4M4 11h10a5 5 0 0 1 5 5v1" /><path d="M8 3h10v8" /></svg>
+      )
+    case 'eye':
+      return (
+        <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z" />
+          <circle cx="12" cy="12" r="2.6" />
+        </svg>
+      )
+    case 'eye-off':
+      return (
+        <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m3 3 18 18M10.6 6.2A10.5 10.5 0 0 1 12 6c6 0 9.5 6 9.5 6a16 16 0 0 1-2.1 2.8M6.3 6.4C3.8 8.1 2.5 12 2.5 12s3.5 6 9.5 6a9 9 0 0 0 3.1-.5M10.2 10.3a2.6 2.6 0 0 0 3.5 3.5" />
+        </svg>
+      )
     case 'cart':
       return (
         <svg
@@ -653,6 +743,40 @@ function Icon({ name, className = '' }) {
           strokeLinejoin="round"
         >
           <path d="M5 4h4l1.5 4-2.2 1.8a15 15 0 0 0 6.1 6.1l1.8-2.2 4 1.5v4a2 2 0 0 1-2 2A15.5 15.5 0 0 1 3 6a2 2 0 0 1 2-2z" />
+        </svg>
+      )
+    case 'clock':
+      return (
+        <svg
+          aria-hidden="true"
+          className={className}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx="12" cy="12" r="8.5" />
+          <path d="M12 7.5V12l3.2 2" />
+        </svg>
+      )
+    case 'store':
+      return (
+        <svg
+          aria-hidden="true"
+          className={className}
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M4 10v10h16V10" />
+          <path d="M3 10h18l-2-6H5l-2 6z" />
+          <path d="M8 10v1.2a2 2 0 0 0 4 0V10m0 0v1.2a2 2 0 0 0 4 0V10" />
+          <path d="M9 20v-5h6v5" />
         </svg>
       )
     case 'mail':
@@ -993,7 +1117,7 @@ function TopBar() {
   )
 }
 
-function Navbar({ cartItemCount = baseCartItemCount }) {
+function Navbar({ cartItemCount = baseCartItemCount, wishlistCount = 0, isAuthenticated = false }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -1137,8 +1261,12 @@ function Navbar({ cartItemCount = baseCartItemCount }) {
               </button>
             </form>
 
-            <button type="button" className="icon-button" aria-label="Profile">
+            <button type="button" className="icon-button" aria-label={isAuthenticated ? 'Open my account' : 'Open login page'} onClick={(event) => handleNavLinkClick(event, isAuthenticated ? '#account' : '#login')}>
               <Icon name="user" className="icon-button__icon" />
+            </button>
+            <button type="button" className="icon-button icon-button--wishlist" aria-label={isAuthenticated ? 'Open wishlist' : 'Log in to view wishlist'} onClick={(event) => handleNavLinkClick(event, isAuthenticated ? '#account' : '#login')}>
+              <Icon name="heart" className="icon-button__icon" />
+              {wishlistCount > 0 ? <span className="icon-button__badge" aria-hidden="true">{wishlistCount}</span> : null}
             </button>
             <button
               type="button"
@@ -1191,8 +1319,12 @@ function Navbar({ cartItemCount = baseCartItemCount }) {
             >
               <Icon name="search" className="icon-button__icon" />
             </button>
-            <button type="button" className="icon-button" aria-label="Profile">
+            <button type="button" className="icon-button" aria-label={isAuthenticated ? 'Open my account' : 'Open login page'} onClick={(event) => handleNavLinkClick(event, isAuthenticated ? '#account' : '#login')}>
               <Icon name="user" className="icon-button__icon" />
+            </button>
+            <button type="button" className="icon-button icon-button--wishlist" aria-label={isAuthenticated ? 'Open wishlist' : 'Log in to view wishlist'} onClick={(event) => handleNavLinkClick(event, isAuthenticated ? '#account' : '#login')}>
+              <Icon name="heart" className="icon-button__icon" />
+              {wishlistCount > 0 ? <span className="icon-button__badge" aria-hidden="true">{wishlistCount}</span> : null}
             </button>
             <button
               type="button"
@@ -1709,70 +1841,102 @@ function ContactPage() {
 
       <Reveal as="section" className="contact-page__location-section">
         <div className="shell-content">
-          <div className="contact-location">
-            <article className="contact-location__card">
-              <div className="contact-location__eyebrow">
-                <Icon name="pin" className="stroke-icon" />
-                <span>Visit Our Store</span>
-              </div>
-              <h2>Our Location</h2>
-              <span className="contact-location__accent" aria-hidden="true" />
-              <p className="contact-location__description">
-                Come visit us and explore the authentic taste of Ayush Kursela.
-              </p>
-              <div className="contact-location__address">
-                <span className="contact-location__address-icon">
-                  <Icon name="pin" className="stroke-icon" />
+          <div className="contact-store-locator">
+            <article className="contact-store-locator__details">
+              <div className="contact-store-locator__eyebrow">
+                <span className="contact-store-locator__eyebrow-icon">
+                  <Icon name="pin" />
                 </span>
-                <div>
-                  <p className="contact-location__address-main">{footerContactInfo.addressTitle}</p>
-                  <p className="contact-location__address-sub">{footerContactInfo.addressBody}</p>
-                </div>
+                <span>Our Store Location</span>
               </div>
+
+              <h2>Find Us <span>Here</span></h2>
+              <p className="contact-store-locator__intro">
+                We're easy to find! Visit our store for the best quality products and warm service.
+              </p>
+
               <a
-                className="contact-location__link"
+                className="contact-store-locator__featured-address"
                 href={contactMapHref}
                 target="_blank"
-                rel="noreferrer"
-                aria-label="View Ayush Kursela location on Google Maps"
+                rel="noopener noreferrer"
+                aria-label="Open the Ayush Kursela store address in Google Maps"
               >
-                <Icon name="send" className="contact-location__link-icon" />
-                <span>Get Directions</span>
-                <Icon name="chevron-right" className="contact-location__link-icon" />
+                <Icon name="pin" />
+                <span>
+                  <strong>{footerContactInfo.addressTitle}</strong>
+                  <small>{footerContactInfo.addressBody}</small>
+                </span>
               </a>
-              <Icon name="pin" className="contact-location__watermark" />
-            </article>
 
-            <article className="contact-location__store-card">
-              <header className="contact-location__store-header">
-                <h2>Store Information</h2>
-                <p>Everything you need before visiting us.</p>
-              </header>
-
-              <div className="contact-location__store-list">
-                <div className="contact-location__store-row">
-                  <span className="contact-location__store-icon"><Icon name="pin" /></span>
-                  <div><span>Location</span><strong>{footerContactInfo.addressTitle}</strong><p>{footerContactInfo.addressBody}</p></div>
+              <div className="contact-store-locator__info-list">
+                <div className="contact-store-locator__info-row">
+                  <span className="contact-store-locator__info-icon"><Icon name="store" /></span>
+                  <div>
+                    <strong>Store Address</strong>
+                    <p>{footerContactInfo.addressTitle},<br />{footerContactInfo.addressBody}</p>
+                  </div>
                 </div>
-                <div className="contact-location__store-row">
-                  <span className="contact-location__store-icon"><Icon name="badge" /></span>
-                  <div><span>Opening Hours</span><strong>Monday – Saturday</strong><p>9:00 AM – 6:00 PM</p></div>
+                <div className="contact-store-locator__info-row">
+                  <span className="contact-store-locator__info-icon"><Icon name="clock" /></span>
+                  <div>
+                    <strong>Store Timing</strong>
+                    <p>{footerContactInfo.phoneNote}</p>
+                  </div>
                 </div>
-                <div className="contact-location__store-row">
-                  <span className="contact-location__store-icon"><Icon name="send" /></span>
-                  <div><span>Landmark</span><p>Maranga, Purnia</p></div>
-                </div>
-                <div className="contact-location__store-row">
-                  <span className="contact-location__store-icon"><Icon name="phone" /></span>
-                  <div><span>Contact</span><strong>{footerContactInfo.phone}</strong></div>
+                <div className="contact-store-locator__info-row">
+                  <span className="contact-store-locator__info-icon"><Icon name="phone" /></span>
+                  <div>
+                    <strong>Contact Us</strong>
+                    <p>{footerContactInfo.phone}</p>
+                  </div>
                 </div>
               </div>
 
-              <a className="contact-location__open-maps" href={contactMapHref} target="_blank" rel="noopener noreferrer">
-                <span><Icon name="send" /> Open in Google Maps</span>
+              <a
+                className="contact-store-locator__primary-link"
+                href={contactMapHref}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span><Icon name="send" />Tap to Open in Maps</span>
                 <Icon name="chevron-right" />
               </a>
             </article>
+
+            <div className="contact-store-locator__map">
+              <iframe
+                src={contactMapEmbedHref}
+                title="Ayush Kursela store location on Google Maps"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                allowFullScreen
+              />
+
+              <a
+                className="contact-store-locator__map-address"
+                href={contactMapHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Open store address in Google Maps"
+              >
+                <Icon name="pin" />
+                <span>
+                  <strong>{footerContactInfo.addressTitle}</strong>
+                  <small>{footerContactInfo.addressBody}</small>
+                </span>
+              </a>
+
+              <a
+                className="contact-store-locator__map-link"
+                href={contactMapHref}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Icon name="send" />
+                <span>Open in Maps</span>
+              </a>
+            </div>
           </div>
         </div>
       </Reveal>
@@ -1803,11 +1967,326 @@ function ContactPage() {
   )
 }
 
-function ProductCard({ onAddToCart, onBuyNow, onShareProduct, product, sectionId = 'products' }) {
+function GoogleMark() {
+  return (
+    <svg className="login-page__google-mark" viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="#4285F4" d="M21.6 12.2c0-.7-.1-1.5-.2-2.2H12v4.2h5.4a4.6 4.6 0 0 1-2 3v2.7h3.3c1.9-1.8 2.9-4.4 2.9-7.7Z" />
+      <path fill="#34A853" d="M12 22c2.7 0 5-.9 6.7-2.3l-3.3-2.6c-.9.6-2.1 1-3.4 1a5.9 5.9 0 0 1-5.5-4.1H3.1v2.7A10 10 0 0 0 12 22Z" />
+      <path fill="#FBBC05" d="M6.5 14a6 6 0 0 1 0-3.9V7.3H3.1a10 10 0 0 0 0 9.4L6.5 14Z" />
+      <path fill="#EA4335" d="M12 5.9c1.5 0 2.9.5 3.9 1.5l2.9-2.9A9.8 9.8 0 0 0 3.1 7.3l3.4 2.8A5.9 5.9 0 0 1 12 5.9Z" />
+    </svg>
+  )
+}
+
+function LoginPage({ onLogin }) {
+  const [identifier, setIdentifier] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [message, setMessage] = useState('')
+
+  const handleSubmit = (event) => {
+    event.preventDefault()
+
+    if (!identifier.trim() || !password) {
+      setMessage('Please enter your email/mobile number and password.')
+      return
+    }
+
+    setMessage('')
+    setIsSubmitting(true)
+    window.setTimeout(() => {
+      const existingAccount = readStoredAccount()
+      const account = existingAccount ?? {
+        name: identifier.includes('@') ? identifier.split('@')[0].replace(/[._-]/g, ' ') : 'Ayush Customer',
+        email: identifier.includes('@') ? identifier : 'customer@ayushkursela.com',
+        mobile: identifier.includes('@') ? '+91 91234 56789' : identifier,
+      }
+      onLogin(account)
+      setIsSubmitting(false)
+      window.location.hash = '#account'
+    }, 450)
+  }
+
+  const handleUnavailableAction = () => {
+    setMessage('This authentication option is not connected yet.')
+  }
+
+  return (
+    <main className="login-page" id="login">
+      <section className="login-card" aria-labelledby="login-title">
+        <h1 id="login-title">Login</h1>
+        <div className="login-card__ornament" aria-hidden="true"><span /></div>
+
+        <form className="login-form" onSubmit={handleSubmit} noValidate>
+          <label className="login-field">
+            <span className="sr-only">Email or mobile number</span>
+            <Icon name="user" className="login-field__icon" />
+            <input
+              type="text"
+              autoComplete="username"
+              value={identifier}
+              onChange={(event) => { setIdentifier(event.target.value); setMessage('') }}
+              placeholder="Email / Mobile Number"
+            />
+          </label>
+
+          <label className="login-field">
+            <span className="sr-only">Password</span>
+            <Icon name="lock" className="login-field__icon" />
+            <input
+              type={showPassword ? 'text' : 'password'}
+              autoComplete="current-password"
+              value={password}
+              onChange={(event) => { setPassword(event.target.value); setMessage('') }}
+              placeholder="Password"
+            />
+            <button type="button" className="login-field__visibility" onClick={() => setShowPassword((value) => !value)} aria-label={showPassword ? 'Hide password' : 'Show password'}>
+              <Icon name={showPassword ? 'eye-off' : 'eye'} />
+            </button>
+          </label>
+
+          <button type="button" className="login-form__forgot" onClick={handleUnavailableAction}>Forgot Password?</button>
+
+          {message ? <p className="login-form__message" role="status">{message}</p> : null}
+
+          <button type="submit" className="login-form__submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Logging in...' : 'Login'}
+          </button>
+
+          <div className="login-form__divider" aria-hidden="true"><span>OR</span></div>
+
+          <button type="button" className="login-form__google" onClick={handleUnavailableAction}>
+            <GoogleMark />
+            <span>Login with Google</span>
+          </button>
+
+          <p className="login-form__signup">
+            Don&apos;t have an account?{' '}
+            <button type="button" onClick={() => { window.location.hash = '#register' }}>Sign up</button>
+          </p>
+        </form>
+      </section>
+    </main>
+  )
+}
+
+function RegisterPage({ onRegister }) {
+  const [fullName, setFullName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [message, setMessage] = useState('')
+
+  const handleSubmit = (event) => {
+    event.preventDefault()
+
+    if (!fullName.trim() || !email.trim() || !password || !confirmPassword) {
+      setMessage('Please complete all registration fields.')
+      return
+    }
+
+    if (password !== confirmPassword) {
+      setMessage('Passwords do not match.')
+      return
+    }
+
+    onRegister({ name: fullName.trim(), email: email.trim(), mobile: '+91 91234 56789' })
+    window.location.hash = '#account'
+  }
+
+  const handleUnavailableAction = () => setMessage('This authentication option is not connected yet.')
+
+  return (
+    <main className="login-page register-page" id="register">
+      <section className="login-card register-card" aria-labelledby="register-title">
+        <h1 id="register-title">Register</h1>
+        <div className="login-card__ornament" aria-hidden="true"><span /></div>
+
+        <form className="login-form register-form" onSubmit={handleSubmit} noValidate>
+          <label className="login-field">
+            <span className="sr-only">Full name</span>
+            <Icon name="user" className="login-field__icon" />
+            <input type="text" autoComplete="name" value={fullName} onChange={(event) => { setFullName(event.target.value); setMessage('') }} placeholder="Full Name" />
+          </label>
+
+          <label className="login-field">
+            <span className="sr-only">Email address</span>
+            <Icon name="mail" className="login-field__icon" />
+            <input type="email" autoComplete="email" value={email} onChange={(event) => { setEmail(event.target.value); setMessage('') }} placeholder="Email Address" />
+          </label>
+
+          <label className="login-field">
+            <span className="sr-only">Password</span>
+            <Icon name="lock" className="login-field__icon" />
+            <input type={showPassword ? 'text' : 'password'} autoComplete="new-password" value={password} onChange={(event) => { setPassword(event.target.value); setMessage('') }} placeholder="Password" />
+            <button type="button" className="login-field__visibility" onClick={() => setShowPassword((value) => !value)} aria-label={showPassword ? 'Hide password' : 'Show password'}><Icon name={showPassword ? 'eye-off' : 'eye'} /></button>
+          </label>
+
+          <label className="login-field">
+            <span className="sr-only">Confirm password</span>
+            <Icon name="lock" className="login-field__icon" />
+            <input type={showConfirmPassword ? 'text' : 'password'} autoComplete="new-password" value={confirmPassword} onChange={(event) => { setConfirmPassword(event.target.value); setMessage('') }} placeholder="Confirm Password" />
+            <button type="button" className="login-field__visibility" onClick={() => setShowConfirmPassword((value) => !value)} aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}><Icon name={showConfirmPassword ? 'eye-off' : 'eye'} /></button>
+          </label>
+
+          {message ? <p className="login-form__message" role="status">{message}</p> : null}
+
+          <button type="submit" className="login-form__submit">Register</button>
+
+          <div className="login-form__divider" aria-hidden="true"><span>OR</span></div>
+
+          <button type="button" className="login-form__google" onClick={handleUnavailableAction}>
+            <GoogleMark />
+            <span>Register with Google</span>
+          </button>
+
+          <p className="login-form__signup">
+            Already have an account?{' '}
+            <button type="button" onClick={() => { window.location.hash = '#login' }}>Login</button>
+          </p>
+        </form>
+      </section>
+    </main>
+  )
+}
+
+function OrderProgress({ status }) {
+  const isShipped = status === 'Shipped'
+  const stages = [
+    { label: 'Ordered', date: isShipped ? '10 May' : '12 May', icon: 'bag', state: 'done' },
+    { label: 'Packed', date: isShipped ? '11 May' : '13 May', icon: 'package', state: isShipped ? 'done' : 'current' },
+    { label: 'Shipped', date: isShipped ? '12 May' : '—', icon: 'truck', state: isShipped ? 'current' : 'pending' },
+    { label: 'Delivered', date: '—', icon: 'shield', state: 'pending' },
+  ]
+
+  return (
+    <div className="account-order__tracking">
+      <span className={['account-order__label', isShipped ? 'account-order__label--shipped' : ''].filter(Boolean).join(' ')}>{status}</span>
+      <ol>
+        {stages.map((stage) => (
+          <li key={stage.label} className={`is-${stage.state}`}>
+            <span className="account-order__stage-icon"><Icon name={stage.icon} /></span>
+            <strong>{stage.label}</strong>
+            <small>{stage.date}</small>
+          </li>
+        ))}
+      </ol>
+    </div>
+  )
+}
+
+function AccountPage({ user, onLogout, onAddToCart, onBuyNow }) {
+  const [activePanel, setActivePanel] = useState('orders')
+  const [notice, setNotice] = useState('')
+  const initials = user.name.split(' ').map((name) => name[0]).join('').slice(0, 2).toUpperCase()
+  const accountItems = [
+    { id: 'orders', icon: 'bag', title: 'My Orders', description: 'View orders, order details and tracking.' },
+    { id: 'addresses', icon: 'pin', title: 'Saved Addresses', description: 'Manage delivery addresses and defaults.' },
+    { id: 'wishlist', icon: 'heart', title: 'Wishlist', description: 'See your saved product favourites.' },
+    { id: 'settings', icon: 'user', title: 'Account Settings', description: 'Update your personal information and password.' },
+    { id: 'support', icon: 'mail', title: 'Help & Support', description: 'Contact, FAQ and returns assistance.' },
+  ]
+  const showNotice = (text) => setNotice(text)
+
+  return (
+    <main className="account-page" id="account">
+      <div className="shell-content account-page__inner">
+        <section className="account-profile" aria-labelledby="account-title">
+          <div className="account-profile__avatar" aria-hidden="true">{initials}</div>
+          <div className="account-profile__details">
+            <p className="account-page__eyebrow">MY ACCOUNT</p>
+            <div className="account-profile__name-row"><h1 id="account-title">{user.name}</h1><span>♛&nbsp; Premium Member</span></div>
+            <p>{user.email}</p>
+            <p>{user.mobile || '+91 91234 56789'}</p>
+          </div>
+          <button type="button" className="account-button account-button--secondary" onClick={() => { setActivePanel('settings'); showNotice('Edit your profile details below.') }}>Edit Profile</button>
+        </section>
+
+        <div className="account-layout">
+          <nav className="account-nav" aria-label="Account options">
+            <div className="account-nav__heading">
+              <p>MY ACCOUNT</p>
+              <span aria-hidden="true">— ◉ —</span>
+            </div>
+            {accountItems.map((item) => (
+              <button key={item.id} type="button" className={activePanel === item.id ? 'is-active' : ''} onClick={() => { setActivePanel(item.id); setNotice('') }}>
+                <Icon name={item.icon} />
+                <span><strong>{item.title}</strong><small>{item.description}</small></span>
+                <Icon name="chevron-right" />
+              </button>
+            ))}
+            <button type="button" className="account-nav__logout" onClick={onLogout}>
+              <Icon name="logout" />
+              <span><strong>Logout</strong><small>Sign out from your account</small></span>
+            </button>
+          </nav>
+
+          <section className="account-panel" aria-live="polite">
+            {activePanel === 'orders' ? <>
+              <h2>My Orders</h2><p className="account-panel__intro">Track your recent purchases and delivery status.</p>
+              <div className="account-summary" aria-label="Order summary">
+                <button type="button" onClick={() => showNotice('All order history opened.')}><Icon name="bag" /><span><strong>12</strong><small>All Orders</small></span></button>
+                <button type="button" onClick={() => showNotice('Processing orders opened.')}><Icon name="clock" /><span><strong>03</strong><small>Processing</small></span></button>
+                <button type="button" onClick={() => showNotice('Shipped orders opened.')}><Icon name="truck" /><span><strong>04</strong><small>Shipped</small></span></button>
+                <button type="button" onClick={() => showNotice('Delivered orders opened.')}><Icon name="shield" /><span><strong>05</strong><small>Delivered</small></span></button>
+              </div>
+              <article className="account-order account-order--detailed">
+                <img src="/ayush/product-sattu.png" alt="Ayush Sattu order" />
+                <div className="account-order__product"><strong>Order #AK-10248</strong><p>Ayush Kursela Mixture · 2110</p><small>1L Glass Jar</small><b>₹899</b></div>
+                <div className="account-order__meta"><span>◫&nbsp; 12 May 2025</span><small>Order Date</small><strong>₹899</strong><small>Total Amount</small></div>
+                <OrderProgress status="Processing" />
+                <button type="button" className="account-order__button" onClick={() => showNotice('Order #AK-10248 details opened.')}>View Details</button>
+              </article>
+              <article className="account-order account-order--detailed">
+                <img src="/ayush/product-katarr-matar.png" alt="Ayush Katarr Matar order" />
+                <div className="account-order__product"><strong>Order #AK-10247</strong><p>Ayush Katarr Matar</p><small>500g</small><b>₹60</b></div>
+                <div className="account-order__meta"><span>◫&nbsp; 10 May 2025</span><small>Order Date</small><strong>₹120</strong><small>Total Amount</small></div>
+                <OrderProgress status="Shipped" />
+                <button type="button" className="account-order__button" onClick={() => showNotice('Tracking for Order #AK-10247 opened.')}>Track Order</button>
+              </article>
+              <div className="account-statuses"><span>Processing</span><span>Shipped</span><span>Delivered</span><span>Cancelled</span></div>
+            </> : null}
+            {activePanel === 'addresses' ? <>
+              <div className="account-panel__title-row"><div><h2>Saved Addresses</h2><p className="account-panel__intro">Manage your saved delivery addresses.</p></div><button type="button" className="account-button" onClick={() => showNotice('Add new address form opened.')}>＋&nbsp; Add New Address</button></div>
+              <article className="account-address account-address--detailed"><div className="account-address__icon"><Icon name="home" /></div><div className="account-address__content"><strong>Home <em>Default</em></strong><p>85 P, Barauni – Purnea Hwy<br />Maranga, Purnia, Bihar 854301<br />+91 91234 56789</p></div><button type="button" className="account-address__more" aria-label="Home address options" onClick={() => showNotice('Home address options opened.')}><Icon name="more" /></button><div className="account-address__actions"><button type="button" onClick={() => showNotice('Home address edit mode opened.')}><Icon name="edit" /> Edit</button><button type="button" className="is-delete" onClick={() => showNotice('Home address removed.')}><Icon name="trash" /> Delete</button><button type="button" className="is-default" onClick={() => showNotice('Home is already your default address.')}>✓&nbsp; Default Address</button></div></article>
+              <article className="account-address account-address--detailed"><div className="account-address__icon"><Icon name="building" /></div><div className="account-address__content"><strong>Office</strong><p>2nd Floor, Sagar Building<br />Naya Tola, Purnia, Bihar 854301<br />+91 98765 43210</p></div><button type="button" className="account-address__more" aria-label="Office address options" onClick={() => showNotice('Office address options opened.')}><Icon name="more" /></button><div className="account-address__actions"><button type="button" onClick={() => showNotice('Office address edit mode opened.')}><Icon name="edit" /> Edit</button><button type="button" className="is-delete" onClick={() => showNotice('Office address removed.')}><Icon name="trash" /> Delete</button><button type="button" className="is-default" onClick={() => showNotice('Office saved as your default address.')}>Set as Default</button></div></article>
+              <p className="account-address__note">✓&nbsp; Your default address will be used for all deliveries.</p>
+            </> : null}
+            {activePanel === 'wishlist' ? <>
+              <h2>Wishlist</h2><p className="account-panel__intro">Your saved favourites, ready whenever you are.</p>
+              <article className="account-wishlist"><img src="/ayush/product-katarr-matar.png" alt="Katarr Matar" /><div><strong>Katarr Matar</strong><p>150g · ₹25</p></div><div className="account-panel__actions"><button type="button" onClick={() => { onAddToCart(productCatalog.find((product) => product.id.includes('katarr')) ?? productCatalog[0]); showNotice('Katarr Matar added to cart.') }}>Add to Cart</button><button type="button" onClick={() => { onBuyNow(); showNotice('Checkout is ready from your cart.') }}>Buy Now</button></div></article>
+            </> : null}
+            {activePanel === 'settings' ? <>
+              <h2>Account Settings</h2><p className="account-panel__intro">Keep your account details and password secure.</p>
+              <div className="account-settings account-settings--detailed">
+                <button type="button" onClick={() => showNotice('Personal information edit mode opened.')}><span><Icon name="user" /></span><span><strong>Edit Personal Information</strong><small>Update your name, date of birth and other details.</small></span><Icon name="chevron-right" /></button>
+                <button type="button" onClick={() => showNotice('Email/mobile update mode opened.')}><span><Icon name="mail" /></span><span><strong>Update Email / Mobile</strong><small>Update your email address and mobile number.</small></span><Icon name="chevron-right" /></button>
+                <button type="button" onClick={() => showNotice('Change password mode opened.')}><span><Icon name="lock" /></span><span><strong>Change Password</strong><small>Choose a strong password to keep your account secure.</small></span><Icon name="chevron-right" /></button>
+                <button type="button" onClick={() => showNotice('Two-factor authentication setup opened.')}><span><Icon name="shield" /></span><span><strong>Two-Factor Authentication</strong><small>Add an extra layer of security to your account.</small></span><em>Inactive</em><Icon name="chevron-right" /></button>
+              </div>
+              <aside className="account-security-note"><Icon name="shield" /><span><strong>We never share your personal information</strong><small>Your data is 100% safe and secure with us.</small></span></aside>
+            </> : null}
+            {activePanel === 'support' ? <>
+              <h2>Help & Support</h2><p className="account-panel__intro">Our team is here to help with every order.</p>
+              <div className="account-settings"><button type="button" onClick={() => { window.location.hash = '#contact' }}>Contact Us</button><button type="button" onClick={() => { window.location.hash = '#contact' }}>FAQ</button><button type="button" onClick={() => { window.location.hash = '#contact' }}>Return / Refund Help</button></div>
+            </> : null}
+            {notice ? <p className="account-panel__notice">{notice}</p> : null}
+          </section>
+        </div>
+      </div>
+    </main>
+  )
+}
+
+function ProductCard({ onAddToCart, onBuyNow, onShareProduct, onToggleWishlist, wishlistIds = [], product, sectionId = 'products' }) {
   const variants = product.variants?.length
     ? product.variants
     : [{ label: product.weight, price: product.price, originalPrice: product.originalPrice }]
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0)
+  const isWishlisted = wishlistIds.includes(product.id)
   const selectedVariant = variants[selectedVariantIndex] ?? variants[0]
   const salePrice = selectedVariant.price
   const originalPrice = selectedVariant.originalPrice
@@ -1849,6 +2328,15 @@ function ProductCard({ onAddToCart, onBuyNow, onShareProduct, product, sectionId
         onClick={handleShareClick}
       >
         <Icon name="share" className="product-card__share-icon" />
+      </button>
+      <button
+        type="button"
+        className={['product-card__wishlist', isWishlisted ? 'is-active' : ''].filter(Boolean).join(' ')}
+        aria-label={`${isWishlisted ? 'Remove' : 'Add'} ${product.name} ${isWishlisted ? 'from' : 'to'} wishlist`}
+        aria-pressed={isWishlisted}
+        onClick={(event) => { event.stopPropagation(); onToggleWishlist(product) }}
+      >
+        <Icon name="heart" className="product-card__wishlist-icon" />
       </button>
 
       <div className="product-card__image-shell">
@@ -1915,7 +2403,7 @@ function ProductCard({ onAddToCart, onBuyNow, onShareProduct, product, sectionId
   )
 }
 
-function ProductsPage({ onAddToCart, onBuyNow, onShareProduct }) {
+function ProductsPage({ onAddToCart, onBuyNow, onShareProduct, onToggleWishlist, wishlistIds }) {
   const availableSizes = [...new Set(productCatalog.map((product) => product.weight))]
   const [productFilter, setProductFilter] = useState('all')
   const [sizeFilter, setSizeFilter] = useState('all')
@@ -2007,6 +2495,8 @@ function ProductsPage({ onAddToCart, onBuyNow, onShareProduct }) {
               onAddToCart={onAddToCart}
               onBuyNow={onBuyNow}
               onShareProduct={onShareProduct}
+              onToggleWishlist={onToggleWishlist}
+              wishlistIds={wishlistIds}
               sectionId="products"
             />
           ))}
@@ -2016,7 +2506,7 @@ function ProductsPage({ onAddToCart, onBuyNow, onShareProduct }) {
   )
 }
 
-function ProductCarousel({ onAddToCart, onBuyNow, onShareProduct }) {
+function ProductCarousel({ onAddToCart, onBuyNow, onShareProduct, onToggleWishlist, wishlistIds }) {
   const getVisibleCards = () => {
     if (typeof window === 'undefined') {
       return 4
@@ -2088,6 +2578,8 @@ function ProductCarousel({ onAddToCart, onBuyNow, onShareProduct }) {
                   onAddToCart={onAddToCart}
                   onBuyNow={onBuyNow}
                   onShareProduct={onShareProduct}
+                  onToggleWishlist={onToggleWishlist}
+                  wishlistIds={wishlistIds}
                 />
               ))}
             </div>
@@ -2108,7 +2600,7 @@ function ProductCarousel({ onAddToCart, onBuyNow, onShareProduct }) {
       </div>
 
       <div className="product-carousel__cta-wrap">
-        <a className="product-carousel__cta" href="#shopping-modes">
+        <a className="product-carousel__cta" href="#products">
           Explore more
         </a>
       </div>
@@ -2116,7 +2608,7 @@ function ProductCarousel({ onAddToCart, onBuyNow, onShareProduct }) {
   )
 }
 
-function BrandStorySection({ onAddToCart, onBuyNow, onShareProduct }) {
+function BrandStorySection({ onAddToCart, onBuyNow, onShareProduct, onToggleWishlist, wishlistIds }) {
   return (
     <Reveal as="section" className="brand-story-section" id="products">
       <div className="shell-content shell-content--wide">
@@ -2133,6 +2625,8 @@ function BrandStorySection({ onAddToCart, onBuyNow, onShareProduct }) {
               onAddToCart={onAddToCart}
               onBuyNow={onBuyNow}
               onShareProduct={onShareProduct}
+              onToggleWishlist={onToggleWishlist}
+              wishlistIds={wishlistIds}
             />
           </div>
         </div>
@@ -2227,7 +2721,7 @@ function ModeSelection() {
   )
 }
 
-function BestsellersSection({ onAddToCart, onBuyNow, onShareProduct }) {
+function BestsellersSection({ onAddToCart, onBuyNow, onShareProduct, onToggleWishlist, wishlistIds }) {
   return (
     <Reveal as="section" className="bestsellers-section" id="bestsellers">
       <div className="shell-content">
@@ -2252,6 +2746,8 @@ function BestsellersSection({ onAddToCart, onBuyNow, onShareProduct }) {
                 onAddToCart={onAddToCart}
                 onBuyNow={onBuyNow}
                 onShareProduct={onShareProduct}
+                onToggleWishlist={onToggleWishlist}
+                wishlistIds={wishlistIds}
                 sectionId="bestsellers"
               />
             ))}
@@ -2584,8 +3080,10 @@ function SiteToast({ message }) {
 
 function App() {
   const [cartItems, setCartItems] = useState({})
+  const [wishlistIds, setWishlistIds] = useState([])
   const [toastMessage, setToastMessage] = useState('')
   const [currentHash, setCurrentHash] = useState(getCurrentPageHash)
+  const [account, setAccount] = useState(readStoredAccount)
 
   useEffect(() => {
     if (!toastMessage) {
@@ -2614,6 +3112,10 @@ function App() {
   const isAboutPage = currentHash === '#about'
   const isContactPage = currentHash === '#contact'
   const isProductsPage = currentHash === '#products'
+  const isLoginPage = currentHash === '#login'
+  const isRegisterPage = currentHash === '#register'
+  const isAccountPage = currentHash === '#account' && Boolean(account)
+  const isAuthPage = isLoginPage || isRegisterPage
 
   useEffect(() => {
     if (typeof window === 'undefined' || typeof document === 'undefined') {
@@ -2628,7 +3130,7 @@ function App() {
     })
 
     return () => window.cancelAnimationFrame(frameId)
-  }, [currentHash, isAboutPage, isContactPage, isProductsPage])
+  }, [currentHash, isAboutPage, isContactPage, isProductsPage, isLoginPage, isRegisterPage, isAccountPage])
 
   const cartItemCount =
     baseCartItemCount +
@@ -2654,10 +3156,30 @@ function App() {
     triggerProductCta()
   }
 
+  const handleToggleWishlist = (product) => {
+    setWishlistIds((current) => {
+      const isSaved = current.includes(product.id)
+      setToastMessage(isSaved ? `${product.name} removed from wishlist` : `${product.name} added to wishlist`)
+      return isSaved ? current.filter((id) => id !== product.id) : [...current, product.id]
+    })
+  }
+
+  const handleLogin = (nextAccount) => {
+    persistAccount(nextAccount)
+    setAccount(nextAccount)
+  }
+
+  const handleLogout = () => {
+    window.localStorage.removeItem(accountStorageKey)
+    setAccount(null)
+    setToastMessage('You have been logged out.')
+    window.location.hash = '#home'
+  }
+
   return (
     <div className="site-shell">
       <TopBar />
-      <Navbar cartItemCount={cartItemCount} />
+      <Navbar cartItemCount={cartItemCount} wishlistCount={wishlistIds.length} isAuthenticated={Boolean(account)} />
 
       {isAboutPage ? (
         <AboutPage
@@ -2668,7 +3190,13 @@ function App() {
       ) : isContactPage ? (
         <ContactPage />
       ) : isProductsPage ? (
-        <ProductsPage onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} onShareProduct={handleShareProduct} />
+        <ProductsPage onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} onShareProduct={handleShareProduct} onToggleWishlist={handleToggleWishlist} wishlistIds={wishlistIds} />
+      ) : isLoginPage ? (
+        <LoginPage onLogin={handleLogin} />
+      ) : isRegisterPage ? (
+        <RegisterPage onRegister={handleLogin} />
+      ) : isAccountPage ? (
+        <AccountPage user={account} onLogout={handleLogout} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
       ) : (
         <main>
           <HeroBanner />
@@ -2676,6 +3204,8 @@ function App() {
             onAddToCart={handleAddToCart}
             onBuyNow={handleBuyNow}
             onShareProduct={handleShareProduct}
+            onToggleWishlist={handleToggleWishlist}
+            wishlistIds={wishlistIds}
           />
           <HeritageSection />
           <ModeSelection />
@@ -2683,12 +3213,14 @@ function App() {
             onAddToCart={handleAddToCart}
             onBuyNow={handleBuyNow}
             onShareProduct={handleShareProduct}
+            onToggleWishlist={handleToggleWishlist}
+            wishlistIds={wishlistIds}
           />
           <FactoryBanner />
         </main>
       )}
 
-      <Footer />
+      {!isAuthPage && !isAccountPage ? <Footer /> : null}
       <SiteToast message={toastMessage} />
     </div>
   )

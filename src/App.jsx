@@ -18,6 +18,10 @@ const announcementItems = [
 const defaultNavHref = menuLinks[0].href
 const accountStorageKey = 'ayush-kursela-account'
 
+function formatBagWeight(weight) {
+  return Number.isInteger(weight) ? String(weight) : Number(weight).toFixed(2).replace(/0+$/, '').replace(/\.$/, '')
+}
+
 function readStoredAccount() {
   if (typeof window === 'undefined') return null
 
@@ -278,6 +282,7 @@ const productCatalog = [
     name: 'Katarr Matar',
     weight: '150g',
     price: 25,
+    wholesale: { pcsPerBag: 120, weightKgPerBag: 5.4, ratePerBag: 820 },
     image: '/ayush/product-katarr-matar.png',
     alt: 'Ayush Katarr Matar product pack',
   },
@@ -286,6 +291,7 @@ const productCatalog = [
     name: 'Bhujia',
     weight: '150g',
     price: 25,
+    wholesale: { pcsPerBag: 100, weightKgPerBag: 5, ratePerBag: 760 },
     image: '/ayush/product-bhujia.png',
     alt: 'Ayush Bhujia product pack',
   },
@@ -294,6 +300,7 @@ const productCatalog = [
     name: 'Mixture',
     weight: '150g',
     price: 25,
+    wholesale: { pcsPerBag: 90, weightKgPerBag: 4.5, ratePerBag: 700 },
     image: '/ayush/product-mixture.png',
     alt: 'Ayush Mixture product pack',
   },
@@ -302,6 +309,7 @@ const productCatalog = [
     name: 'Ayush Sattu',
     weight: '500g',
     price: 65,
+    wholesale: { pcsPerBag: 30, weightKgPerBag: 15, ratePerBag: 1260 },
     image: '/ayush/product-sattu.png',
     alt: 'Ayush Sattu product pack',
   },
@@ -310,6 +318,7 @@ const productCatalog = [
     name: 'Paneer Bhujia',
     weight: '150g',
     price: 30,
+    wholesale: { pcsPerBag: 100, weightKgPerBag: 5, ratePerBag: 920 },
     image: '/ayush/product-paneer-bhujia.png',
     alt: 'Ayush Paneer Bhujia product pack',
   },
@@ -318,6 +327,7 @@ const productCatalog = [
     name: 'Nimbu Bhujia',
     weight: '150g',
     price: 25,
+    wholesale: { pcsPerBag: 110, weightKgPerBag: 5.5, ratePerBag: 790 },
     image: '/ayush/product-nimbu-bhujia.png',
     alt: 'Ayush Nimbu Bhujia product pack',
   },
@@ -326,6 +336,7 @@ const productCatalog = [
     name: 'Kursela Chanachur',
     weight: '200g',
     price: 35,
+    wholesale: { pcsPerBag: 80, weightKgPerBag: 4.8, ratePerBag: 880 },
     image: '/ayush/product-kursela-chanachur.png',
     alt: 'Ayush Kursela Chanachur product pack',
   },
@@ -2198,7 +2209,7 @@ function AccountPage({ user, onLogout, onAddToCart, onBuyNow }) {
           <div className="account-profile__avatar" aria-hidden="true">{initials}</div>
           <div className="account-profile__details">
             <p className="account-page__eyebrow">MY ACCOUNT</p>
-            <div className="account-profile__name-row"><h1 id="account-title">{user.name}</h1><span>♛&nbsp; Premium Member</span></div>
+            <div className="account-profile__name-row"><h1 id="account-title">{user.name}</h1></div>
             <p>{user.email}</p>
             <p>{user.mobile || '+91 91234 56789'}</p>
           </div>
@@ -2270,8 +2281,19 @@ function AccountPage({ user, onLogout, onAddToCart, onBuyNow }) {
               <aside className="account-security-note"><Icon name="shield" /><span><strong>We never share your personal information</strong><small>Your data is 100% safe and secure with us.</small></span></aside>
             </> : null}
             {activePanel === 'support' ? <>
-              <h2>Help & Support</h2><p className="account-panel__intro">Our team is here to help with every order.</p>
-              <div className="account-settings"><button type="button" onClick={() => { window.location.hash = '#contact' }}>Contact Us</button><button type="button" onClick={() => { window.location.hash = '#contact' }}>FAQ</button><button type="button" onClick={() => { window.location.hash = '#contact' }}>Return / Refund Help</button></div>
+              <h2>Help &amp; Support</h2><p className="account-panel__intro">Our team is here to help with every order.</p>
+              <div className="account-support-links">
+                <button type="button" onClick={() => { window.location.hash = '#contact' }}><span><Icon name="headset" /></span><span><strong>Contact Us</strong><small>Get in touch with our support team for any assistance.</small></span><Icon name="chevron-right" /></button>
+                <button type="button" onClick={() => { window.location.hash = '#contact' }}><span><Icon name="chat" /></span><span><strong>FAQ</strong><small>Find answers to frequently asked questions.</small></span><Icon name="chevron-right" /></button>
+                <button type="button" onClick={() => showNotice('Return and refund help opened.')}><span><Icon name="return" /></span><span><strong>Return / Refund Help</strong><small>Learn about returns, refunds and exchange policy.</small></span><Icon name="chevron-right" /></button>
+              </div>
+              <aside className="account-support-note"><Icon name="shield" /><span><strong>We are here for you!</strong><small>Your satisfaction is our top priority.</small></span><Icon name="headset" /></aside>
+              <div className="account-support-contact">
+                <button type="button" onClick={() => showNotice('Live chat will be available shortly.')}><Icon name="chat" /><span><strong>Live Chat</strong><small>Chat with us<br />9 AM – 9 PM</small></span></button>
+                <a href="mailto:support@ayushkursela.com"><Icon name="mail" /><span><strong>Email Support</strong><small>support@ayushkursela.com<br />Response in 24 hrs</small></span></a>
+                <a href="tel:+919123456789"><Icon name="phone" /><span><strong>Call Us</strong><small>+91 12345 67890<br />9 AM – 6 PM</small></span></a>
+                <span><Icon name="clock" /><span><strong>Support Hours</strong><small>Mon – Sat<br />9 AM – 6 PM</small></span></span>
+              </div>
             </> : null}
             {notice ? <p className="account-panel__notice">{notice}</p> : null}
           </section>
@@ -2281,24 +2303,22 @@ function AccountPage({ user, onLogout, onAddToCart, onBuyNow }) {
   )
 }
 
-function ProductCard({ onAddToCart, onBuyNow, onShareProduct, onToggleWishlist, wishlistIds = [], product, sectionId = 'products' }) {
-  const variants = product.variants?.length
-    ? product.variants
-    : [{ label: product.weight, price: product.price, originalPrice: product.originalPrice }]
-  const [selectedVariantIndex, setSelectedVariantIndex] = useState(0)
+function ProductCard({ onAddToCart, onBuyNow, onShareProduct, onToggleWishlist, wishlistIds = [], product, sectionId = 'products', shoppingMode = 'retail' }) {
+  const [quantity, setQuantity] = useState('1')
+  const [bagQuantity, setBagQuantity] = useState(5)
   const isWishlisted = wishlistIds.includes(product.id)
-  const selectedVariant = variants[selectedVariantIndex] ?? variants[0]
-  const salePrice = selectedVariant.price
-  const originalPrice = selectedVariant.originalPrice
-  const discount = originalPrice > salePrice
-    ? Math.round(((originalPrice - salePrice) / originalPrice) * 100)
-    : 0
-  const offerLabel = discount > 0 ? `${discount}% OFF` : (product.offerLabel ?? '5% OFF')
+  const pieceCount = Math.max(1, Number.parseInt(quantity, 10) || 1)
+  const wholesale = product.wholesale
+  const isWholesale = shoppingMode === 'wholesale' && wholesale
+  const totalPcs = isWholesale ? wholesale.pcsPerBag * bagQuantity : 0
+  const totalWeightKg = isWholesale ? wholesale.weightKgPerBag * bagQuantity : 0
+  const salePrice = isWholesale ? wholesale.ratePerBag * bagQuantity : pieceCount * 5
+  const offerLabel = product.offerLabel ?? '5% OFF'
   const selectedProduct = {
     ...product,
     price: salePrice,
-    weight: selectedVariant.label,
-    selectedVariant,
+    weight: isWholesale ? `${bagQuantity} Bags` : `${pieceCount} ${pieceCount === 1 ? 'piece' : 'pieces'}`,
+    quantity: isWholesale ? bagQuantity : pieceCount,
   }
 
   const handleShareClick = async (event) => {
@@ -2362,20 +2382,36 @@ function ProductCard({ onAddToCart, onBuyNow, onShareProduct, onToggleWishlist, 
           </button>
         </div>
 
-        <label className="product-card__variant-label">
-          <span className="sr-only">Select weight for {product.name}</span>
-          <select
+        {isWholesale ? <>
+          <label className="product-card__variant-label product-card__variant-label--wholesale">
+            <span className="sr-only">Select bags for {product.name}</span>
+            <select className="product-card__variant product-card__wholesale-select" value={bagQuantity} onChange={(event) => setBagQuantity(Number(event.target.value))} aria-label={`Select bags for ${product.name}`}>
+              {[5, 6, 7, 8, 9, 10, 15, 20].map((bags) => (
+                <option key={bags} value={bags}>{bags === 5 ? '5 Bags (Minimum)' : `${bags} Bags`} • {wholesale.pcsPerBag * bags} PCS • {formatBagWeight(wholesale.weightKgPerBag * bags)} KG</option>
+              ))}
+            </select>
+          </label>
+          <p className="product-card__bag-detail"><Icon name="bag" /> 1 Bag <span>•</span> {wholesale.pcsPerBag} PCS <span>•</span> {formatBagWeight(wholesale.weightKgPerBag)} KG <span>•</span> ₹{wholesale.ratePerBag} / Bag</p>
+        </> : <label className="product-card__variant-label">
+          <span className="sr-only">Select pieces for {product.name}</span>
+          <input
             className="product-card__variant"
-            value={selectedVariantIndex}
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            list={`pieces-${product.id}`}
+            value={quantity}
+            placeholder="Pieces"
             onClick={(event) => event.stopPropagation()}
-            onChange={(event) => setSelectedVariantIndex(Number(event.target.value))}
-            aria-label={`Select weight for ${product.name}`}
-          >
-            {variants.map((variant, index) => (
-              <option key={`${variant.label}-${index}`} value={index}>{variant.label}</option>
-            ))}
-          </select>
-        </label>
+            onChange={(event) => setQuantity(event.target.value.replace(/\D/g, ''))}
+            onBlur={() => setQuantity(String(pieceCount))}
+            aria-label={`Select pieces for ${product.name}`}
+          />
+          <datalist id={`pieces-${product.id}`}>
+            {[1, 2, 5, 10, 20].map((pieces) => <option key={pieces} value={pieces}>{pieces} {pieces === 1 ? 'piece' : 'pieces'}</option>)}
+          </datalist>
+          <span className="product-card__pieces-suffix">{pieceCount === 1 ? 'piece' : 'pieces'}</span>
+        </label>}
 
         {product.rating && product.reviewCount ? (
           <p className="product-card__rating">
@@ -2386,9 +2422,9 @@ function ProductCard({ onAddToCart, onBuyNow, onShareProduct, onToggleWishlist, 
 
         <div className="product-card__price-row">
           <p className="product-card__price">₹{salePrice}</p>
-          {discount > 0 ? <del className="product-card__original-price">₹{originalPrice}</del> : null}
         </div>
-        <p className="product-card__unit-price">₹{salePrice} for {selectedVariant.label}</p>
+        <p className="product-card__unit-price">{isWholesale ? `₹${wholesale.ratePerBag} × ${bagQuantity} Bags` : `₹5 per piece · ${pieceCount} ${pieceCount === 1 ? 'piece' : 'pieces'}`}</p>
+        {isWholesale ? <p className="product-card__minimum-order"><Icon name="package" /> Minimum order: 5 Bags</p> : null}
       </div>
 
       <button
@@ -2498,6 +2534,7 @@ function ProductsPage({ onAddToCart, onBuyNow, onShareProduct, onToggleWishlist,
               onToggleWishlist={onToggleWishlist}
               wishlistIds={wishlistIds}
               sectionId="products"
+              shoppingMode={shoppingMode}
             />
           ))}
         </section>

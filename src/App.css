@@ -7364,14 +7364,14 @@ a.contact-card__title:focus-visible {
 .product-card__title { min-width: 0; min-height: 40px; color: #174f37; font-size: 16px; line-height: 1.35; font-weight: 700; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .product-card__cart-action { position: static; width: 38px; height: 38px; flex: 0 0 38px; border: 1px solid rgba(25,75,50,.15); border-radius: 10px; background: transparent; color: #176442; box-shadow: none; }
 
-.product-card__variant-label { display: block; width: 100%; align-self: stretch; }
+.product-card__variant-label { position: relative; display: block; width: 100%; align-self: stretch; }
 .product-card__variant {
   display: block;
   width: 100%;
   max-width: none;
   min-height: 42px;
   margin-top: 12px;
-  padding: 0 12px;
+  padding: 0 76px 0 14px;
   border: 1px solid rgba(20,100,65,.32);
   border-radius: 10px;
   background: #fffdf9;
@@ -7381,6 +7381,25 @@ a.contact-card__title:focus-visible {
   font-weight: 600;
   outline: none;
 }
+
+.product-card__pieces-suffix {
+  position: absolute;
+  top: calc(50% + 6px);
+  right: 14px;
+  color: #5b6b61;
+  font-size: 12px;
+  font-weight: 700;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.product-card__variant-label--wholesale { margin-top: 12px; }
+.product-card__wholesale-select { margin-top: 0; padding: 0 38px 0 13px; font-weight: 800; cursor: pointer; }
+.product-card__bag-detail { min-height: 32px; margin: 9px 0 0; padding: 7px 9px; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 5px 7px; border-radius: 9px; background: #f0f5e9; color: #075f39; font-size: 11px; font-weight: 700; line-height: 1.25; }
+.product-card__bag-detail svg { width: 15px; height: 15px; }
+.product-card__bag-detail span { color: #6b886f; }
+.product-card__minimum-order { width: fit-content; margin: 10px 0 0; padding: 7px 10px; display: inline-flex; align-items: center; gap: 7px; border-radius: 8px; background: #fff1df; color: #aa4b1b; font-size: 11px; font-weight: 800; }
+.product-card__minimum-order svg { width: 15px; height: 15px; }
 
 .product-card__variant:focus { border-color: #176442; box-shadow: 0 0 0 3px rgba(23,100,66,.08); }
 .product-card__rating { display: flex; align-items: center; gap: 6px; margin-top: 10px; font-size: 12px; }
@@ -7425,6 +7444,11 @@ a.contact-card__title:focus-visible {
   .product-card__title { font-size: 12px; }
   .product-card__cart-action { width: 30px; height: 30px; flex-basis: 30px; }
   .product-card__variant { min-height: 36px; margin-top: 8px; font-size: 11px; }
+  .product-card__variant-label--wholesale { margin-top: 8px; }
+  .product-card__wholesale-select { margin-top: 0; padding-left: 9px; font-size: 10px; }
+  .product-card__bag-detail { margin-top: 6px; padding: 6px; font-size: 9px; }
+  .product-card__minimum-order { margin-top: 7px; padding: 5px 7px; font-size: 9px; }
+  .product-card__pieces-suffix { top: calc(50% + 4px); right: 11px; font-size: 10px; }
   .product-card__price { font-size: 18px; }
   .product-card__button { min-height: 38px; margin-top: 10px; font-size: 11px; }
   .product-card__offer { top: 9px; left: -40px; width: 120px; padding: 5px 0; font-size: 9px; }
@@ -7942,6 +7966,30 @@ a.contact-card__title:focus-visible {
 .account-security-note span { display: grid; gap: 7px; }
 .account-security-note strong { font-size: 15px; }
 .account-security-note small { color: #50675a; font-size: 13px; }
+.account-support-links { margin-top: 24px; display: grid; gap: 14px; }
+.account-support-links button { min-height: 92px; padding: 16px 20px; display: grid; grid-template-columns: 58px minmax(0, 1fr) 18px; align-items: center; gap: 17px; border: 1px solid rgba(19,76,49,.14); border-radius: 14px; background: #fffdf9; color: #075f39; text-align: left; cursor: pointer; transition: background-color .2s ease, box-shadow .2s ease, transform .2s ease; }
+.account-support-links button:hover, .account-support-links button:focus-visible { background: #fff; box-shadow: 0 8px 18px rgba(58,46,20,.06); transform: translateY(-1px); outline: none; }
+.account-support-links button > span:first-child { width: 58px; height: 58px; display: grid; place-items: center; border-radius: 50%; background: #f0f5e9; }
+.account-support-links button > span:first-child svg { width: 29px; height: 29px; }
+.account-support-links button > span:nth-child(2) { display: grid; gap: 7px; }
+.account-support-links strong { color: #103e2c; font-size: 16px; }
+.account-support-links small { color: #53645a; font-size: 13px; line-height: 1.35; }
+.account-support-links button > svg { width: 18px; height: 18px; }
+.account-support-note { margin-top: 25px; padding: 21px 23px; display: flex; align-items: center; gap: 16px; border-radius: 13px; background: linear-gradient(100deg, #edf5e8, #fafbf7); color: #075f39; }
+.account-support-note > svg:first-child { width: 39px; height: 39px; flex: 0 0 auto; }
+.account-support-note > svg:last-child { width: 48px; height: 48px; margin-left: auto; opacity: .38; }
+.account-support-note span { display: grid; gap: 6px; }
+.account-support-note strong { font-size: 16px; }
+.account-support-note small { color: #50675a; font-size: 13px; }
+.account-support-contact { margin-top: 27px; padding-top: 22px; display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px dashed rgba(25,75,50,.17); }
+.account-support-contact > * { min-width: 0; padding: 0 17px; display: flex; align-items: center; gap: 12px; border: 0; border-right: 1px dashed rgba(25,75,50,.17); background: transparent; color: #0b5438; text-align: left; text-decoration: none; font: inherit; cursor: pointer; }
+.account-support-contact > *:first-child { padding-left: 0; }
+.account-support-contact > *:last-child { border-right: 0; }
+.account-support-contact svg { width: 25px; height: 25px; flex: 0 0 auto; padding: 10px; border-radius: 50%; background: #f0f5e9; }
+.account-support-contact span > span, .account-support-contact > span { display: flex; align-items: center; }
+.account-support-contact strong, .account-support-contact small { display: block; }
+.account-support-contact strong { font-size: 12px; }
+.account-support-contact small { margin-top: 5px; color: #4d5e55; font-size: 11px; line-height: 1.45; }
 .account-panel__notice { margin: 18px 0 0; padding: 10px 12px; border-radius: 9px; background: #edf6ee; color: #075f39; font-size: 13px; }
 .account-logout { margin-top: 22px; display: inline-flex; align-items: center; gap: 8px; background: #fff7ed; border: 1px solid rgba(196, 74, 38, .28); color: #b74425; }
 .account-logout svg { width: 16px; height: 16px; }
@@ -8089,6 +8137,15 @@ a.contact-card__title:focus-visible {
   .account-settings--detailed small { font-size: 11px; }
   .account-settings--detailed button:last-child { grid-template-columns: 45px minmax(0, 1fr) auto 16px; }
   .account-security-note { margin-top: 20px; padding: 16px; }
+  .account-support-links button { min-height: 78px; grid-template-columns: 46px minmax(0, 1fr) 16px; gap: 11px; padding: 12px; }
+  .account-support-links button > span:first-child { width: 46px; height: 46px; }
+  .account-support-links button > span:first-child svg { width: 23px; height: 23px; }
+  .account-support-links strong { font-size: 13px; }
+  .account-support-links small { font-size: 11px; }
+  .account-support-contact { grid-template-columns: repeat(2, 1fr); gap: 15px 0; }
+  .account-support-contact > * { padding: 0 10px; }
+  .account-support-contact > *:nth-child(2) { border-right: 0; }
+  .account-support-contact > *:nth-child(3) { padding-left: 0; }
   .account-panel__actions, .account-wishlist .account-panel__actions { margin-left: 0; justify-content: flex-start; }
 }
 

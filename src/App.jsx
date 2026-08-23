@@ -788,6 +788,10 @@ function Icon({ name, className = '' }) {
           <path d="M5 4h4l1.5 4-2.2 1.8a15 15 0 0 0 6.1 6.1l1.8-2.2 4 1.5v4a2 2 0 0 1-2 2A15.5 15.5 0 0 1 3 6a2 2 0 0 1 2-2z" />
         </svg>
       )
+    case 'card':
+      return <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 9h18M7 15h3" /></svg>
+    case 'qr':
+      return <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="4" y="4" width="6" height="6" rx="1" /><rect x="14" y="4" width="6" height="6" rx="1" /><rect x="4" y="14" width="6" height="6" rx="1" /><path d="M14 14h3v3h3M14 20h3M20 14v2" /></svg>
     case 'calendar':
       return (
         <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
@@ -795,6 +799,12 @@ function Icon({ name, className = '' }) {
           <path d="M8 3.5v4M16 3.5v4M4 10h16" />
         </svg>
       )
+    case 'list':
+      return <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M9 6h11M9 12h11M9 18h11" /><circle cx="4.5" cy="6" r="1" fill="currentColor" /><circle cx="4.5" cy="12" r="1" fill="currentColor" /><circle cx="4.5" cy="18" r="1" fill="currentColor" /></svg>
+    case 'ruler':
+      return <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M7 3h8v18H7zM7 7h4M7 11h3M7 15h4M15 18h4v3h-4" /></svg>
+    case 'trending':
+      return <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m4 17 5-5 4 4 7-9M15 7h5v5" /></svg>
     case 'clock':
       return (
         <svg
@@ -2678,6 +2688,42 @@ function CartPage({ cartItems, onUpdateQuantity, onRemove, onMoveToWishlist, onC
   </div></main>
 }
 
+function BuyNowPage({ product, user, onComplete }) {
+  const wholesale = product?.wholesale
+  const initialQuantity = Math.max(1, Number(product?.quantity) || (String(product?.weight).includes('Bag') ? 5 : 1))
+  const isWholesale = Boolean(wholesale && String(product?.weight).includes('Bag'))
+  const minimum = isWholesale ? 5 : 1
+  const [quantity, setQuantity] = useState(Math.max(minimum, initialQuantity))
+  const [delivery, setDelivery] = useState('standard')
+  const [payment, setPayment] = useState('upi')
+  const [saveAddress, setSaveAddress] = useState(false)
+  const [message, setMessage] = useState('')
+  const [address, setAddress] = useState({ name: user?.name || '', phone: user?.mobile || '', building: '', street: '', city: '', state: '', pincode: '' })
+  const savedAddresses = readStoredAddresses()
+  if (!product) return <main className="buy-now-page"><div className="shell-content cart-empty"><h2>No product selected</h2><a href="#products">Explore Products</a></div></main>
+  const unitPrice = isWholesale ? wholesale.ratePerBag : Math.max(1, Math.round(product.price / initialQuantity))
+  const subtotal = unitPrice * quantity
+  const shipping = delivery === 'express' ? 120 : 0
+  const tax = Math.round(subtotal * .05)
+  const total = subtotal + shipping + tax
+  const placeOrder = (event) => {
+    event.preventDefault()
+    if (Object.values(address).some((value) => !String(value).trim())) { setMessage('Please complete the delivery address.'); return }
+    setMessage('Order placed successfully! Your confirmation number is AK-' + String(Date.now()).slice(-6) + '.')
+    onComplete?.()
+  }
+  return <main className="buy-now-page" id="buy-now"><form className="shell-content buy-now-page__inner" onSubmit={placeOrder}>
+    <nav className="buy-now-breadcrumb"><a href="#home">Home</a><span>›</span><span>Buy Now</span></nav>
+    <header className="buy-now-heading"><div><h1>Buy Now</h1><p>You&apos;re almost there! Just a few details to place your order.</p></div><span><Icon name="shield" /> 100% Secure Checkout</span></header>
+    <section className="buy-now-product"><img src={product.image} alt={product.alt} /><div><h2>{product.name}</h2><p>{product.weight}</p>{isWholesale ? <><span>{quantity} Bags (Minimum)</span><span>{wholesale.pcsPerBag * quantity} PCS</span><span>{formatBagWeight(wholesale.weightKgPerBag * quantity)} KG</span><aside><Icon name="bag" /> 1 Bag&nbsp; • &nbsp;{wholesale.pcsPerBag} PCS&nbsp; • &nbsp;{formatBagWeight(wholesale.weightKgPerBag)} KG<br /><strong>₹{wholesale.ratePerBag} / Bag</strong></aside></> : null}</div><div className="buy-now-product__price"><strong>₹{subtotal.toLocaleString('en-IN')}</strong><small>₹{unitPrice} × {quantity} {isWholesale ? 'Bags' : 'Pieces'}</small></div><div className="buy-now-quantity"><button type="button" disabled={quantity <= minimum} onClick={() => setQuantity((value) => Math.max(minimum, value - 1))}>−</button><strong>{quantity}</strong><button type="button" onClick={() => setQuantity((value) => value + 1)}>＋</button></div></section>
+    <section className="checkout-section"><div className="checkout-section__heading"><h2><Icon name="pin" /> Delivery Address</h2><select aria-label="Use a saved address" defaultValue="" onChange={(e) => { const saved = savedAddresses.find((item) => item.id === e.target.value); if (saved) setAddress({ name: user?.name || '', phone: saved.phone, building: saved.addressLine, street: '', city: saved.cityLine, state: 'Bihar', pincode: saved.cityLine.match(/\d{6}/)?.[0] || '' }) }}><option value="">Saved Addresses</option>{savedAddresses.map((item) => <option key={item.id} value={item.id}>{item.label}{item.isDefault ? ' (Default)' : ''}</option>)}</select></div><div className="checkout-address-grid"><input placeholder="Full Name*" value={address.name} onChange={(e) => setAddress({ ...address, name: e.target.value })} /><input placeholder="Phone Number*" value={address.phone} onChange={(e) => setAddress({ ...address, phone: e.target.value })} /><input placeholder="House / Flat / Building*" value={address.building} onChange={(e) => setAddress({ ...address, building: e.target.value })} /><input placeholder="Area / Street / Landmark*" value={address.street} onChange={(e) => setAddress({ ...address, street: e.target.value })} /><input placeholder="City*" value={address.city} onChange={(e) => setAddress({ ...address, city: e.target.value })} /><input placeholder="State*" value={address.state} onChange={(e) => setAddress({ ...address, state: e.target.value })} /><input placeholder="Pincode*" value={address.pincode} onChange={(e) => setAddress({ ...address, pincode: e.target.value.replace(/\D/g, '').slice(0, 6) })} /></div><label className="checkout-save-address"><input type="checkbox" checked={saveAddress} onChange={(e) => setSaveAddress(e.target.checked)} /> Save this address for future orders</label></section>
+    <section className="checkout-section"><h2><Icon name="truck" /> Delivery Options</h2><div className="checkout-options"><label className={delivery === 'standard' ? 'is-active' : ''}><input type="radio" name="delivery" checked={delivery === 'standard'} onChange={() => setDelivery('standard')} /><span><strong>Standard Delivery</strong><small>3 – 5 Business Days</small></span><em>FREE</em></label><label className={delivery === 'express' ? 'is-active' : ''}><input type="radio" name="delivery" checked={delivery === 'express'} onChange={() => setDelivery('express')} /><span><strong>Express Delivery</strong><small>1 – 2 Business Days</small></span><em>₹120</em></label></div></section>
+    <section className="checkout-section"><h2><Icon name="card" /> Payment Method</h2><div className="checkout-payments">{[['upi','UPI / QR','qr'],['card','Card','card'],['netbanking','Net Banking','building'],['cod','COD','truck']].map(([id,label,icon]) => <label key={id} className={payment === id ? 'is-active' : ''}><input type="radio" name="payment" checked={payment === id} onChange={() => setPayment(id)} /><Icon name={icon} /><span><strong>{label}</strong><small>{id === 'cod' ? 'Cash on Delivery' : id === 'card' ? 'Debit / Credit Card' : '100% secure payment'}</small></span></label>)}</div><aside className="checkout-secure-strip"><Icon name="shield" /> Secure Payments <b>•</b> 100% Safe &amp; Secure <b>•</b> Easy Returns</aside></section>
+    <section className="checkout-final"><div><h2><Icon name="bag" /> Order Summary</h2><article><img src={product.image} alt="" /><span><strong>{product.name}</strong><small>{quantity} {isWholesale ? 'Bags' : 'Pieces'} · ₹{unitPrice} / {isWholesale ? 'Bag' : 'Piece'}</small></span><b>₹{subtotal.toLocaleString('en-IN')}</b></article></div><aside><p><span>Subtotal</span><strong>₹{subtotal.toLocaleString('en-IN')}</strong></p><p><span>Shipping Charges</span><strong>{shipping ? `₹${shipping}` : 'FREE'}</strong></p><p><span>Tax (5%)</span><strong>₹{tax.toLocaleString('en-IN')}</strong></p><div><span>Total Amount</span><strong>₹{total.toLocaleString('en-IN')}</strong></div><small><Icon name="truck" /> Estimated Delivery: {delivery === 'express' ? '1 – 2' : '3 – 5'} Business Days</small><button type="submit"><Icon name="lock" /> PLACE ORDER</button>{message ? <p className="checkout-message" role="status">{message}</p> : null}</aside></section>
+    <section className="checkout-trust"><span><Icon name="shield" /><b>Quality Assured</b><small>Premium Quality Products</small></span><span><Icon name="truck" /><b>Fast Delivery</b><small>Across India</small></span><span><Icon name="return" /><b>Easy Returns</b><small>Hassle Free Returns</small></span><span><Icon name="headset" /><b>24/7 Support</b><small>We&apos;re here to help</small></span></section>
+  </form></main>
+}
+
 function ProductsPage({ initialShoppingMode = 'wholesale', onAddToCart, onBuyNow, onShareProduct, onToggleWishlist, wishlistIds }) {
   const availableSizes = [...new Set(productCatalog.map((product) => product.weight))]
   const [productFilter, setProductFilter] = useState('all')
@@ -2685,6 +2731,7 @@ function ProductsPage({ initialShoppingMode = 'wholesale', onAddToCart, onBuyNow
   const [priceFilter, setPriceFilter] = useState('all')
   const [shoppingMode, setShoppingMode] = useState(initialShoppingMode)
   const [sortBy, setSortBy] = useState('popular')
+  const [viewMode, setViewMode] = useState('grid')
 
   const visibleProducts = productCatalog
     .filter((product) => productFilter === 'all' || product.id === productFilter)
@@ -2712,6 +2759,7 @@ function ProductsPage({ initialShoppingMode = 'wholesale', onAddToCart, onBuyNow
           </div>
 
           <label className="products-filter-control">
+            <Icon name="bag" />
             <span className="sr-only">Product</span>
             <select value={productFilter} onChange={(event) => setProductFilter(event.target.value)}>
               <option value="all">All Products</option>
@@ -2720,6 +2768,7 @@ function ProductsPage({ initialShoppingMode = 'wholesale', onAddToCart, onBuyNow
           </label>
 
           <label className="products-filter-control">
+            <Icon name="ruler" />
             <span className="sr-only">Pack size</span>
             <select value={sizeFilter} onChange={(event) => setSizeFilter(event.target.value)}>
               <option value="all">Size</option>
@@ -2728,6 +2777,7 @@ function ProductsPage({ initialShoppingMode = 'wholesale', onAddToCart, onBuyNow
           </label>
 
           <label className="products-filter-control">
+            <span className="products-filter-control__rupee">₹</span>
             <span className="sr-only">Price range</span>
             <select value={priceFilter} onChange={(event) => setPriceFilter(event.target.value)}>
               <option value="all">Price</option>
@@ -2748,6 +2798,7 @@ function ProductsPage({ initialShoppingMode = 'wholesale', onAddToCart, onBuyNow
           <div className="products-sort">
             <span>Sort By</span>
             <label className="products-filter-control">
+              <Icon name="trending" />
               <span className="sr-only">Sort products</span>
               <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
                 <option value="popular">Popular</option>
@@ -2756,13 +2807,16 @@ function ProductsPage({ initialShoppingMode = 'wholesale', onAddToCart, onBuyNow
                 <option value="price-high">Price: High to Low</option>
               </select>
             </label>
-            <span className="products-grid-indicator" aria-label="Grid view"><Icon name="grid" /></span>
+            <div className="products-view-toggle" aria-label="Product view">
+              <button type="button" className={viewMode === 'grid' ? 'is-active' : ''} aria-label="Grid view" aria-pressed={viewMode === 'grid'} onClick={() => setViewMode('grid')}><Icon name="grid" /></button>
+              <button type="button" className={viewMode === 'list' ? 'is-active' : ''} aria-label="List view" aria-pressed={viewMode === 'list'} onClick={() => setViewMode('list')}><Icon name="list" /></button>
+            </div>
           </div>
         </section>
 
         <p className="products-result-count">Showing {visibleProducts.length} products</p>
 
-        <section className="products-catalog-grid" aria-label="Product catalog">
+        <section className={`products-catalog-grid products-catalog-grid--${viewMode}`} aria-label="Product catalog">
           {visibleProducts.map((product) => (
             <ProductCard
               key={product.id}
@@ -2857,7 +2911,7 @@ function ProductCarousel({ onAddToCart, onBuyNow, onShareProduct, onToggleWishli
                   onShareProduct={onShareProduct}
                   onToggleWishlist={onToggleWishlist}
                   wishlistIds={wishlistIds}
-                  shoppingMode="wholesale"
+                  shoppingMode={visibleCards === 1 ? 'retail' : 'wholesale'}
                 />
               ))}
             </div>
@@ -3365,6 +3419,7 @@ function App() {
   const [cartItems, setCartItems] = useState({})
   const [wishlistIds, setWishlistIds] = useState(readStoredWishlist)
   const [toastMessage, setToastMessage] = useState('')
+  const [checkoutProduct, setCheckoutProduct] = useState(null)
   const [currentHash, setCurrentHash] = useState(getCurrentPageHash)
   const [account, setAccount] = useState(readStoredAccount)
 
@@ -3398,6 +3453,7 @@ function App() {
   const isProductsPage = pageHash === '#products'
   const isWishlistPage = pageHash === '#wishlist'
   const isCartPage = pageHash === '#cart'
+  const isBuyNowPage = pageHash === '#buy-now'
   const isLoginPage = currentHash === '#login'
   const isRegisterPage = currentHash === '#register'
   const isAccountPage = currentHash === '#account' && Boolean(account)
@@ -3445,8 +3501,10 @@ function App() {
     }
   }
 
-  const handleBuyNow = () => {
-    triggerProductCta()
+  const handleBuyNow = (product) => {
+    if (!product) { window.location.hash = '#cart'; return }
+    setCheckoutProduct(product)
+    window.location.hash = '#buy-now'
   }
 
   const handleToggleWishlist = (product) => {
@@ -3504,6 +3562,8 @@ function App() {
         <WishlistPage wishlistIds={wishlistIds} onAddToCart={handleAddToCart} onRemove={handleToggleWishlist} onClear={() => { setWishlistIds([]); setToastMessage('Wishlist cleared.') }} />
       ) : isCartPage ? (
         <CartPage cartItems={cartItems} onUpdateQuantity={handleUpdateCartQuantity} onRemove={handleRemoveCartItem} onMoveToWishlist={handleMoveCartItemToWishlist} onCheckout={() => setToastMessage('Checkout is ready.')} />
+      ) : isBuyNowPage ? (
+        <BuyNowPage product={checkoutProduct} user={account} onComplete={() => setToastMessage('Order placed successfully.')} />
       ) : isLoginPage ? (
         <LoginPage onLogin={handleLogin} />
       ) : isRegisterPage ? (
@@ -3511,7 +3571,7 @@ function App() {
       ) : isAccountPage ? (
         <AccountPage user={account} onLogout={handleLogout} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} onUpdateAccount={handleUpdateAccount} />
       ) : (
-        <main>
+        <main className="home-main">
           <HeroBanner />
           <BrandStorySection
             onAddToCart={handleAddToCart}

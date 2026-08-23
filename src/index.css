@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Marcellus&family=DM+Sans:wght@400;500;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@500;600&family=Manrope:wght@400;500;600;700&display=swap');
 
 :root {
   --page-max: 108rem;
@@ -12,8 +12,9 @@
   --text: #2e241d;
   --text-soft: #5d5045;
   --heading-primary: 'Cormorant Garamond', Georgia, serif;
-  --heading-secondary: 'Marcellus', Georgia, serif;
-  --body-font: 'DM Sans', 'Segoe UI', sans-serif;
+  --heading-secondary: 'Cormorant Garamond', Georgia, serif;
+  --body-font: 'Manrope', 'Segoe UI', sans-serif;
+  --label-font: 'Inter', 'Segoe UI', sans-serif;
   color: var(--text);
   font-family: var(--body-font);
   font-size: 18px;

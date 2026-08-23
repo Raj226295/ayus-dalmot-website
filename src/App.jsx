@@ -17,6 +17,11 @@ const announcementItems = [
 
 const defaultNavHref = menuLinks[0].href
 const accountStorageKey = 'ayush-kursela-account'
+const addressStorageKey = 'ayush-kursela-addresses'
+const defaultAccountAddresses = [
+  { id: 'home', label: 'Home', addressLine: '85 P, Barauni – Purnea Hwy', cityLine: 'Maranga, Purnia, Bihar 854301', phone: '+91 91234 56789', isDefault: true, icon: 'home' },
+  { id: 'office', label: 'Office', addressLine: '2nd Floor, Sagar Building', cityLine: 'Naya Tola, Purnia, Bihar 854301', phone: '+91 98765 43210', isDefault: false, icon: 'building' },
+]
 
 function formatBagWeight(weight) {
   return Number.isInteger(weight) ? String(weight) : Number(weight).toFixed(2).replace(/0+$/, '').replace(/\.$/, '')
@@ -37,12 +42,22 @@ function persistAccount(account) {
   window.localStorage.setItem(accountStorageKey, JSON.stringify(account))
 }
 
+function readStoredAddresses() {
+  if (typeof window === 'undefined') return defaultAccountAddresses
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(addressStorageKey) || 'null')
+    return Array.isArray(stored) ? stored : defaultAccountAddresses
+  } catch {
+    return defaultAccountAddresses
+  }
+}
+
 function getCurrentNavHref() {
   if (typeof window === 'undefined') {
     return defaultNavHref
   }
 
-  const currentHash = window.location.hash
+  const currentHash = window.location.hash.split('?')[0]
 
   return menuLinks.some((item) => item.href === currentHash) ? currentHash : defaultNavHref
 }
@@ -348,6 +363,7 @@ const bestsellerProducts = [
     name: 'Ayush Sattu',
     weight: '500g',
     price: 65,
+    wholesale: { pcsPerBag: 30, weightKgPerBag: 15, ratePerBag: 1260 },
     image: '/ayush/product-sattu.png',
     alt: 'Ayush Sattu bestseller pack',
     isBestseller: true,
@@ -357,6 +373,7 @@ const bestsellerProducts = [
     name: 'Katarrar Matar',
     weight: '150g',
     price: 25,
+    wholesale: { pcsPerBag: 120, weightKgPerBag: 5.4, ratePerBag: 820 },
     image: '/ayush/product-katarr-matar.png',
     alt: 'Ayush Katarrar Matar bestseller pack',
   },
@@ -365,6 +382,7 @@ const bestsellerProducts = [
     name: 'Nimbu Bhujiya',
     weight: '200g',
     price: 30,
+    wholesale: { pcsPerBag: 110, weightKgPerBag: 5.5, ratePerBag: 790 },
     image: '/ayush/product-nimbu-bhujia.png',
     alt: 'Ayush Nimbu Bhujiya bestseller pack',
   },
@@ -373,6 +391,7 @@ const bestsellerProducts = [
     name: 'Mixture',
     weight: '400g',
     price: 55,
+    wholesale: { pcsPerBag: 90, weightKgPerBag: 4.5, ratePerBag: 700 },
     image: '/ayush/product-mixture.png',
     alt: 'Ayush Mixture bestseller pack',
   },
@@ -381,6 +400,7 @@ const bestsellerProducts = [
     name: 'Kursela Chanachur',
     weight: '200g',
     price: 35,
+    wholesale: { pcsPerBag: 80, weightKgPerBag: 4.8, ratePerBag: 880 },
     image: '/ayush/product-kursela-chanachur.png',
     alt: 'Ayush Kursela Chanachur bestseller pack',
   },
@@ -389,6 +409,7 @@ const bestsellerProducts = [
     name: 'Paneer Bhujiya',
     weight: '200g',
     price: 40,
+    wholesale: { pcsPerBag: 100, weightKgPerBag: 5, ratePerBag: 920 },
     image: '/ayush/product-paneer-bhujia.png',
     alt: 'Ayush Paneer Bhujiya bestseller pack',
   },
@@ -1128,7 +1149,7 @@ function TopBar() {
   )
 }
 
-function Navbar({ cartItemCount = baseCartItemCount, wishlistCount = 0, isAuthenticated = false }) {
+function Navbar({ activePageHref, cartItemCount = baseCartItemCount, wishlistCount = 0, isAuthenticated = false }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -1136,6 +1157,9 @@ function Navbar({ cartItemCount = baseCartItemCount, wishlistCount = 0, isAuthen
   const [isScrolled, setIsScrolled] = useState(
     () => typeof window !== 'undefined' && window.scrollY > 18,
   )
+  const displayedActiveHref = menuLinks.some((item) => item.href === activePageHref)
+    ? activePageHref
+    : activeHref
   const mobileSearchInputRef = useRef(null)
 
   useEffect(() => {
@@ -1244,9 +1268,9 @@ function Navbar({ cartItemCount = baseCartItemCount, wishlistCount = 0, isAuthen
             {menuLinks.map((item) => (
               <a
                 key={item.label}
-                className={activeHref === item.href ? 'is-active' : ''}
+                className={displayedActiveHref === item.href ? 'is-active' : ''}
                 href={item.href}
-                aria-current={activeHref === item.href ? 'page' : undefined}
+                aria-current={displayedActiveHref === item.href ? 'page' : undefined}
                 onClick={(event) => handleNavLinkClick(event, item.href)}
               >
                 {item.label}
@@ -1387,9 +1411,9 @@ function Navbar({ cartItemCount = baseCartItemCount, wishlistCount = 0, isAuthen
             {menuLinks.map((item) => (
               <a
                 key={item.label}
-                className={activeHref === item.href ? 'is-active' : ''}
+                className={displayedActiveHref === item.href ? 'is-active' : ''}
                 href={item.href}
-                aria-current={activeHref === item.href ? 'page' : undefined}
+                aria-current={displayedActiveHref === item.href ? 'page' : undefined}
                 onClick={(event) => handleNavLinkClick(event, item.href)}
               >
                 {item.label}
@@ -2189,9 +2213,16 @@ function OrderProgress({ status }) {
   )
 }
 
-function AccountPage({ user, onLogout, onAddToCart, onBuyNow }) {
+function AccountPage({ user, onLogout, onAddToCart, onBuyNow, onUpdateAccount }) {
   const [activePanel, setActivePanel] = useState('orders')
   const [notice, setNotice] = useState('')
+  const [settingsView, setSettingsView] = useState('menu')
+  const [profileDraft, setProfileDraft] = useState({ name: user.name, dob: user.dob || '', gender: user.gender || '' })
+  const [contactDraft, setContactDraft] = useState({ email: user.email, mobile: user.mobile || '' })
+  const [passwordDraft, setPasswordDraft] = useState({ current: '', next: '', confirm: '' })
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(Boolean(user.twoFactorEnabled))
+  const [addresses, setAddresses] = useState(readStoredAddresses)
+  const [addressEditor, setAddressEditor] = useState(null)
   const initials = user.name.split(' ').map((name) => name[0]).join('').slice(0, 2).toUpperCase()
   const accountItems = [
     { id: 'orders', icon: 'bag', title: 'My Orders', description: 'View orders, order details and tracking.' },
@@ -2201,6 +2232,72 @@ function AccountPage({ user, onLogout, onAddToCart, onBuyNow }) {
     { id: 'support', icon: 'mail', title: 'Help & Support', description: 'Contact, FAQ and returns assistance.' },
   ]
   const showNotice = (text) => setNotice(text)
+  const openSettingsView = (view) => { setActivePanel('settings'); setSettingsView(view); setNotice('') }
+  const saveProfile = (event) => {
+    event.preventDefault()
+    if (!profileDraft.name.trim()) return showNotice('Name is required.')
+    onUpdateAccount({ ...user, ...profileDraft, name: profileDraft.name.trim() })
+    setSettingsView('menu')
+    showNotice('Personal information updated successfully.')
+  }
+  const saveContact = (event) => {
+    event.preventDefault()
+    if (!/^\S+@\S+\.\S+$/.test(contactDraft.email)) return showNotice('Enter a valid email address.')
+    if (!/^[+\d][\d\s-]{8,}$/.test(contactDraft.mobile)) return showNotice('Enter a valid mobile number.')
+    onUpdateAccount({ ...user, email: contactDraft.email.trim(), mobile: contactDraft.mobile.trim() })
+    setSettingsView('menu')
+    showNotice('Email and mobile number updated successfully.')
+  }
+  const savePassword = (event) => {
+    event.preventDefault()
+    if (!passwordDraft.current) return showNotice('Enter your current password.')
+    if (passwordDraft.next.length < 8) return showNotice('New password must contain at least 8 characters.')
+    if (passwordDraft.next !== passwordDraft.confirm) return showNotice('New passwords do not match.')
+    setPasswordDraft({ current: '', next: '', confirm: '' })
+    setSettingsView('menu')
+    showNotice('Password changed successfully.')
+  }
+  const toggleTwoFactor = () => {
+    const nextValue = !twoFactorEnabled
+    setTwoFactorEnabled(nextValue)
+    onUpdateAccount({ ...user, twoFactorEnabled: nextValue })
+    showNotice(`Two-factor authentication ${nextValue ? 'enabled' : 'disabled'}.`)
+  }
+  useEffect(() => {
+    window.localStorage.setItem(addressStorageKey, JSON.stringify(addresses))
+  }, [addresses])
+  const openAddressEditor = (address = null) => setAddressEditor({
+    id: address?.id || `address-${Date.now()}`,
+    label: address?.label || '',
+    addressLine: address?.addressLine || '',
+    cityLine: address?.cityLine || '',
+    phone: address?.phone || '',
+    isDefault: address?.isDefault || addresses.length === 0,
+    icon: address?.icon || 'home',
+  })
+  const saveAddress = (event) => {
+    event.preventDefault()
+    if (!addressEditor.label.trim() || !addressEditor.addressLine.trim() || !addressEditor.cityLine.trim() || !addressEditor.phone.trim()) return showNotice('Please complete all address fields.')
+    setAddresses((current) => {
+      const exists = current.some((address) => address.id === addressEditor.id)
+      const next = exists ? current.map((address) => address.id === addressEditor.id ? addressEditor : address) : [...current, addressEditor]
+      return addressEditor.isDefault ? next.map((address) => ({ ...address, isDefault: address.id === addressEditor.id })) : next
+    })
+    setAddressEditor(null)
+    showNotice('Address saved successfully.')
+  }
+  const deleteAddress = (id) => {
+    setAddresses((current) => {
+      const remaining = current.filter((address) => address.id !== id)
+      return remaining.some((address) => address.isDefault) || remaining.length === 0 ? remaining : remaining.map((address, index) => ({ ...address, isDefault: index === 0 }))
+    })
+    setAddressEditor(null)
+    showNotice('Address deleted successfully.')
+  }
+  const setDefaultAddress = (id) => {
+    setAddresses((current) => current.map((address) => ({ ...address, isDefault: address.id === id })))
+    showNotice('Default delivery address updated.')
+  }
 
   return (
     <main className="account-page" id="account">
@@ -2213,7 +2310,7 @@ function AccountPage({ user, onLogout, onAddToCart, onBuyNow }) {
             <p>{user.email}</p>
             <p>{user.mobile || '+91 91234 56789'}</p>
           </div>
-          <button type="button" className="account-button account-button--secondary" onClick={() => { setActivePanel('settings'); showNotice('Edit your profile details below.') }}>Edit Profile</button>
+          <button type="button" className="account-button account-button--secondary" onClick={() => openSettingsView('profile')}>Edit Profile</button>
         </section>
 
         <div className="account-layout">
@@ -2261,9 +2358,17 @@ function AccountPage({ user, onLogout, onAddToCart, onBuyNow }) {
               <div className="account-statuses"><span>Processing</span><span>Shipped</span><span>Delivered</span><span>Cancelled</span></div>
             </> : null}
             {activePanel === 'addresses' ? <>
-              <div className="account-panel__title-row"><div><h2>Saved Addresses</h2><p className="account-panel__intro">Manage your saved delivery addresses.</p></div><button type="button" className="account-button" onClick={() => showNotice('Add new address form opened.')}>＋&nbsp; Add New Address</button></div>
-              <article className="account-address account-address--detailed"><div className="account-address__icon"><Icon name="home" /></div><div className="account-address__content"><strong>Home <em>Default</em></strong><p>85 P, Barauni – Purnea Hwy<br />Maranga, Purnia, Bihar 854301<br />+91 91234 56789</p></div><button type="button" className="account-address__more" aria-label="Home address options" onClick={() => showNotice('Home address options opened.')}><Icon name="more" /></button><div className="account-address__actions"><button type="button" onClick={() => showNotice('Home address edit mode opened.')}><Icon name="edit" /> Edit</button><button type="button" className="is-delete" onClick={() => showNotice('Home address removed.')}><Icon name="trash" /> Delete</button><button type="button" className="is-default" onClick={() => showNotice('Home is already your default address.')}>✓&nbsp; Default Address</button></div></article>
-              <article className="account-address account-address--detailed"><div className="account-address__icon"><Icon name="building" /></div><div className="account-address__content"><strong>Office</strong><p>2nd Floor, Sagar Building<br />Naya Tola, Purnia, Bihar 854301<br />+91 98765 43210</p></div><button type="button" className="account-address__more" aria-label="Office address options" onClick={() => showNotice('Office address options opened.')}><Icon name="more" /></button><div className="account-address__actions"><button type="button" onClick={() => showNotice('Office address edit mode opened.')}><Icon name="edit" /> Edit</button><button type="button" className="is-delete" onClick={() => showNotice('Office address removed.')}><Icon name="trash" /> Delete</button><button type="button" className="is-default" onClick={() => showNotice('Office saved as your default address.')}>Set as Default</button></div></article>
+              <div className="account-panel__title-row"><div><h2>Saved Addresses</h2><p className="account-panel__intro">Manage your saved delivery addresses.</p></div><button type="button" className="account-button" onClick={() => openAddressEditor()}>＋&nbsp; Add New Address</button></div>
+              {addressEditor ? <form className="account-edit-form account-address-form" onSubmit={saveAddress}>
+                <h3>{addresses.some((address) => address.id === addressEditor.id) ? 'Edit Address' : 'Add New Address'}</h3>
+                <div className="account-edit-form__grid"><label>Address Label<input value={addressEditor.label} onChange={(event) => setAddressEditor({ ...addressEditor, label: event.target.value })} placeholder="Home, Office…" /></label><label>Phone Number<input type="tel" value={addressEditor.phone} onChange={(event) => setAddressEditor({ ...addressEditor, phone: event.target.value })} /></label></div>
+                <label>Street / Building<input value={addressEditor.addressLine} onChange={(event) => setAddressEditor({ ...addressEditor, addressLine: event.target.value })} /></label>
+                <label>City, State and PIN Code<input value={addressEditor.cityLine} onChange={(event) => setAddressEditor({ ...addressEditor, cityLine: event.target.value })} /></label>
+                <label className="account-edit-form__checkbox"><input type="checkbox" checked={addressEditor.isDefault} onChange={(event) => setAddressEditor({ ...addressEditor, isDefault: event.target.checked })} /> Use as default delivery address</label>
+                <div className="account-edit-form__actions"><button type="button" onClick={() => setAddressEditor(null)}>Cancel</button><button type="submit">Save Address</button></div>
+              </form> : null}
+              {addresses.map((address) => <article key={address.id} className="account-address account-address--detailed"><div className="account-address__icon"><Icon name={address.icon} /></div><div className="account-address__content"><strong>{address.label} {address.isDefault ? <em>Default</em> : null}</strong><p>{address.addressLine}<br />{address.cityLine}<br />{address.phone}</p></div><button type="button" className="account-address__more" aria-label={`${address.label} address options`} onClick={() => openAddressEditor(address)}><Icon name="more" /></button><div className="account-address__actions"><button type="button" onClick={() => openAddressEditor(address)}><Icon name="edit" /> Edit</button><button type="button" className="is-delete" onClick={() => deleteAddress(address.id)}><Icon name="trash" /> Delete</button><button type="button" className="is-default" disabled={address.isDefault} onClick={() => setDefaultAddress(address.id)}>{address.isDefault ? '✓ Default Address' : 'Set as Default'}</button></div></article>)}
+              {addresses.length === 0 ? <p className="account-panel__empty">No saved addresses yet. Add your first delivery address.</p> : null}
               <p className="account-address__note">✓&nbsp; Your default address will be used for all deliveries.</p>
             </> : null}
             {activePanel === 'wishlist' ? <>
@@ -2272,12 +2377,30 @@ function AccountPage({ user, onLogout, onAddToCart, onBuyNow }) {
             </> : null}
             {activePanel === 'settings' ? <>
               <h2>Account Settings</h2><p className="account-panel__intro">Keep your account details and password secure.</p>
-              <div className="account-settings account-settings--detailed">
-                <button type="button" onClick={() => showNotice('Personal information edit mode opened.')}><span><Icon name="user" /></span><span><strong>Edit Personal Information</strong><small>Update your name, date of birth and other details.</small></span><Icon name="chevron-right" /></button>
-                <button type="button" onClick={() => showNotice('Email/mobile update mode opened.')}><span><Icon name="mail" /></span><span><strong>Update Email / Mobile</strong><small>Update your email address and mobile number.</small></span><Icon name="chevron-right" /></button>
-                <button type="button" onClick={() => showNotice('Change password mode opened.')}><span><Icon name="lock" /></span><span><strong>Change Password</strong><small>Choose a strong password to keep your account secure.</small></span><Icon name="chevron-right" /></button>
-                <button type="button" onClick={() => showNotice('Two-factor authentication setup opened.')}><span><Icon name="shield" /></span><span><strong>Two-Factor Authentication</strong><small>Add an extra layer of security to your account.</small></span><em>Inactive</em><Icon name="chevron-right" /></button>
-              </div>
+              {settingsView === 'menu' ? <div className="account-settings account-settings--detailed">
+                <button type="button" onClick={() => openSettingsView('profile')}><span><Icon name="user" /></span><span><strong>Edit Personal Information</strong><small>Update your name, date of birth and other details.</small></span><Icon name="chevron-right" /></button>
+                <button type="button" onClick={() => openSettingsView('contact')}><span><Icon name="mail" /></span><span><strong>Update Email / Mobile</strong><small>Update your email address and mobile number.</small></span><Icon name="chevron-right" /></button>
+                <button type="button" onClick={() => openSettingsView('password')}><span><Icon name="lock" /></span><span><strong>Change Password</strong><small>Choose a strong password to keep your account secure.</small></span><Icon name="chevron-right" /></button>
+                <button type="button" onClick={toggleTwoFactor}><span><Icon name="shield" /></span><span><strong>Two-Factor Authentication</strong><small>Add an extra layer of security to your account.</small></span><em>{twoFactorEnabled ? 'Active' : 'Inactive'}</em><Icon name="chevron-right" /></button>
+              </div> : null}
+              {settingsView === 'profile' ? <form className="account-edit-form" onSubmit={saveProfile}>
+                <h3>Edit Personal Information</h3>
+                <label>Full Name<input value={profileDraft.name} onChange={(event) => setProfileDraft({ ...profileDraft, name: event.target.value })} autoComplete="name" /></label>
+                <div className="account-edit-form__grid"><label>Date of Birth<input type="date" value={profileDraft.dob} onChange={(event) => setProfileDraft({ ...profileDraft, dob: event.target.value })} /></label><label>Gender<select value={profileDraft.gender} onChange={(event) => setProfileDraft({ ...profileDraft, gender: event.target.value })}><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select></label></div>
+                <div className="account-edit-form__actions"><button type="button" onClick={() => setSettingsView('menu')}>Cancel</button><button type="submit">Save Changes</button></div>
+              </form> : null}
+              {settingsView === 'contact' ? <form className="account-edit-form" onSubmit={saveContact}>
+                <h3>Update Email / Mobile</h3>
+                <label>Email Address<input type="email" value={contactDraft.email} onChange={(event) => setContactDraft({ ...contactDraft, email: event.target.value })} autoComplete="email" /></label>
+                <label>Mobile Number<input type="tel" value={contactDraft.mobile} onChange={(event) => setContactDraft({ ...contactDraft, mobile: event.target.value })} autoComplete="tel" /></label>
+                <div className="account-edit-form__actions"><button type="button" onClick={() => setSettingsView('menu')}>Cancel</button><button type="submit">Update Contact</button></div>
+              </form> : null}
+              {settingsView === 'password' ? <form className="account-edit-form" onSubmit={savePassword}>
+                <h3>Change Password</h3>
+                <label>Current Password<input type="password" value={passwordDraft.current} onChange={(event) => setPasswordDraft({ ...passwordDraft, current: event.target.value })} autoComplete="current-password" /></label>
+                <div className="account-edit-form__grid"><label>New Password<input type="password" value={passwordDraft.next} onChange={(event) => setPasswordDraft({ ...passwordDraft, next: event.target.value })} autoComplete="new-password" /></label><label>Confirm New Password<input type="password" value={passwordDraft.confirm} onChange={(event) => setPasswordDraft({ ...passwordDraft, confirm: event.target.value })} autoComplete="new-password" /></label></div>
+                <div className="account-edit-form__actions"><button type="button" onClick={() => setSettingsView('menu')}>Cancel</button><button type="submit">Change Password</button></div>
+              </form> : null}
               <aside className="account-security-note"><Icon name="shield" /><span><strong>We never share your personal information</strong><small>Your data is 100% safe and secure with us.</small></span></aside>
             </> : null}
             {activePanel === 'support' ? <>
@@ -2303,7 +2426,7 @@ function AccountPage({ user, onLogout, onAddToCart, onBuyNow }) {
   )
 }
 
-function ProductCard({ onAddToCart, onBuyNow, onShareProduct, onToggleWishlist, wishlistIds = [], product, sectionId = 'products', shoppingMode = 'retail' }) {
+function ProductCard({ cardContext = 'catalog', onAddToCart, onBuyNow, onShareProduct, onToggleWishlist, wishlistIds = [], product, sectionId = 'products', shoppingMode = 'retail' }) {
   const [quantity, setQuantity] = useState('1')
   const [bagQuantity, setBagQuantity] = useState(5)
   const isWishlisted = wishlistIds.includes(product.id)
@@ -2339,7 +2462,7 @@ function ProductCard({ onAddToCart, onBuyNow, onShareProduct, onToggleWishlist, 
   }
 
   return (
-    <article className="product-card">
+    <article className={`product-card product-card--${cardContext}`}>
       <span className="product-card__offer">{offerLabel}</span>
       <button
         type="button"
@@ -2390,8 +2513,16 @@ function ProductCard({ onAddToCart, onBuyNow, onShareProduct, onToggleWishlist, 
                 <option key={bags} value={bags}>{bags === 5 ? '5 Bags (Minimum)' : `${bags} Bags`} • {wholesale.pcsPerBag * bags} PCS • {formatBagWeight(wholesale.weightKgPerBag * bags)} KG</option>
               ))}
             </select>
+            <span className="product-card__wholesale-value" aria-hidden="true">
+              <span>{bagQuantity === 5 ? '5 Bags (Minimum)' : `${bagQuantity} Bags`}</span>
+              <span className="product-card__wholesale-separator">•</span>
+              <span>{totalPcs} PCS</span>
+              <span className="product-card__wholesale-separator">•</span>
+              <span>{formatBagWeight(totalWeightKg)} KG</span>
+              <Icon name="chevron-right" />
+            </span>
           </label>
-          <p className="product-card__bag-detail"><Icon name="bag" /> 1 Bag <span>•</span> {wholesale.pcsPerBag} PCS <span>•</span> {formatBagWeight(wholesale.weightKgPerBag)} KG <span>•</span> ₹{wholesale.ratePerBag} / Bag</p>
+          {cardContext !== 'home' || sectionId === 'bestsellers' ? <p className="product-card__bag-detail"><Icon name="bag" /> 1 Bag <span>•</span> {wholesale.pcsPerBag} PCS <span>•</span> {formatBagWeight(wholesale.weightKgPerBag)} KG <span>•</span> ₹{wholesale.ratePerBag} / Bag</p> : null}
         </> : <label className="product-card__variant-label">
           <span className="sr-only">Select pieces for {product.name}</span>
           <input
@@ -2439,12 +2570,12 @@ function ProductCard({ onAddToCart, onBuyNow, onShareProduct, onToggleWishlist, 
   )
 }
 
-function ProductsPage({ onAddToCart, onBuyNow, onShareProduct, onToggleWishlist, wishlistIds }) {
+function ProductsPage({ initialShoppingMode = 'wholesale', onAddToCart, onBuyNow, onShareProduct, onToggleWishlist, wishlistIds }) {
   const availableSizes = [...new Set(productCatalog.map((product) => product.weight))]
   const [productFilter, setProductFilter] = useState('all')
   const [sizeFilter, setSizeFilter] = useState('all')
   const [priceFilter, setPriceFilter] = useState('all')
-  const [shoppingMode, setShoppingMode] = useState('retail')
+  const [shoppingMode, setShoppingMode] = useState(initialShoppingMode)
   const [sortBy, setSortBy] = useState('popular')
 
   const visibleProducts = productCatalog
@@ -2610,6 +2741,7 @@ function ProductCarousel({ onAddToCart, onBuyNow, onShareProduct, onToggleWishli
             <div className="product-carousel__track">
               {renderedProducts.map((product) => (
                 <ProductCard
+                  cardContext="home"
                   key={product.id}
                   product={product}
                   onAddToCart={onAddToCart}
@@ -2617,6 +2749,7 @@ function ProductCarousel({ onAddToCart, onBuyNow, onShareProduct, onToggleWishli
                   onShareProduct={onShareProduct}
                   onToggleWishlist={onToggleWishlist}
                   wishlistIds={wishlistIds}
+                  shoppingMode="wholesale"
                 />
               ))}
             </div>
@@ -2731,7 +2864,7 @@ function ModeSelection() {
         <div className="retail-wholesale-wrapper">
           <a
             className="mode-card"
-            href="#products"
+            href="#products?mode=retail"
             aria-label="Open retail mode for individual customers"
           >
             <img
@@ -2743,7 +2876,7 @@ function ModeSelection() {
 
           <a
             className="mode-card"
-            href="#contact"
+            href="#products?mode=wholesale"
             aria-label="Open wholesale mode for business and resellers"
           >
             <img
@@ -2778,6 +2911,7 @@ function BestsellersSection({ onAddToCart, onBuyNow, onShareProduct, onToggleWis
           <div className="bestseller-grid" aria-label="Our bestseller products">
             {bestsellerProducts.map((product) => (
               <ProductCard
+                cardContext="home"
                 key={product.id}
                 product={product}
                 onAddToCart={onAddToCart}
@@ -2786,8 +2920,12 @@ function BestsellersSection({ onAddToCart, onBuyNow, onShareProduct, onToggleWis
                 onToggleWishlist={onToggleWishlist}
                 wishlistIds={wishlistIds}
                 sectionId="bestsellers"
+                shoppingMode="wholesale"
               />
             ))}
+          </div>
+          <div className="bestsellers-explore-wrap">
+            <a className="bestsellers-explore-button" href="#products">Explore More</a>
           </div>
         </div>
       </div>
@@ -3148,7 +3286,8 @@ function App() {
 
   const isAboutPage = currentHash === '#about'
   const isContactPage = currentHash === '#contact'
-  const isProductsPage = currentHash === '#products'
+  const pageHash = currentHash.split('?')[0]
+  const isProductsPage = pageHash === '#products'
   const isLoginPage = currentHash === '#login'
   const isRegisterPage = currentHash === '#register'
   const isAccountPage = currentHash === '#account' && Boolean(account)
@@ -3160,14 +3299,14 @@ function App() {
     }
 
     const frameId = window.requestAnimationFrame(() => {
-      scrollToHashTarget(currentHash, {
+      scrollToHashTarget(pageHash, {
         behavior: 'auto',
         updateUrl: false,
       })
     })
 
     return () => window.cancelAnimationFrame(frameId)
-  }, [currentHash, isAboutPage, isContactPage, isProductsPage, isLoginPage, isRegisterPage, isAccountPage])
+  }, [currentHash, pageHash, isAboutPage, isContactPage, isProductsPage, isLoginPage, isRegisterPage, isAccountPage])
 
   const cartItemCount =
     baseCartItemCount +
@@ -3213,10 +3352,15 @@ function App() {
     window.location.hash = '#home'
   }
 
+  const handleUpdateAccount = (nextAccount) => {
+    persistAccount(nextAccount)
+    setAccount(nextAccount)
+  }
+
   return (
     <div className="site-shell">
       <TopBar />
-      <Navbar cartItemCount={cartItemCount} wishlistCount={wishlistIds.length} isAuthenticated={Boolean(account)} />
+      <Navbar activePageHref={pageHash} cartItemCount={cartItemCount} wishlistCount={wishlistIds.length} isAuthenticated={Boolean(account)} />
 
       {isAboutPage ? (
         <AboutPage
@@ -3227,13 +3371,21 @@ function App() {
       ) : isContactPage ? (
         <ContactPage />
       ) : isProductsPage ? (
-        <ProductsPage onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} onShareProduct={handleShareProduct} onToggleWishlist={handleToggleWishlist} wishlistIds={wishlistIds} />
+        <ProductsPage
+          key={currentHash}
+          initialShoppingMode={currentHash.includes('mode=retail') ? 'retail' : 'wholesale'}
+          onAddToCart={handleAddToCart}
+          onBuyNow={handleBuyNow}
+          onShareProduct={handleShareProduct}
+          onToggleWishlist={handleToggleWishlist}
+          wishlistIds={wishlistIds}
+        />
       ) : isLoginPage ? (
         <LoginPage onLogin={handleLogin} />
       ) : isRegisterPage ? (
         <RegisterPage onRegister={handleLogin} />
       ) : isAccountPage ? (
-        <AccountPage user={account} onLogout={handleLogout} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} />
+        <AccountPage user={account} onLogout={handleLogout} onAddToCart={handleAddToCart} onBuyNow={handleBuyNow} onUpdateAccount={handleUpdateAccount} />
       ) : (
         <main>
           <HeroBanner />

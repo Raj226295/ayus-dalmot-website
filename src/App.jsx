@@ -1723,6 +1723,35 @@ function ContactPage() {
 
   return (
     <main className="contact-page">
+      <div className="contact-mobile-layout">
+        <section className="contact-mobile-quick" aria-label="Contact options">
+          <a href="tel:+911234567890"><span className="contact-mobile-quick__icon is-orange"><Icon name="phone" /></span><strong>Call Us</strong><small>{footerContactInfo.phone}</small><i>{footerContactInfo.phoneNote}</i></a>
+          <a href="https://wa.me/911234567890" target="_blank" rel="noreferrer"><span className="contact-mobile-quick__icon is-green"><Icon name="chat" /></span><strong>WhatsApp</strong><small>{footerContactInfo.phone}</small><i>Quick Support</i></a>
+          <a href={`mailto:${footerContactInfo.email}`}><span className="contact-mobile-quick__icon is-orange"><Icon name="mail" /></span><strong>Email Us</strong><small>{footerContactInfo.email}</small><i>{footerContactInfo.emailNote}</i></a>
+          <a href={contactMapHref} target="_blank" rel="noreferrer"><span className="contact-mobile-quick__icon is-green"><Icon name="pin" /></span><strong>Visit Us</strong><small>{footerContactInfo.addressTitle}</small><i>{footerContactInfo.addressBody}</i></a>
+        </section>
+
+        <section className="contact-mobile-form-card">
+          <h1>Send Us a Message</h1>
+          <form noValidate onSubmit={handleSubmit}>
+            <label><Icon name="user" /><input type="text" value={formValues.firstName} onChange={handleFieldChange('firstName')} aria-label="Your name" aria-invalid={Boolean(formErrors.firstName)} placeholder="Your Name" />{formErrors.firstName ? <em>{formErrors.firstName}</em> : null}</label>
+            <label><Icon name="mail" /><input type="email" value={formValues.email} onChange={handleFieldChange('email')} aria-label="Your email" aria-invalid={Boolean(formErrors.email)} placeholder="Your Email" />{formErrors.email ? <em>{formErrors.email}</em> : null}</label>
+            <label className="is-wide"><Icon name="phone" /><input type="tel" value={formValues.phone} onChange={handleFieldChange('phone')} aria-label="Phone number" aria-invalid={Boolean(formErrors.phone)} placeholder="Phone Number (Optional)" />{formErrors.phone ? <em>{formErrors.phone}</em> : null}</label>
+            <label className="is-wide is-message"><Icon name="edit" /><textarea value={formValues.message} onChange={handleFieldChange('message')} aria-label="Your message" aria-invalid={Boolean(formErrors.message)} placeholder="How can we help you?" />{formErrors.message ? <em>{formErrors.message}</em> : null}</label>
+            <button type="submit" disabled={isSubmitting}><Icon name="send" />{isSubmitting ? 'Sending...' : 'Send Message'}</button>
+            {submitState.type !== 'idle' ? <p className={`contact-mobile-form-card__status is-${submitState.type}`} role="status">{submitState.message}</p> : null}
+          </form>
+        </section>
+
+        <section className="contact-mobile-map-card">
+          <h2><Icon name="pin" /> Our Store Location</h2>
+          <iframe src={contactMapEmbedHref} title="Ayush Kursela store location" loading="lazy" referrerPolicy="no-referrer-when-downgrade" allowFullScreen />
+          <a href={contactMapHref} target="_blank" rel="noreferrer"><Icon name="send" /> Open in Google Maps</a>
+        </section>
+
+        <a className="contact-mobile-help" href="#contact-faq-mobile"><Icon name="headset" /><span><strong>Need Help?</strong><small>Check our FAQs or chat with us on WhatsApp.</small></span><b>View FAQs <Icon name="chevron-right" /></b></a>
+      </div>
+
       <Reveal as="section" className="contact-page__hero" id="contact">
         <div className="shell-content shell-content--wide">
           <div className="contact-page__hero-shell">
@@ -2035,7 +2064,7 @@ function ContactPage() {
         </div>
       </Reveal>
 
-      <Reveal as="section" className="contact-page__faq-section">
+      <Reveal as="section" className="contact-page__faq-section" id="contact-faq-mobile">
         <div className="shell-content">
           <div className="contact-page__faq-heading">
             <p className="contact-page__section-label">FAQs</p>
@@ -2946,7 +2975,7 @@ function ProductCarousel({ onAddToCart, onBuyNow, onShareProduct, onToggleWishli
     }
 
     if (window.innerWidth <= 680) {
-      return 1
+      return 2
     }
 
     if (window.innerWidth <= 980) {
@@ -2958,6 +2987,7 @@ function ProductCarousel({ onAddToCart, onBuyNow, onShareProduct, onToggleWishli
 
   const [visibleCards, setVisibleCards] = useState(getVisibleCards)
   const [currentIndex, setCurrentIndex] = useState(0)
+  const carouselViewportRef = useRef(null)
 
   useEffect(() => {
     const syncVisibleCards = () => setVisibleCards(getVisibleCards())
@@ -2976,6 +3006,13 @@ function ProductCarousel({ onAddToCart, onBuyNow, onShareProduct, onToggleWishli
   }, [maxStartIndex])
 
   const scrollProducts = (direction) => {
+    if (typeof window !== 'undefined' && window.innerWidth <= 680 && carouselViewportRef.current) {
+      const viewport = carouselViewportRef.current
+      viewport.scrollBy({ left: direction * viewport.clientWidth, behavior: 'smooth' })
+      setCurrentIndex((value) => Math.max(0, Math.min(value + (direction * visibleCards), maxStartIndex)))
+      return
+    }
+
     setCurrentIndex((value) => {
       const nextIndex = value + direction
 
@@ -2984,7 +3021,7 @@ function ProductCarousel({ onAddToCart, onBuyNow, onShareProduct, onToggleWishli
   }
 
   const visibleProducts = productCatalog.slice(currentIndex, currentIndex + visibleCards)
-  const renderedProducts = visibleCards === 1 ? productCatalog : visibleProducts
+  const renderedProducts = visibleCards === 2 ? productCatalog : visibleProducts
 
   return (
     <div className="product-carousel-shell">
@@ -3002,7 +3039,14 @@ function ProductCarousel({ onAddToCart, onBuyNow, onShareProduct, onToggleWishli
             <Icon name="chevron-left" className="product-carousel__arrow-icon" />
           </button>
 
-          <div className="product-carousel__viewport">
+          <div className="product-carousel__viewport" ref={carouselViewportRef} onScroll={(event) => {
+            if (typeof window === 'undefined' || window.innerWidth > 680) return
+            const viewport = event.currentTarget
+            const firstCard = viewport.querySelector('.product-card')
+            if (!firstCard) return
+            const cardStep = firstCard.getBoundingClientRect().width + 10
+            setCurrentIndex(Math.max(0, Math.min(Math.round(viewport.scrollLeft / cardStep), maxStartIndex)))
+          }}>
             <div className="product-carousel__track">
               {renderedProducts.map((product) => (
                 <ProductCard

@@ -1433,6 +1433,8 @@ a.contact-card__title:focus-visible {
   display: block;
 }
 
+.contact-mobile-layout { display: none; }
+
 .hero-frame__mobile-video {
   display: none;
 }
@@ -7718,8 +7720,11 @@ a.contact-card__title:focus-visible {
 /* Mobile-only home composition. Desktop layout remains unchanged. */
 @media (max-width: 700px) {
   .site-shell--products {
-    background-color: #668d5d;
-    background-image: none;
+    background-color: #57cbb8;
+    background-image: url('/ayush/products-mobile-background.png');
+    background-position: center top;
+    background-repeat: repeat-y;
+    background-size: 100% auto;
   }
 
   .site-shell--products .page-footer {
@@ -8321,8 +8326,11 @@ a.contact-card__title:focus-visible {
 
 @media (max-width: 700px) {
   .products-page-main {
-    background-color: #668d5d;
-    background-image: none;
+    background-color: #57cbb8;
+    background-image: url('/ayush/products-mobile-background.png');
+    background-position: center top;
+    background-repeat: repeat-y;
+    background-size: 100% auto;
   }
 
   .products-page-content { width: min(100% - 20px, 1200px); padding-top: 20px; }
@@ -9632,8 +9640,14 @@ a.contact-card__title:focus-visible {
 /* Keep the moving announcement ribbon visible above the navbar on phones. */
 @media (max-width: 700px) {
   .announcement-bar {
+    position: sticky;
+    z-index: 1102;
+    top: 0;
     display: block;
+    height: 30px;
     min-height: 30px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(110, 0, 0, 0.16);
   }
   .announcement-bar__viewport { min-height: 30px; }
   .announcement-bar__track {
@@ -9652,14 +9666,19 @@ a.contact-card__title:focus-visible {
   }
   .announcement-bar__item::after { margin-left: 16px; }
   .announcement-bar__icon { width: 12px; height: 12px; }
+  .site-header {
+    z-index: 1101;
+    top: 30px;
+  }
 }
 
 /* About page product range: mobile cards remain visible and swipeable. */
 @media (max-width: 700px) {
   .about-page__product-range .product-carousel-shell {
-    --carousel-card-width: calc((100vw - 42px) / 2);
+    --about-mobile-card-width: calc((100vw - 54px) / 2);
     width: 100%;
     max-width: 100%;
+    min-width: 0;
     display: grid;
     gap: 12px;
     visibility: visible;
@@ -9668,15 +9687,24 @@ a.contact-card__title:focus-visible {
   .about-page__product-range .product-carousel,
   .about-page__product-range .product-carousel__content,
   .about-page__product-range .product-carousel__viewport { width: 100%; max-width: 100%; }
+  .about-page__product-range .product-carousel,
+  .about-page__product-range .product-carousel__content { min-width: 0; }
   .about-page__product-range .product-carousel__viewport {
+    width: calc(100% - 24px);
+    margin-inline: auto;
     display: block;
     overflow-x: auto;
     overflow-y: hidden;
     scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
     scroll-padding-inline: 2px;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior-inline: contain;
+    touch-action: pan-x;
+    cursor: grab;
   }
+  .about-page__product-range .product-carousel__viewport:active { cursor: grabbing; }
   .about-page__product-range .product-carousel__viewport::-webkit-scrollbar { display: none; }
   .about-page__product-range .product-carousel__track {
     width: max-content;
@@ -9688,50 +9716,69 @@ a.contact-card__title:focus-visible {
     padding: 4px 2px 10px;
   }
   .about-page__product-range .product-card {
-    flex: 0 0 var(--carousel-card-width);
-    width: var(--carousel-card-width);
-    min-width: var(--carousel-card-width);
+    flex: 0 0 var(--about-mobile-card-width);
+    width: var(--about-mobile-card-width);
+    min-width: var(--about-mobile-card-width);
     min-height: 0;
     height: auto;
-    padding: 9px;
+    padding: 6px;
     display: flex;
     scroll-snap-align: start;
-    border-radius: 14px;
+    scroll-snap-stop: always;
+    border-radius: 12px;
+    box-sizing: border-box;
+    overflow: hidden;
     visibility: visible;
     opacity: 1;
   }
-  .about-page__product-range .product-card__image-shell { height: clamp(112px, 32vw, 138px); margin-bottom: 6px; }
+  .about-page__product-range .product-card__image-shell { height: clamp(72px, 21vw, 90px); margin-bottom: 3px; }
   .about-page__product-range .product-card__image { width: 100%; height: 100%; object-fit: contain; }
-  .about-page__product-range .product-card__title { min-height: 32px; font-size: clamp(13px, 3.8vw, 16px); line-height: 1.12; }
+  .about-page__product-range .product-card__title { min-height: 25px; margin: 3px 0; font-size: clamp(10px, 3vw, 13px); line-height: 1.12; }
   .about-page__product-range .product-card__heading-row { gap: 4px; }
-  .about-page__product-range .product-card__cart-action { width: 32px; height: 32px; flex-basis: 32px; }
+  .about-page__product-range .product-card__cart-action { width: 28px; height: 28px; flex-basis: 28px; border-radius: 8px; }
+  .about-page__product-range .product-card__cart-action svg { width: 14px; height: 14px; }
   .about-page__product-range .product-card__variant-label--wholesale,
   .about-page__product-range .product-card__wholesale-select,
-  .about-page__product-range .product-card__wholesale-value { min-height: 38px; }
+  .about-page__product-range .product-card__wholesale-value { min-height: 34px; }
   .about-page__product-range .product-card__wholesale-select,
   .about-page__product-range .product-card__wholesale-value { max-width: 100%; box-sizing: border-box; }
-  .about-page__product-range .product-card__wholesale-value { padding-right: 26px; font-size: clamp(7px, 2.1vw, 9px); white-space: nowrap; }
-  .about-page__product-range .product-card__price-row { margin-top: 8px; }
-  .about-page__product-range .product-card__price { font-size: clamp(20px, 6vw, 25px); }
-  .about-page__product-range .product-card__price-note { font-size: 8px; }
-  .about-page__product-range .product-card__minimum-order { margin-top: 8px; padding: 6px; font-size: 8px; }
-  .about-page__product-range .product-card__button { width: 100%; min-height: 40px; margin-top: 9px; font-size: 11px; }
-  .about-page__product-range .product-carousel__arrow { display: none; }
+  .about-page__product-range .product-card__wholesale-select { overflow: hidden; }
+  .about-page__product-range .product-card__wholesale-value { width: 100%; min-width: 0; padding: 0 23px 0 6px; overflow: hidden; font-size: clamp(6px, 1.8vw, 8px); line-height: 1.1; text-overflow: ellipsis; white-space: nowrap; }
+  .about-page__product-range .product-card__wholesale-select svg { right: 6px; width: 12px; height: 12px; }
+  .about-page__product-range .product-card__price-row { margin-top: 5px; }
+  .about-page__product-range .product-card__price { font-size: clamp(16px, 4.7vw, 20px); }
+  .about-page__product-range .product-card__price-note { font-size: 7px; }
+  .about-page__product-range .product-card__minimum-order { max-width: 100%; margin-top: 5px; padding: 4px; gap: 3px; overflow: hidden; font-size: 7px; white-space: nowrap; }
+  .about-page__product-range .product-card__minimum-order svg { width: 11px; height: 11px; }
+  .about-page__product-range .product-card__button { width: 100%; min-height: 30px; margin-top: 5px; padding-inline: 4px; font-size: 8px; }
+  .about-page__product-range .product-card__button svg { width: 14px; height: 14px; }
+  .about-page__product-range .product-carousel__arrow {
+    display: none;
+  }
   .about-page__product-range .product-carousel__cta-wrap { margin-top: 4px; }
-  .about-page__product-range .product-carousel__cta { min-width: 190px; min-height: 44px; font-size: 16px; }
+  .about-page__product-range .product-carousel__cta-wrap {
+    position: static;
+    width: 100%;
+    margin: 10px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .about-page__product-range .product-carousel__cta { min-width: 170px; min-height: 40px; margin: 0 auto; font-size: 14px; }
 }
 
 @media (max-width: 380px) {
-  .about-page__product-range .product-carousel-shell { --carousel-card-width: calc((100vw - 36px) / 2); }
+  .about-page__product-range .product-carousel-shell { --about-mobile-card-width: calc((100vw - 44px) / 2); }
   .about-page__product-range { padding-inline: 7px; }
   .about-page__product-range .product-card { padding: 7px; }
-  .about-page__product-range .product-card__image-shell { height: 104px; }
+  .about-page__product-range .product-carousel__viewport { width: calc(100% - 18px); }
+  .about-page__product-range .product-card__image-shell { height: 68px; }
 }
 
 /* Supplied purple food pattern on the Contact page, mobile only. */
 @media (max-width: 700px) {
   .contact-page {
-    background-color: #6f2e5e;
+    background-color: #deeffb;
     background-image: url('/ayush/contact-mobile-pattern.png');
     background-position: center top;
     background-repeat: repeat-y;
@@ -9747,6 +9794,160 @@ a.contact-card__title:focus-visible {
   .contact-page__faq-section > .shell-content {
     box-shadow: 0 12px 28px rgba(45, 11, 37, 0.2);
   }
+}
+
+/* Reference-led Contact experience for phones; desktop Contact remains intact. */
+@media (max-width: 700px) {
+  .contact-page > .contact-page__hero,
+  .contact-page > .contact-page__message-section,
+  .contact-page > .contact-page__location-section { display: none; }
+  .contact-mobile-layout {
+    width: min(100% - 16px, 620px);
+    margin: 12px auto 0;
+    display: grid;
+    gap: 12px;
+  }
+  .contact-mobile-quick {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .contact-mobile-quick > a {
+    min-width: 0;
+    min-height: 158px;
+    padding: 10px 5px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 6px;
+    border: 1px solid rgba(26,69,42,.12);
+    border-radius: 14px;
+    background: rgba(255,255,255,.97);
+    box-shadow: 0 7px 18px rgba(38,34,28,.1);
+    color: #17472a;
+    text-align: center;
+    text-decoration: none;
+  }
+  .contact-mobile-quick__icon {
+    width: 48px;
+    height: 48px;
+    display: grid;
+    flex: 0 0 48px;
+    place-items: center;
+    border-radius: 50%;
+  }
+  .contact-mobile-quick__icon.is-orange { background: #fff0d8; color: #ff7100; }
+  .contact-mobile-quick__icon.is-green { background: #e7f4e5; color: #18813d; }
+  .contact-mobile-quick__icon svg { width: 25px; height: 25px; stroke-width: 1.8; }
+  .contact-mobile-quick strong { font-size: 11px; line-height: 1.15; }
+  .contact-mobile-quick small,
+  .contact-mobile-quick i { width: 100%; overflow-wrap: anywhere; color: #303a34; font-size: 7px; line-height: 1.35; font-style: normal; }
+  .contact-mobile-quick i { margin-top: auto; padding-top: 7px; border-top: 1px solid #f2c88e; }
+  .contact-mobile-quick > a:nth-child(even) i { border-top-color: #bcdcbc; }
+
+  .contact-mobile-form-card,
+  .contact-mobile-map-card {
+    padding: 15px;
+    border: 1px solid rgba(26,69,42,.12);
+    border-radius: 16px;
+    background: rgba(255,255,255,.98);
+    box-shadow: 0 8px 22px rgba(35,24,28,.13);
+  }
+  .contact-mobile-form-card h1,
+  .contact-mobile-map-card h2 { margin: 0 0 13px; color: #134b24; font-size: 21px; line-height: 1.2; }
+  .contact-mobile-form-card form { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 9px; }
+  .contact-mobile-form-card label {
+    position: relative;
+    min-width: 0;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    border: 1px solid #d8deda;
+    border-radius: 9px;
+    background: #fff;
+  }
+  .contact-mobile-form-card label > svg { width: 18px; height: 18px; margin-left: 12px; flex: 0 0 18px; color: #737b76; stroke-width: 1.8; }
+  .contact-mobile-form-card input,
+  .contact-mobile-form-card textarea { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: #233229; font: inherit; font-size: 13px; }
+  .contact-mobile-form-card input { height: 46px; padding: 0 10px; }
+  .contact-mobile-form-card textarea { min-height: 100px; padding: 14px 10px; resize: vertical; }
+  .contact-mobile-form-card label.is-wide,
+  .contact-mobile-form-card button,
+  .contact-mobile-form-card__status { grid-column: 1 / -1; }
+  .contact-mobile-form-card label.is-message { align-items: flex-start; }
+  .contact-mobile-form-card label.is-message > svg { margin-top: 14px; }
+  .contact-mobile-form-card label em { position: absolute; right: 6px; bottom: 2px; color: #c62e25; font-size: 7px; font-style: normal; }
+  .contact-mobile-form-card button {
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: 0;
+    border-radius: 9px;
+    background: linear-gradient(90deg,#ff7b08,#ff9414);
+    color: #fff;
+    font: inherit;
+    font-size: 15px;
+    font-weight: 800;
+  }
+  .contact-mobile-form-card button svg { width: 20px; height: 20px; }
+  .contact-mobile-form-card__status { margin: 0; padding: 8px; border-radius: 7px; font-size: 10px; text-align: center; }
+  .contact-mobile-form-card__status.is-success { background: #e9f7e7; color: #17613a; }
+  .contact-mobile-form-card__status.is-error { background: #fff0ed; color: #b62e27; }
+
+  .contact-mobile-map-card { background: rgba(249,255,248,.98); }
+  .contact-mobile-map-card h2 { display: flex; align-items: center; gap: 8px; }
+  .contact-mobile-map-card h2 svg { width: 23px; height: 23px; }
+  .contact-mobile-map-card iframe { width: 100%; height: 235px; display: block; border: 0; border-radius: 10px; }
+  .contact-mobile-map-card > a {
+    min-height: 44px;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: 1px solid #174f29;
+    border-radius: 9px;
+    color: #174f29;
+    font-size: 13px;
+    font-weight: 800;
+    text-decoration: none;
+  }
+  .contact-mobile-map-card > a svg { width: 17px; height: 17px; }
+  .contact-mobile-help {
+    min-height: 82px;
+    padding: 12px 14px;
+    display: grid;
+    grid-template-columns: 42px minmax(0,1fr) auto;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid #f0dfad;
+    border-radius: 15px;
+    background: linear-gradient(90deg,#fff8dc,#fff1c8);
+    color: #17472a;
+    text-decoration: none;
+  }
+  .contact-mobile-help > svg { width: 34px; height: 34px; color: #4a2207; }
+  .contact-mobile-help span { display: grid; gap: 4px; }
+  .contact-mobile-help span strong { font-size: 13px; }
+  .contact-mobile-help span small { color: #3d443f; font-size: 9px; line-height: 1.35; }
+  .contact-mobile-help b { min-height: 40px; padding: 0 10px; display: flex; align-items: center; gap: 6px; border: 1px solid #efdca9; border-radius: 10px; background: #fff; font-size: 10px; white-space: nowrap; }
+  .contact-mobile-help b svg { width: 14px; height: 14px; }
+  .contact-page__faq-section { margin-top: 12px; }
+}
+
+@media (max-width: 380px) {
+  .contact-mobile-layout { width: calc(100% - 12px); gap: 9px; }
+  .contact-mobile-quick { gap: 4px; }
+  .contact-mobile-quick > a { min-height: 148px; padding-inline: 3px; }
+  .contact-mobile-quick__icon { width: 42px; height: 42px; flex-basis: 42px; }
+  .contact-mobile-form-card,
+  .contact-mobile-map-card { padding: 11px; }
+  .contact-mobile-form-card h1,
+  .contact-mobile-map-card h2 { font-size: 19px; }
+  .contact-mobile-help { grid-template-columns: 34px minmax(0,1fr) auto; padding-inline: 10px; gap: 7px; }
+  .contact-mobile-help > svg { width: 29px; height: 29px; }
 }
 @media (max-width: 1050px) { .cart-layout { grid-template-columns: 1fr; } .cart-summary { position: static; } }
 @media (max-width: 750px) {

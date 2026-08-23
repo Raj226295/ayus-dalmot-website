@@ -18,6 +18,7 @@ const announcementItems = [
 const defaultNavHref = menuLinks[0].href
 const accountStorageKey = 'ayush-kursela-account'
 const addressStorageKey = 'ayush-kursela-addresses'
+const wishlistStorageKey = 'ayush-kursela-wishlist'
 const defaultAccountAddresses = [
   { id: 'home', label: 'Home', addressLine: '85 P, Barauni – Purnea Hwy', cityLine: 'Maranga, Purnia, Bihar 854301', phone: '+91 91234 56789', isDefault: true, icon: 'home' },
   { id: 'office', label: 'Office', addressLine: '2nd Floor, Sagar Building', cityLine: 'Naya Tola, Purnia, Bihar 854301', phone: '+91 98765 43210', isDefault: false, icon: 'building' },
@@ -49,6 +50,16 @@ function readStoredAddresses() {
     return Array.isArray(stored) ? stored : defaultAccountAddresses
   } catch {
     return defaultAccountAddresses
+  }
+}
+
+function readStoredWishlist() {
+  if (typeof window === 'undefined') return []
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(wishlistStorageKey) || '[]')
+    return Array.isArray(stored) ? stored : []
+  } catch {
+    return []
   }
 }
 
@@ -415,7 +426,7 @@ const bestsellerProducts = [
   },
 ]
 
-const baseCartItemCount = 2
+const baseCartItemCount = 0
 
 function Icon({ name, className = '' }) {
   switch (name) {
@@ -775,6 +786,13 @@ function Icon({ name, className = '' }) {
           strokeLinejoin="round"
         >
           <path d="M5 4h4l1.5 4-2.2 1.8a15 15 0 0 0 6.1 6.1l1.8-2.2 4 1.5v4a2 2 0 0 1-2 2A15.5 15.5 0 0 1 3 6a2 2 0 0 1 2-2z" />
+        </svg>
+      )
+    case 'calendar':
+      return (
+        <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="4" y="5.5" width="16" height="14.5" rx="2" />
+          <path d="M8 3.5v4M16 3.5v4M4 10h16" />
         </svg>
       )
     case 'clock':
@@ -1299,7 +1317,7 @@ function Navbar({ activePageHref, cartItemCount = baseCartItemCount, wishlistCou
             <button type="button" className="icon-button" aria-label={isAuthenticated ? 'Open my account' : 'Open login page'} onClick={(event) => handleNavLinkClick(event, isAuthenticated ? '#account' : '#login')}>
               <Icon name="user" className="icon-button__icon" />
             </button>
-            <button type="button" className="icon-button icon-button--wishlist" aria-label={isAuthenticated ? 'Open wishlist' : 'Log in to view wishlist'} onClick={(event) => handleNavLinkClick(event, isAuthenticated ? '#account' : '#login')}>
+            <button type="button" className="icon-button icon-button--wishlist" aria-label="Open wishlist" onClick={(event) => handleNavLinkClick(event, '#wishlist')}>
               <Icon name="heart" className="icon-button__icon" />
               {wishlistCount > 0 ? <span className="icon-button__badge" aria-hidden="true">{wishlistCount}</span> : null}
             </button>
@@ -1307,6 +1325,7 @@ function Navbar({ activePageHref, cartItemCount = baseCartItemCount, wishlistCou
               type="button"
               className="icon-button icon-button--cart"
               aria-label="Shopping cart"
+              onClick={(event) => handleNavLinkClick(event, '#cart')}
             >
               <Icon name="cart" className="icon-button__icon" />
               {cartItemCount > 0 ? (
@@ -1357,7 +1376,7 @@ function Navbar({ activePageHref, cartItemCount = baseCartItemCount, wishlistCou
             <button type="button" className="icon-button" aria-label={isAuthenticated ? 'Open my account' : 'Open login page'} onClick={(event) => handleNavLinkClick(event, isAuthenticated ? '#account' : '#login')}>
               <Icon name="user" className="icon-button__icon" />
             </button>
-            <button type="button" className="icon-button icon-button--wishlist" aria-label={isAuthenticated ? 'Open wishlist' : 'Log in to view wishlist'} onClick={(event) => handleNavLinkClick(event, isAuthenticated ? '#account' : '#login')}>
+            <button type="button" className="icon-button icon-button--wishlist" aria-label="Open wishlist" onClick={(event) => handleNavLinkClick(event, '#wishlist')}>
               <Icon name="heart" className="icon-button__icon" />
               {wishlistCount > 0 ? <span className="icon-button__badge" aria-hidden="true">{wishlistCount}</span> : null}
             </button>
@@ -1365,6 +1384,7 @@ function Navbar({ activePageHref, cartItemCount = baseCartItemCount, wishlistCou
               type="button"
               className="icon-button icon-button--cart"
               aria-label="Shopping cart"
+              onClick={(event) => handleNavLinkClick(event, '#cart')}
             >
               <Icon name="cart" className="icon-button__icon" />
               {cartItemCount > 0 ? (
@@ -2223,6 +2243,10 @@ function AccountPage({ user, onLogout, onAddToCart, onBuyNow, onUpdateAccount })
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(Boolean(user.twoFactorEnabled))
   const [addresses, setAddresses] = useState(readStoredAddresses)
   const [addressEditor, setAddressEditor] = useState(null)
+  const [supportView, setSupportView] = useState('menu')
+  const [openFaq, setOpenFaq] = useState(null)
+  const [supportDraft, setSupportDraft] = useState({ subject: '', message: '' })
+  const [returnDraft, setReturnDraft] = useState({ orderNumber: '', reason: '', details: '' })
   const initials = user.name.split(' ').map((name) => name[0]).join('').slice(0, 2).toUpperCase()
   const accountItems = [
     { id: 'orders', icon: 'bag', title: 'My Orders', description: 'View orders, order details and tracking.' },
@@ -2298,6 +2322,26 @@ function AccountPage({ user, onLogout, onAddToCart, onBuyNow, onUpdateAccount })
     setAddresses((current) => current.map((address) => ({ ...address, isDefault: address.id === id })))
     showNotice('Default delivery address updated.')
   }
+  const submitSupportTicket = (event) => {
+    event.preventDefault()
+    if (!supportDraft.subject.trim() || !supportDraft.message.trim()) return showNotice('Please enter a subject and message.')
+    setSupportDraft({ subject: '', message: '' })
+    setSupportView('menu')
+    showNotice(`Support ticket #AKS-${String(Date.now()).slice(-6)} submitted successfully.`)
+  }
+  const submitReturnRequest = (event) => {
+    event.preventDefault()
+    if (!returnDraft.orderNumber.trim() || !returnDraft.reason || !returnDraft.details.trim()) return showNotice('Please complete all return/refund fields.')
+    setReturnDraft({ orderNumber: '', reason: '', details: '' })
+    setSupportView('menu')
+    showNotice(`Return/refund request for ${returnDraft.orderNumber.trim()} submitted successfully.`)
+  }
+  const supportFaqs = [
+    ['How can I track my order?', 'Open My Orders and select Track Order to view the latest delivery status.'],
+    ['Can I change my delivery address?', 'You can edit an address before dispatch from Saved Addresses. For an active order, contact support.'],
+    ['How do returns and refunds work?', 'Submit the Return / Refund form with your order number. Our team will review it and respond within 24 hours.'],
+    ['How long does delivery take?', 'Most orders arrive within 3–7 business days, depending on your delivery location.'],
+  ]
 
   return (
     <main className="account-page" id="account">
@@ -2344,14 +2388,14 @@ function AccountPage({ user, onLogout, onAddToCart, onBuyNow, onUpdateAccount })
               <article className="account-order account-order--detailed">
                 <img src="/ayush/product-sattu.png" alt="Ayush Sattu order" />
                 <div className="account-order__product"><strong>Order #AK-10248</strong><p>Ayush Kursela Mixture · 2110</p><small>1L Glass Jar</small><b>₹899</b></div>
-                <div className="account-order__meta"><span>◫&nbsp; 12 May 2025</span><small>Order Date</small><strong>₹899</strong><small>Total Amount</small></div>
+                <div className="account-order__meta"><div className="account-order__meta-item"><span className="account-order__meta-icon"><Icon name="calendar" /></span><span><strong>12 May 2025</strong><small>Order Date</small></span></div><div className="account-order__meta-item"><span className="account-order__meta-icon account-order__meta-icon--rupee">₹</span><span><strong>₹899</strong><small>Total Amount</small></span></div></div>
                 <OrderProgress status="Processing" />
                 <button type="button" className="account-order__button" onClick={() => showNotice('Order #AK-10248 details opened.')}>View Details</button>
               </article>
               <article className="account-order account-order--detailed">
                 <img src="/ayush/product-katarr-matar.png" alt="Ayush Katarr Matar order" />
                 <div className="account-order__product"><strong>Order #AK-10247</strong><p>Ayush Katarr Matar</p><small>500g</small><b>₹60</b></div>
-                <div className="account-order__meta"><span>◫&nbsp; 10 May 2025</span><small>Order Date</small><strong>₹120</strong><small>Total Amount</small></div>
+                <div className="account-order__meta"><div className="account-order__meta-item"><span className="account-order__meta-icon"><Icon name="calendar" /></span><span><strong>10 May 2025</strong><small>Order Date</small></span></div><div className="account-order__meta-item"><span className="account-order__meta-icon account-order__meta-icon--rupee">₹</span><span><strong>₹120</strong><small>Total Amount</small></span></div></div>
                 <OrderProgress status="Shipped" />
                 <button type="button" className="account-order__button" onClick={() => showNotice('Tracking for Order #AK-10247 opened.')}>Track Order</button>
               </article>
@@ -2404,15 +2448,29 @@ function AccountPage({ user, onLogout, onAddToCart, onBuyNow, onUpdateAccount })
               <aside className="account-security-note"><Icon name="shield" /><span><strong>We never share your personal information</strong><small>Your data is 100% safe and secure with us.</small></span></aside>
             </> : null}
             {activePanel === 'support' ? <>
-              <h2>Help &amp; Support</h2><p className="account-panel__intro">Our team is here to help with every order.</p>
-              <div className="account-support-links">
-                <button type="button" onClick={() => { window.location.hash = '#contact' }}><span><Icon name="headset" /></span><span><strong>Contact Us</strong><small>Get in touch with our support team for any assistance.</small></span><Icon name="chevron-right" /></button>
-                <button type="button" onClick={() => { window.location.hash = '#contact' }}><span><Icon name="chat" /></span><span><strong>FAQ</strong><small>Find answers to frequently asked questions.</small></span><Icon name="chevron-right" /></button>
-                <button type="button" onClick={() => showNotice('Return and refund help opened.')}><span><Icon name="return" /></span><span><strong>Return / Refund Help</strong><small>Learn about returns, refunds and exchange policy.</small></span><Icon name="chevron-right" /></button>
-              </div>
+              <div className="account-panel__title-row"><div><h2>Help &amp; Support</h2><p className="account-panel__intro">Our team is here to help with every order.</p></div>{supportView !== 'menu' ? <button type="button" className="account-button account-button--secondary" onClick={() => { setSupportView('menu'); setNotice('') }}>← Back</button> : null}</div>
+              {supportView === 'menu' ? <div className="account-support-links">
+                <button type="button" onClick={() => { setSupportView('contact'); setNotice('') }}><span><Icon name="headset" /></span><span><strong>Contact Us</strong><small>Submit a support ticket for any assistance.</small></span><Icon name="chevron-right" /></button>
+                <button type="button" onClick={() => { setSupportView('faq'); setNotice('') }}><span><Icon name="chat" /></span><span><strong>FAQ</strong><small>Find answers to frequently asked questions.</small></span><Icon name="chevron-right" /></button>
+                <button type="button" onClick={() => { setSupportView('return'); setNotice('') }}><span><Icon name="return" /></span><span><strong>Return / Refund Help</strong><small>Submit your order details to our support team.</small></span><Icon name="chevron-right" /></button>
+              </div> : null}
+              {supportView === 'contact' ? <form className="account-edit-form account-support-form" onSubmit={submitSupportTicket}>
+                <h3>Contact Support</h3>
+                <div className="account-edit-form__grid"><label>Your Name<input value={user.name} readOnly /></label><label>Email Address<input value={user.email} readOnly /></label></div>
+                <label>Subject<input value={supportDraft.subject} onChange={(event) => setSupportDraft({ ...supportDraft, subject: event.target.value })} placeholder="How can we help?" /></label>
+                <label>Message<textarea value={supportDraft.message} onChange={(event) => setSupportDraft({ ...supportDraft, message: event.target.value })} placeholder="Describe your issue in detail" /></label>
+                <div className="account-edit-form__actions"><button type="button" onClick={() => setSupportView('menu')}>Cancel</button><button type="submit">Submit Ticket</button></div>
+              </form> : null}
+              {supportView === 'faq' ? <div className="account-faq-list">{supportFaqs.map(([question, answer], index) => <article key={question} className={openFaq === index ? 'is-open' : ''}><button type="button" aria-expanded={openFaq === index} onClick={() => setOpenFaq((current) => current === index ? null : index)}><strong>{question}</strong><span>{openFaq === index ? '−' : '+'}</span></button>{openFaq === index ? <p>{answer}</p> : null}</article>)}</div> : null}
+              {supportView === 'return' ? <form className="account-edit-form account-support-form" onSubmit={submitReturnRequest}>
+                <h3>Return / Refund Request</h3>
+                <div className="account-edit-form__grid"><label>Order Number<input value={returnDraft.orderNumber} onChange={(event) => setReturnDraft({ ...returnDraft, orderNumber: event.target.value })} placeholder="e.g. AK-10248" /></label><label>Reason<select value={returnDraft.reason} onChange={(event) => setReturnDraft({ ...returnDraft, reason: event.target.value })}><option value="">Select a reason</option><option>Damaged product</option><option>Wrong product received</option><option>Missing item</option><option>Quality issue</option><option>Other</option></select></label></div>
+                <label>Details<textarea value={returnDraft.details} onChange={(event) => setReturnDraft({ ...returnDraft, details: event.target.value })} placeholder="Tell us what happened" /></label>
+                <div className="account-edit-form__actions"><button type="button" onClick={() => setSupportView('menu')}>Cancel</button><button type="submit">Submit Request</button></div>
+              </form> : null}
               <aside className="account-support-note"><Icon name="shield" /><span><strong>We are here for you!</strong><small>Your satisfaction is our top priority.</small></span><Icon name="headset" /></aside>
               <div className="account-support-contact">
-                <button type="button" onClick={() => showNotice('Live chat will be available shortly.')}><Icon name="chat" /><span><strong>Live Chat</strong><small>Chat with us<br />9 AM – 9 PM</small></span></button>
+                <a href="https://wa.me/919123456789?text=Hello%20Ayush%20Kursela%20Support%2C%20I%20need%20help." target="_blank" rel="noreferrer"><Icon name="chat" /><span><strong>Live Chat</strong><small>Chat on WhatsApp<br />9 AM – 9 PM</small></span></a>
                 <a href="mailto:support@ayushkursela.com"><Icon name="mail" /><span><strong>Email Support</strong><small>support@ayushkursela.com<br />Response in 24 hrs</small></span></a>
                 <a href="tel:+919123456789"><Icon name="phone" /><span><strong>Call Us</strong><small>+91 12345 67890<br />9 AM – 6 PM</small></span></a>
                 <span><Icon name="clock" /><span><strong>Support Hours</strong><small>Mon – Sat<br />9 AM – 6 PM</small></span></span>
@@ -2568,6 +2626,56 @@ function ProductCard({ cardContext = 'catalog', onAddToCart, onBuyNow, onSharePr
       </button>
     </article>
   )
+}
+
+function WishlistPage({ wishlistIds, onAddToCart, onRemove, onClear }) {
+  const allProducts = [...productCatalog, ...bestsellerProducts]
+  const savedProducts = wishlistIds.map((id) => allProducts.find((product) => product.id === id)).filter(Boolean)
+  const recommendedProducts = productCatalog.filter((product) => !wishlistIds.includes(product.id)).slice(0, 3)
+  const estimatedValue = savedProducts.reduce((total, product) => total + (product.wholesale ? product.wholesale.ratePerBag * 5 : product.price), 0)
+  const moveToCart = (product) => {
+    const wholesale = product.wholesale
+    onAddToCart({ ...product, price: wholesale ? wholesale.ratePerBag * 5 : product.price, weight: wholesale ? '5 Bags' : product.weight, quantity: wholesale ? 5 : 1 })
+    onRemove(product)
+  }
+  const moveAllToCart = () => {
+    savedProducts.forEach((product) => {
+      const wholesale = product.wholesale
+      onAddToCart({ ...product, price: wholesale ? wholesale.ratePerBag * 5 : product.price, weight: wholesale ? '5 Bags' : product.weight, quantity: wholesale ? 5 : 1 })
+    })
+    onClear()
+  }
+
+  return (
+    <main className="wishlist-page" id="wishlist">
+      <div className="shell-content wishlist-page__inner">
+        <div className="wishlist-heading-row"><div><h1>My Wishlist <Icon name="heart" /></h1><p>Products you&apos;ve liked and saved for later</p></div><div className="wishlist-heading-actions"><button type="button" disabled={!savedProducts.length} onClick={moveAllToCart}><Icon name="cart" /> Move All to Cart</button><button type="button" className="is-clear" disabled={!savedProducts.length} onClick={onClear}><Icon name="trash" /> Clear Wishlist</button></div></div>
+        <section className="wishlist-summary" aria-label="Wishlist summary"><div><Icon name="heart" /><span><small>Total Saved Items</small><strong>{savedProducts.length}</strong></span></div><div><Icon name="package" /><span><small>Available Items</small><strong>{savedProducts.length}</strong></span></div><div><span className="wishlist-summary__rupee">₹</span><span><small>Total Est. Value</small><strong>₹{estimatedValue.toLocaleString('en-IN')}</strong></span></div></section>
+        {savedProducts.length ? <section className="wishlist-grid" aria-label="Saved products">{savedProducts.map((product) => {
+          const wholesale = product.wholesale
+          return <article className="wishlist-card" key={product.id}><span className="wishlist-card__offer">5% OFF</span><button type="button" className="wishlist-card__remove" aria-label={`Remove ${product.name}`} onClick={() => onRemove(product)}>×</button><img src={product.image} alt={product.alt} /><h2>{product.name}</h2><p className="wishlist-card__stock">In Stock</p>{wholesale ? <><p className="wishlist-card__variant">5 Bags (Minimum) <span>•</span> {wholesale.pcsPerBag * 5} PCS <span>•</span> {formatBagWeight(wholesale.weightKgPerBag * 5)} KG</p><p className="wishlist-card__bag">1 Bag&nbsp; • &nbsp;{wholesale.pcsPerBag} PCS&nbsp; • &nbsp;{formatBagWeight(wholesale.weightKgPerBag)} KG<br /><strong>₹{wholesale.ratePerBag} / Bag</strong></p><strong className="wishlist-card__price">₹{(wholesale.ratePerBag * 5).toLocaleString('en-IN')}</strong><small>₹{wholesale.ratePerBag} × 5 Bags</small><em>Minimum order: 5 Bags</em></> : <strong className="wishlist-card__price">₹{product.price}</strong>}<button type="button" className="wishlist-card__cart" onClick={() => moveToCart(product)}><Icon name="cart" /> Move to Cart</button><a href="#products">View Product</a></article>
+        })}</section> : <section className="wishlist-empty"><Icon name="heart" /><h2>Your wishlist is empty</h2><p>Tap the heart on any product to save it here.</p><a href="#products">Explore Products</a></section>}
+        <section className="wishlist-recommendations" aria-labelledby="wishlist-recommendations-title">
+          <div className="wishlist-recommendations__heading"><div><Icon name="heart" /><h2 id="wishlist-recommendations-title">You may also like</h2></div><a href="#products">View all products →</a></div>
+          <div className="wishlist-recommendations__grid">{recommendedProducts.map((product, index) => <article key={product.id} className="wishlist-recommendation-card"><img src={product.image} alt={product.alt} loading="lazy" /><div><h3>{product.name}</h3><p><span aria-label={`${4.5 + index * .1} out of 5 stars`}>★</span> {(4.5 + index * .1).toFixed(1)}</p><strong>₹{product.wholesale ? (product.wholesale.ratePerBag * 5).toLocaleString('en-IN') : product.price}</strong></div><button type="button" aria-label={`Add ${product.name} to cart`} onClick={() => { const wholesale = product.wholesale; onAddToCart({ ...product, price: wholesale ? wholesale.ratePerBag * 5 : product.price, weight: wholesale ? '5 Bags' : product.weight, quantity: wholesale ? 5 : 1 }) }}><Icon name="cart" /></button></article>)}</div>
+        </section>
+        <section className="wishlist-continue"><div><Icon name="heart" /><span><strong>Loved a product?</strong><p>Items in your wishlist are saved here. Add them to cart anytime!</p></span></div><a href="#products">Continue Shopping →</a></section>
+      </div>
+    </main>
+  )
+}
+
+function CartPage({ cartItems, onUpdateQuantity, onRemove, onMoveToWishlist, onCheckout }) {
+  const items = Object.values(cartItems)
+  const subtotal = items.reduce((total, item) => total + item.unitPrice * item.quantity, 0)
+  const tax = Math.round(subtotal * .05)
+  const total = subtotal + tax
+  return <main className="cart-page" id="cart"><div className="shell-content cart-page__inner">
+    <div className="cart-page__heading"><div><h1>Your Cart ({items.length} {items.length === 1 ? 'Item' : 'Items'})</h1><p>Review your items and proceed to checkout</p></div><a href="#products">← Continue Shopping</a></div>
+    {items.length ? <div className="cart-layout"><section className="cart-items" aria-label="Cart products">{items.map((item) => { const product = item.product; const wholesale = product.wholesale; const isWholesale = item.mode === 'wholesale'; return <article className="cart-item" key={product.id}><img src={product.image} alt={product.alt} /><div className="cart-item__details"><h2>{product.name}</h2><p>{product.weight}</p>{isWholesale && wholesale ? <><small>{item.quantity} Bags (Minimum) • {wholesale.pcsPerBag * item.quantity} PCS • {formatBagWeight(wholesale.weightKgPerBag * item.quantity)} KG</small><span><Icon name="bag" /> 1 Bag&nbsp; • &nbsp;{wholesale.pcsPerBag} PCS&nbsp; • &nbsp;{formatBagWeight(wholesale.weightKgPerBag)} KG&nbsp; • &nbsp;₹{wholesale.ratePerBag} / Bag</span></> : <small>{item.quantity} {item.quantity === 1 ? 'piece' : 'pieces'}</small>}</div><div className="cart-item__price"><strong>₹{(item.unitPrice * item.quantity).toLocaleString('en-IN')}</strong><small>₹{item.unitPrice} × {item.quantity} {isWholesale ? 'Bags' : 'Pieces'}</small></div><div className="cart-item__actions"><button type="button" className="is-delete" aria-label={`Remove ${product.name}`} onClick={() => onRemove(product.id)}><Icon name="trash" /></button><div><button type="button" disabled={item.quantity <= item.minimum} onClick={() => onUpdateQuantity(product.id, item.quantity - 1)}>−</button><strong>{item.quantity}</strong><button type="button" onClick={() => onUpdateQuantity(product.id, item.quantity + 1)}>＋</button></div><button type="button" aria-label={`Move ${product.name} to wishlist`} onClick={() => onMoveToWishlist(product)}><Icon name="heart" /></button></div></article>})}<aside className="cart-minimum-note"><Icon name="shield" /> Minimum order for each wholesale product is 5 Bags</aside></section>
+      <aside className="cart-summary"><h2>Order Summary</h2><p><span>Subtotal</span><strong>₹{subtotal.toLocaleString('en-IN')}</strong></p><p><span>Shipping Charges</span><em>FREE</em></p><p><span>Tax (5%)</span><strong>₹{tax.toLocaleString('en-IN')}</strong></p><div><span>Total Amount</span><strong>₹{total.toLocaleString('en-IN')}</strong></div><small>You save on wholesale pricing with this order</small><aside><Icon name="truck" /><span><strong>Estimated Delivery</strong><small>3 – 5 Business Days</small></span></aside><button type="button" onClick={onCheckout}><Icon name="lock" /> PROCEED TO CHECKOUT</button><a href="#account"><Icon name="user" /> Checkout as Wholesale</a><footer><span><Icon name="shield" /> Secure Payments</span><span><Icon name="return" /> Easy Returns</span><span><Icon name="headset" /> 24/7 Support</span></footer></aside>
+    </div> : <section className="cart-empty"><Icon name="cart" /><h2>Your cart is empty</h2><p>Add products to your cart to see them here.</p><a href="#products">Explore Products</a></section>}
+  </div></main>
 }
 
 function ProductsPage({ initialShoppingMode = 'wholesale', onAddToCart, onBuyNow, onShareProduct, onToggleWishlist, wishlistIds }) {
@@ -3255,7 +3363,7 @@ function SiteToast({ message }) {
 
 function App() {
   const [cartItems, setCartItems] = useState({})
-  const [wishlistIds, setWishlistIds] = useState([])
+  const [wishlistIds, setWishlistIds] = useState(readStoredWishlist)
   const [toastMessage, setToastMessage] = useState('')
   const [currentHash, setCurrentHash] = useState(getCurrentPageHash)
   const [account, setAccount] = useState(readStoredAccount)
@@ -3288,10 +3396,16 @@ function App() {
   const isContactPage = currentHash === '#contact'
   const pageHash = currentHash.split('?')[0]
   const isProductsPage = pageHash === '#products'
+  const isWishlistPage = pageHash === '#wishlist'
+  const isCartPage = pageHash === '#cart'
   const isLoginPage = currentHash === '#login'
   const isRegisterPage = currentHash === '#register'
   const isAccountPage = currentHash === '#account' && Boolean(account)
   const isAuthPage = isLoginPage || isRegisterPage
+
+  useEffect(() => {
+    window.localStorage.setItem(wishlistStorageKey, JSON.stringify(wishlistIds))
+  }, [wishlistIds])
 
   useEffect(() => {
     if (typeof window === 'undefined' || typeof document === 'undefined') {
@@ -3308,14 +3422,17 @@ function App() {
     return () => window.cancelAnimationFrame(frameId)
   }, [currentHash, pageHash, isAboutPage, isContactPage, isProductsPage, isLoginPage, isRegisterPage, isAccountPage])
 
-  const cartItemCount =
-    baseCartItemCount +
-    Object.values(cartItems).reduce((total, quantity) => total + quantity, 0)
+  const cartItemCount = Object.keys(cartItems).length
 
   const handleAddToCart = (product) => {
+    const quantity = Math.max(1, Number(product.quantity) || 1)
+    const mode = product.wholesale && String(product.weight).includes('Bag') ? 'wholesale' : 'retail'
+    const unitPrice = mode === 'wholesale' ? product.wholesale.ratePerBag : Math.round(product.price / quantity)
     setCartItems((current) => ({
       ...current,
-      [product.id]: (current[product.id] ?? 0) + 1,
+      [product.id]: current[product.id]
+        ? { ...current[product.id], quantity: current[product.id].quantity + quantity }
+        : { product, quantity, unitPrice, mode, minimum: mode === 'wholesale' ? 5 : 1 },
     }))
     setToastMessage(`${product.name} added to cart`)
   }
@@ -3351,6 +3468,9 @@ function App() {
     setToastMessage('You have been logged out.')
     window.location.hash = '#home'
   }
+  const handleUpdateCartQuantity = (id, quantity) => setCartItems((current) => ({ ...current, [id]: { ...current[id], quantity: Math.max(current[id].minimum, quantity) } }))
+  const handleRemoveCartItem = (id) => setCartItems((current) => { const next = { ...current }; delete next[id]; return next })
+  const handleMoveCartItemToWishlist = (product) => { setWishlistIds((current) => current.includes(product.id) ? current : [...current, product.id]); handleRemoveCartItem(product.id); setToastMessage(`${product.name} moved to wishlist`) }
 
   const handleUpdateAccount = (nextAccount) => {
     persistAccount(nextAccount)
@@ -3380,6 +3500,10 @@ function App() {
           onToggleWishlist={handleToggleWishlist}
           wishlistIds={wishlistIds}
         />
+      ) : isWishlistPage ? (
+        <WishlistPage wishlistIds={wishlistIds} onAddToCart={handleAddToCart} onRemove={handleToggleWishlist} onClear={() => { setWishlistIds([]); setToastMessage('Wishlist cleared.') }} />
+      ) : isCartPage ? (
+        <CartPage cartItems={cartItems} onUpdateQuantity={handleUpdateCartQuantity} onRemove={handleRemoveCartItem} onMoveToWishlist={handleMoveCartItemToWishlist} onCheckout={() => setToastMessage('Checkout is ready.')} />
       ) : isLoginPage ? (
         <LoginPage onLogin={handleLogin} />
       ) : isRegisterPage ? (
@@ -3409,7 +3533,7 @@ function App() {
         </main>
       )}
 
-      {!isAuthPage && !isAccountPage ? <Footer /> : null}
+      {!isAuthPage && !isAccountPage && !isWishlistPage ? <Footer /> : null}
       <SiteToast message={toastMessage} />
     </div>
   )

@@ -1193,6 +1193,7 @@ function TopBar() {
 
 function Navbar({ activePageHref, cartItemCount = baseCartItemCount, wishlistCount = 0, isAuthenticated = false }) {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [mobileProductsOpen, setMobileProductsOpen] = useState(false)
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [activeHref, setActiveHref] = useState(getCurrentNavHref)
@@ -1281,6 +1282,7 @@ function Navbar({ activePageHref, cartItemCount = baseCartItemCount, wishlistCou
 
   const toggleMenu = () => {
     setMenuOpen((value) => !value)
+    if (menuOpen) setMobileProductsOpen(false)
     setMobileSearchOpen(false)
   }
 
@@ -1452,16 +1454,18 @@ function Navbar({ activePageHref, cartItemCount = baseCartItemCount, wishlistCou
           id="site-navigation"
         >
           <nav className="site-nav site-nav--mobile" aria-label="Mobile primary">
-            {menuLinks.map((item) => (
-              <a
-                key={item.label}
-                className={displayedActiveHref === item.href ? 'is-active' : ''}
-                href={item.href}
-                aria-current={displayedActiveHref === item.href ? 'page' : undefined}
-                onClick={(event) => handleNavLinkClick(event, item.href)}
-              >
-                {item.label}
-              </a>
+            {menuLinks.map((item) => item.href === '#products' ? (
+              <div className={['mobile-products-menu', mobileProductsOpen ? 'is-open' : ''].filter(Boolean).join(' ')} key={item.label}>
+                <button type="button" className={displayedActiveHref === item.href ? 'is-active' : ''} aria-expanded={mobileProductsOpen} aria-controls="mobile-product-types" onClick={() => setMobileProductsOpen((value) => !value)}>
+                  <span>{item.label}</span><Icon name="chevron-right" />
+                </button>
+                <div className="mobile-products-menu__list" id="mobile-product-types">
+                  <a href="#products" onClick={(event) => handleNavLinkClick(event, '#products')}>All Products</a>
+                  {productCatalog.map((product) => <a key={`mobile-menu-${product.id}`} href={`#products?product=${product.id}`} onClick={(event) => handleNavLinkClick(event, `#products?product=${product.id}`)}>{product.name.replace('Ayush ', '')}</a>)}
+                </div>
+              </div>
+            ) : (
+              <a key={item.label} className={displayedActiveHref === item.href ? 'is-active' : ''} href={item.href} aria-current={displayedActiveHref === item.href ? 'page' : undefined} onClick={(event) => handleNavLinkClick(event, item.href)}>{item.label}</a>
             ))}
           </nav>
         </div>
@@ -2688,7 +2692,7 @@ function WishlistPage({ wishlistIds, onAddToCart, onRemove, onClear }) {
         <section className="wishlist-summary" aria-label="Wishlist summary"><div><Icon name="heart" /><span><small>Total Saved Items</small><strong>{savedProducts.length}</strong></span></div><div><Icon name="package" /><span><small>Available Items</small><strong>{savedProducts.length}</strong></span></div><div><span className="wishlist-summary__rupee">₹</span><span><small>Total Est. Value</small><strong>₹{estimatedValue.toLocaleString('en-IN')}</strong></span></div></section>
         {savedProducts.length ? <section className="wishlist-grid" aria-label="Saved products">{savedProducts.map((product) => {
           const wholesale = product.wholesale
-          return <article className="wishlist-card" key={product.id}><span className="wishlist-card__offer">5% OFF</span><button type="button" className="wishlist-card__remove" aria-label={`Remove ${product.name}`} onClick={() => onRemove(product)}>×</button><img src={product.image} alt={product.alt} /><h2>{product.name}</h2><p className="wishlist-card__stock">In Stock</p>{wholesale ? <><p className="wishlist-card__variant">5 Bags (Minimum) <span>•</span> {wholesale.pcsPerBag * 5} PCS <span>•</span> {formatBagWeight(wholesale.weightKgPerBag * 5)} KG</p><p className="wishlist-card__bag">1 Bag&nbsp; • &nbsp;{wholesale.pcsPerBag} PCS&nbsp; • &nbsp;{formatBagWeight(wholesale.weightKgPerBag)} KG<br /><strong>₹{wholesale.ratePerBag} / Bag</strong></p><strong className="wishlist-card__price">₹{(wholesale.ratePerBag * 5).toLocaleString('en-IN')}</strong><small>₹{wholesale.ratePerBag} × 5 Bags</small><em>Minimum order: 5 Bags</em></> : <strong className="wishlist-card__price">₹{product.price}</strong>}<button type="button" className="wishlist-card__cart" onClick={() => moveToCart(product)}><Icon name="cart" /> Move to Cart</button><a href="#products">View Product</a></article>
+          return <article className="wishlist-card" key={product.id}><span className="wishlist-card__offer">5% OFF</span><button type="button" className="wishlist-card__remove" aria-label={`Remove ${product.name}`} onClick={() => onRemove(product)}><Icon name="trash" /></button><img src={product.image} alt={product.alt} /><h2>{product.name}</h2><p className="wishlist-card__stock">In Stock</p>{wholesale ? <><p className="wishlist-card__variant">5 Bags (Minimum) <span>•</span> {wholesale.pcsPerBag * 5} PCS <span>•</span> {formatBagWeight(wholesale.weightKgPerBag * 5)} KG</p><p className="wishlist-card__bag">1 Bag&nbsp; • &nbsp;{wholesale.pcsPerBag} PCS&nbsp; • &nbsp;{formatBagWeight(wholesale.weightKgPerBag)} KG<br /><strong>₹{wholesale.ratePerBag} / Bag</strong></p><strong className="wishlist-card__price">₹{(wholesale.ratePerBag * 5).toLocaleString('en-IN')}</strong><small>₹{wholesale.ratePerBag} × 5 Bags</small><em>Minimum order: 5 Bags</em></> : <strong className="wishlist-card__price">₹{product.price}</strong>}<button type="button" className="wishlist-card__cart" onClick={() => moveToCart(product)}><Icon name="cart" /> Move to Cart</button><a href="#products">View Product</a></article>
         })}</section> : <section className="wishlist-empty"><Icon name="heart" /><h2>Your wishlist is empty</h2><p>Tap the heart on any product to save it here.</p><a href="#products">Explore Products</a></section>}
         <section className="wishlist-recommendations" aria-labelledby="wishlist-recommendations-title">
           <div className="wishlist-recommendations__heading"><div><Icon name="heart" /><h2 id="wishlist-recommendations-title">You may also like</h2></div><a href="#products">View all products →</a></div>
@@ -2749,9 +2753,9 @@ function BuyNowPage({ product, user, onComplete }) {
   </form></main>
 }
 
-function ProductsPage({ initialShoppingMode = 'wholesale', onAddToCart, onBuyNow, onShareProduct, onToggleWishlist, wishlistIds }) {
+function ProductsPage({ initialShoppingMode = 'wholesale', initialProductFilter = 'all', onAddToCart, onBuyNow, onShareProduct, onToggleWishlist, wishlistIds }) {
   const availableSizes = [...new Set(productCatalog.map((product) => product.weight))]
-  const [productFilter, setProductFilter] = useState('all')
+  const [productFilter, setProductFilter] = useState(initialProductFilter)
   const [sizeFilter, setSizeFilter] = useState('all')
   const [weightFilter, setWeightFilter] = useState('all')
   const [priceFilter, setPriceFilter] = useState('all')
@@ -3764,6 +3768,7 @@ function App() {
         <ProductsPage
           key={currentHash}
           initialShoppingMode={currentHash.includes('mode=retail') ? 'retail' : 'wholesale'}
+          initialProductFilter={new URLSearchParams(currentHash.split('?')[1] || '').get('product') || 'all'}
           onAddToCart={handleAddToCart}
           onBuyNow={handleBuyNow}
           onShareProduct={handleShareProduct}

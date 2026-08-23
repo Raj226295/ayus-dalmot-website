@@ -799,6 +799,20 @@ function Icon({ name, className = '' }) {
           <path d="M8 3.5v4M16 3.5v4M4 10h16" />
         </svg>
       )
+    case 'weight':
+      return (
+        <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M8.5 7.5a3.5 3.5 0 1 1 7 0" />
+          <path d="M6 8h12l2 12H4L6 8Z" />
+          <path d="M10 12h4M12 10v4" />
+        </svg>
+      )
+    case 'reset':
+      return (
+        <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M5 8V4m0 0h4M5 4l3.1 3.1A7 7 0 1 1 5.5 14" />
+        </svg>
+      )
     case 'list':
       return <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M9 6h11M9 12h11M9 18h11" /><circle cx="4.5" cy="6" r="1" fill="currentColor" /><circle cx="4.5" cy="12" r="1" fill="currentColor" /><circle cx="4.5" cy="18" r="1" fill="currentColor" /></svg>
     case 'ruler':
@@ -2739,18 +2753,46 @@ function ProductsPage({ initialShoppingMode = 'wholesale', onAddToCart, onBuyNow
   const availableSizes = [...new Set(productCatalog.map((product) => product.weight))]
   const [productFilter, setProductFilter] = useState('all')
   const [sizeFilter, setSizeFilter] = useState('all')
+  const [weightFilter, setWeightFilter] = useState('all')
   const [priceFilter, setPriceFilter] = useState('all')
   const [shoppingMode, setShoppingMode] = useState(initialShoppingMode)
   const [sortBy, setSortBy] = useState('popular')
   const [viewMode, setViewMode] = useState('grid')
+  const [showAllMobileProducts, setShowAllMobileProducts] = useState(false)
+  const availableMobilePackSizes = shoppingMode === 'wholesale'
+    ? [...new Set(productCatalog.map((product) => product.wholesale?.pcsPerBag).filter(Boolean))]
+    : availableSizes
+  const availableMobileWeights = [...new Set(productCatalog.map((product) => (
+    shoppingMode === 'wholesale'
+      ? `${formatBagWeight((product.wholesale?.weightKgPerBag || 0) * 5)} KG`
+      : product.weight
+  )))]
+
+  useEffect(() => {
+    setShowAllMobileProducts(false)
+  }, [productFilter, sizeFilter, weightFilter, priceFilter, sortBy, shoppingMode])
 
   const visibleProducts = productCatalog
     .filter((product) => productFilter === 'all' || product.id === productFilter)
-    .filter((product) => sizeFilter === 'all' || product.weight === sizeFilter)
+    .filter((product) => {
+      if (sizeFilter === 'all') return true
+      if (sizeFilter.startsWith('pcs-')) return product.wholesale?.pcsPerBag === Number(sizeFilter.replace('pcs-', ''))
+      return product.weight === sizeFilter
+    })
+    .filter((product) => {
+      const displayedWeight = shoppingMode === 'wholesale'
+        ? `${formatBagWeight((product.wholesale?.weightKgPerBag || 0) * 5)} KG`
+        : product.weight
+      return weightFilter === 'all' || displayedWeight === weightFilter
+    })
     .filter((product) => {
       if (priceFilter === 'under-30') return product.price < 30
       if (priceFilter === '30-50') return product.price >= 30 && product.price <= 50
       if (priceFilter === 'over-50') return product.price > 50
+      const wholesaleTotal = (product.wholesale?.ratePerBag || product.price) * 5
+      if (priceFilter === 'wholesale-under-4000') return wholesaleTotal < 4000
+      if (priceFilter === 'wholesale-4000-5000') return wholesaleTotal >= 4000 && wholesaleTotal <= 5000
+      if (priceFilter === 'wholesale-over-5000') return wholesaleTotal > 5000
       return true
     })
     .sort((a, b) => {
@@ -2763,6 +2805,47 @@ function ProductsPage({ initialShoppingMode = 'wholesale', onAddToCart, onBuyNow
   return (
     <main className="products-page-main" id="products">
       <div className="products-page-content">
+        <section className="products-mobile-categories" aria-label="Product categories">
+          <div className="products-mobile-categories__track">
+            {productCatalog.map((product) => (
+              <button
+                key={`mobile-category-${product.id}`}
+                type="button"
+                className={productFilter === product.id ? 'is-active' : ''}
+                aria-pressed={productFilter === product.id}
+                onClick={() => setProductFilter(product.id)}
+              >
+                <span><img src={product.image} alt="" aria-hidden="true" /></span>
+                <strong>{product.name.replace('Ayush ', '')}</strong>
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section className="products-mobile-toolbar" aria-label="Mobile product filters">
+          <div className="products-mobile-toolbar__heading">
+            <p>Showing products in <strong>{productFilter === 'all' ? 'All Categories' : productCatalog.find((product) => product.id === productFilter)?.name}</strong></p>
+            <label>
+              <span>Sort by</span>
+              <Icon name="trending" className="products-mobile-toolbar__sort-icon" />
+              <select value={sortBy} onChange={(event) => setSortBy(event.target.value)}>
+                <option value="popular">Popularity</option>
+                <option value="name">Name</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+              </select>
+            </label>
+          </div>
+
+          <div className="products-mobile-toolbar__filters">
+            <span className="products-mobile-toolbar__filter-label"><Icon name="filter" /> Filter</span>
+            <label><span className="sr-only">Price</span><span className="products-mobile-toolbar__rupee" aria-hidden="true">₹</span><select value={priceFilter} onChange={(event) => setPriceFilter(event.target.value)}><option value="all">Price</option>{shoppingMode === 'wholesale' ? <><option value="wholesale-under-4000">Under ₹4,000</option><option value="wholesale-4000-5000">₹4,000–₹5,000</option><option value="wholesale-over-5000">Above ₹5,000</option></> : <><option value="under-30">Under ₹30</option><option value="30-50">₹30–₹50</option><option value="over-50">Above ₹50</option></>}</select></label>
+            <label><span className="sr-only">Pack size</span><Icon name="package" /><select value={sizeFilter} onChange={(event) => setSizeFilter(event.target.value)}><option value="all">Pack Size</option>{availableMobilePackSizes.map((size) => <option key={`pack-${size}`} value={shoppingMode === 'wholesale' ? `pcs-${size}` : size}>{shoppingMode === 'wholesale' ? `${size} PCS / Bag` : size}</option>)}</select></label>
+            <label><span className="sr-only">Weight</span><Icon name="weight" /><select value={weightFilter} onChange={(event) => setWeightFilter(event.target.value)}><option value="all">Weight</option>{availableMobileWeights.map((weight) => <option key={`weight-${weight}`} value={weight}>{weight}</option>)}</select></label>
+            <button type="button" onClick={() => { setProductFilter('all'); setSizeFilter('all'); setWeightFilter('all'); setPriceFilter('all'); setSortBy('popular') }}>Reset <Icon name="reset" /></button>
+          </div>
+        </section>
+
         <section className="products-filter-bar" aria-label="Product filters">
           <div className="products-filter-bar__label">
             <Icon name="filter" />
@@ -2827,7 +2910,7 @@ function ProductsPage({ initialShoppingMode = 'wholesale', onAddToCart, onBuyNow
 
         <p className="products-result-count">Showing {visibleProducts.length} products</p>
 
-        <section className={`products-catalog-grid products-catalog-grid--${viewMode}`} aria-label="Product catalog">
+        <section className={`products-catalog-grid products-catalog-grid--${viewMode}${showAllMobileProducts ? ' is-mobile-expanded' : ''}`} aria-label="Product catalog">
           {visibleProducts.map((product) => (
             <ProductCard
               key={product.id}
@@ -2842,6 +2925,11 @@ function ProductsPage({ initialShoppingMode = 'wholesale', onAddToCart, onBuyNow
             />
           ))}
         </section>
+        {!showAllMobileProducts && visibleProducts.length > 6 ? (
+          <button type="button" className="products-mobile-view-more" onClick={() => setShowAllMobileProducts(true)}>
+            View More <Icon name="chevron-right" />
+          </button>
+        ) : null}
       </div>
     </main>
   )
@@ -3660,7 +3748,7 @@ function App() {
   }
 
   return (
-    <div className="site-shell">
+    <div className={['site-shell', isProductsPage ? 'site-shell--products' : ''].filter(Boolean).join(' ')}>
       <TopBar />
       <Navbar activePageHref={pageHash} cartItemCount={cartItemCount} wishlistCount={wishlistIds.length} isAuthenticated={Boolean(account)} />
 

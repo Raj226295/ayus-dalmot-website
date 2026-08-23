@@ -1464,8 +1464,19 @@ function HeroBanner() {
           <img
             src="/ayush/hero-packshot.png"
             alt="Kursela Dalmot premium hero banner with product pack and namkeen bowl"
-            className="full-bleed-image"
+            className="full-bleed-image hero-frame__desktop-banner"
           />
+          <video
+            className="hero-frame__mobile-video"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            aria-label="Ayush Kursela home banner"
+          >
+            <source src="/ayush/home-mobile-banner.mp4" type="video/mp4" />
+          </video>
         </div>
       </div>
     </Reveal>
@@ -2590,7 +2601,7 @@ function ProductCard({ cardContext = 'catalog', onAddToCart, onBuyNow, onSharePr
               <Icon name="chevron-right" />
             </span>
           </label>
-          {cardContext !== 'home' || sectionId === 'bestsellers' ? <p className="product-card__bag-detail"><Icon name="bag" /> 1 Bag <span>•</span> {wholesale.pcsPerBag} PCS <span>•</span> {formatBagWeight(wholesale.weightKgPerBag)} KG <span>•</span> ₹{wholesale.ratePerBag} / Bag</p> : null}
+          <p className={['product-card__bag-detail', cardContext === 'home' && sectionId !== 'bestsellers' ? 'product-card__bag-detail--home-mobile' : ''].filter(Boolean).join(' ')}><Icon name="bag" /> 1 Bag <span>•</span> {wholesale.pcsPerBag} PCS <span>•</span> {formatBagWeight(wholesale.weightKgPerBag)} KG <span>•</span> ₹{wholesale.ratePerBag} / Bag</p>
         </> : <label className="product-card__variant-label">
           <span className="sr-only">Select pieces for {product.name}</span>
           <input
@@ -2911,7 +2922,7 @@ function ProductCarousel({ onAddToCart, onBuyNow, onShareProduct, onToggleWishli
                   onShareProduct={onShareProduct}
                   onToggleWishlist={onToggleWishlist}
                   wishlistIds={wishlistIds}
-                  shoppingMode={visibleCards === 1 ? 'retail' : 'wholesale'}
+                  shoppingMode="wholesale"
                 />
               ))}
             </div>
@@ -2941,6 +2952,17 @@ function ProductCarousel({ onAddToCart, onBuyNow, onShareProduct, onToggleWishli
 }
 
 function BrandStorySection({ onAddToCart, onBuyNow, onShareProduct, onToggleWishlist, wishlistIds }) {
+  const mobileRibbonRef = useRef(null)
+
+  const scrollMobileRibbon = (direction) => {
+    const ribbon = mobileRibbonRef.current
+    if (!ribbon) return
+
+    const firstItem = ribbon.querySelector('.mobile-product-ribbon__item')
+    const itemWidth = firstItem?.getBoundingClientRect().width || ribbon.clientWidth / 4
+    ribbon.scrollBy({ left: direction * (itemWidth + 8), behavior: 'smooth' })
+  }
+
   return (
     <Reveal as="section" className="brand-story-section" id="products">
       <div className="shell-content shell-content--wide">
@@ -2951,6 +2973,37 @@ function BrandStorySection({ onAddToCart, onBuyNow, onShareProduct, onToggleWish
             className="full-bleed-image"
             loading="lazy"
           />
+
+          <div className="mobile-product-ribbon-shell">
+            <button
+              type="button"
+              className="mobile-product-ribbon__arrow mobile-product-ribbon__arrow--prev"
+              aria-label="Show previous product categories"
+              onClick={() => scrollMobileRibbon(-1)}
+            >
+              <Icon name="chevron-left" />
+            </button>
+
+            <div ref={mobileRibbonRef} className="mobile-product-ribbon" aria-label="Popular Ayush products">
+              {productCatalog.map((product) => (
+                <span className="mobile-product-ribbon__item" key={`mobile-ribbon-${product.id}`}>
+                  <span className="mobile-product-ribbon__circle">
+                    <img src={product.image} alt={product.name} loading="lazy" />
+                  </span>
+                  <span className="mobile-product-ribbon__name">{product.name}</span>
+                </span>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              className="mobile-product-ribbon__arrow mobile-product-ribbon__arrow--next"
+              aria-label="Show next product categories"
+              onClick={() => scrollMobileRibbon(1)}
+            >
+              <Icon name="chevron-right" />
+            </button>
+          </div>
 
           <div className="brand-story-stage__carousel">
             <ProductCarousel
@@ -3020,10 +3073,17 @@ function HeritageSection() {
 }
 
 function ModeSelection() {
+  const [mobileMode, setMobileMode] = useState('wholesale')
+
+  const selectMobileMode = (mode) => {
+    setMobileMode(mode)
+    window.location.hash = `#products?mode=${mode}`
+  }
+
   return (
     <Reveal as="section" className="mode-section" id="shopping-modes">
       <div className="shell-content">
-        <div className="retail-wholesale-wrapper">
+        <div className="retail-wholesale-wrapper retail-wholesale-wrapper--desktop">
           <a
             className="mode-card"
             href="#products?mode=retail"
@@ -3048,6 +3108,23 @@ function ModeSelection() {
             />
           </a>
         </div>
+
+        <fieldset className="mobile-mode-selector">
+          <legend className="sr-only">Choose shopping mode</legend>
+          {['retail', 'wholesale'].map((mode) => (
+            <label className="mobile-mode-selector__option" key={mode}>
+              <input
+                type="radio"
+                name="mobile-shopping-mode"
+                value={mode}
+                checked={mobileMode === mode}
+                onChange={() => selectMobileMode(mode)}
+              />
+              <span className="mobile-mode-selector__control" aria-hidden="true" />
+              <span>{mode === 'retail' ? 'Retail' : 'Wholesale'}</span>
+            </label>
+          ))}
+        </fieldset>
       </div>
     </Reveal>
   )
@@ -3112,16 +3189,25 @@ function FactoryBanner() {
   )
 }
 
-function FeaturesStrip() {
+function FeaturesStrip({ className = '' }) {
+  const mobileFeatures = [
+    { title: '100% Natural', subtitle: 'No Preservatives', icon: 'leaf' },
+    { title: 'Premium Quality', subtitle: 'Best Ingredients', icon: 'badge' },
+    { title: 'Fast Delivery', subtitle: 'Pan India', icon: 'truck' },
+    { title: 'Secure Payment', subtitle: '100% Safe', icon: 'shield' },
+  ]
+
   return (
-    <Reveal as="section" className="feature-strip">
+    <Reveal as="section" className={['feature-strip', className].filter(Boolean).join(' ')}>
       <div className="shell-content">
-        <div className="feature-strip__banner">
-          <img
-            src="/ayush/quality-strip-banner-tight.png"
-            alt="Quality banner showing 100 percent pure ingredients, hygienically processed, no added preservatives, and pan India delivery"
-            loading="lazy"
-          />
+        <div className="mobile-home-feature-grid" aria-label="Ayush quality and service benefits">
+          {mobileFeatures.map((feature) => (
+            <article className="mobile-home-feature" key={feature.title}>
+              <span className="mobile-home-feature__icon"><Icon name={feature.icon} /></span>
+              <strong>{feature.title}</strong>
+              <small>{feature.subtitle}</small>
+            </article>
+          ))}
         </div>
       </div>
     </Reveal>
@@ -3415,6 +3501,44 @@ function SiteToast({ message }) {
   )
 }
 
+function MobileBottomNav({ pageHash, currentHash, cartCount = 0, wishlistCount = 0, isAuthenticated = false }) {
+  const items = [
+    { label: 'Home', href: '#home', icon: 'home', active: pageHash === '#home' },
+    { label: 'Categories', href: '#products', icon: 'grid', active: pageHash === '#products' },
+    { label: 'Wishlist', href: '#wishlist', icon: 'heart', active: pageHash === '#wishlist', count: wishlistCount },
+    { label: 'Cart', href: '#cart', icon: 'cart', active: pageHash === '#cart' || pageHash === '#buy-now', count: cartCount },
+    {
+      label: 'Account',
+      href: isAuthenticated ? '#account' : '#login',
+      icon: 'user',
+      active: currentHash === '#account' || currentHash === '#login' || currentHash === '#register',
+    },
+  ]
+
+  return (
+    <nav className="mobile-bottom-nav" aria-label="Mobile quick navigation">
+      {items.map((item) => (
+        <a
+          key={item.label}
+          href={item.href}
+          className={['mobile-bottom-nav__item', item.active ? 'is-active' : ''].filter(Boolean).join(' ')}
+          aria-current={item.active ? 'page' : undefined}
+        >
+          <span className="mobile-bottom-nav__icon-wrap">
+            <Icon name={item.icon} className="mobile-bottom-nav__icon" />
+            {item.count > 0 ? (
+              <span className="mobile-bottom-nav__badge" aria-label={`${item.count} items`}>
+                {item.count > 99 ? '99+' : item.count}
+              </span>
+            ) : null}
+          </span>
+          <span className="mobile-bottom-nav__label">{item.label}</span>
+        </a>
+      ))}
+    </nav>
+  )
+}
+
 function App() {
   const [cartItems, setCartItems] = useState({})
   const [wishlistIds, setWishlistIds] = useState(readStoredWishlist)
@@ -3580,6 +3704,7 @@ function App() {
             onToggleWishlist={handleToggleWishlist}
             wishlistIds={wishlistIds}
           />
+          <FeaturesStrip className="mobile-home-features" />
           <HeritageSection />
           <ModeSelection />
           <BestsellersSection
@@ -3594,6 +3719,13 @@ function App() {
       )}
 
       {!isAuthPage && !isAccountPage && !isWishlistPage ? <Footer /> : null}
+      <MobileBottomNav
+        pageHash={pageHash}
+        currentHash={currentHash}
+        cartCount={cartItemCount}
+        wishlistCount={wishlistIds.length}
+        isAuthenticated={Boolean(account)}
+      />
       <SiteToast message={toastMessage} />
     </div>
   )

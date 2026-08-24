@@ -5509,6 +5509,126 @@ a.contact-card__title:focus-visible {
   }
 }
 
+/* Compact login proportions; registration and all other pages stay unchanged. */
+.login-page:not(.register-page) {
+  padding-top: clamp(68px, 9vh, 92px);
+  padding-bottom: 46px;
+}
+
+.login-page:not(.register-page) .login-card {
+  width: min(100%, 480px);
+}
+
+.login-page:not(.register-page) .login-card h1 {
+  font-size: clamp(42px, 4vw, 54px);
+}
+
+.login-page:not(.register-page) .login-card__ornament {
+  width: 96px;
+  height: 14px;
+  margin: 12px auto 24px;
+}
+
+.login-page:not(.register-page) .login-card__ornament span {
+  width: 10px;
+  height: 10px;
+}
+
+.login-page:not(.register-page) .login-form {
+  gap: 18px;
+}
+
+.login-page:not(.register-page) .login-field {
+  min-height: 62px;
+  border-radius: 12px;
+}
+
+.login-page:not(.register-page) .login-field input {
+  height: 60px;
+  padding-left: 20px;
+  font-size: 15px;
+}
+
+.login-page:not(.register-page) .login-field__icon {
+  width: 21px;
+  height: 21px;
+  margin-left: 19px;
+}
+
+.login-page:not(.register-page) .login-field__visibility {
+  width: 50px;
+  height: 50px;
+  flex-basis: 50px;
+}
+
+.login-page:not(.register-page) .login-field__visibility svg {
+  width: 21px;
+  height: 21px;
+}
+
+.login-page:not(.register-page) .login-form__forgot {
+  margin-top: -6px;
+  font-size: 14px;
+}
+
+.login-page:not(.register-page) .login-form__submit,
+.login-page:not(.register-page) .login-form__google {
+  min-height: 60px;
+  border-radius: 12px;
+}
+
+.login-page:not(.register-page) .login-form__submit {
+  font-size: 16px;
+}
+
+.login-page:not(.register-page) .login-form__google {
+  font-size: 14px;
+}
+
+.login-page:not(.register-page) .login-form__divider span {
+  width: 30px;
+  height: 30px;
+}
+
+.login-page:not(.register-page) .login-form__signup {
+  margin-top: 4px;
+  font-size: 14px;
+}
+
+@media (max-width: 600px) {
+  .login-page:not(.register-page) {
+    min-height: calc(100svh - 76px);
+    padding: 42px 18px 34px;
+  }
+
+  .login-page:not(.register-page) .login-card {
+    width: min(100%, 430px);
+  }
+
+  .login-page:not(.register-page) .login-card h1 {
+    font-size: 32px;
+  }
+
+  .login-page:not(.register-page) .login-card__ornament {
+    margin: 10px auto 18px;
+  }
+
+  .login-page:not(.register-page) .login-form {
+    gap: 14px;
+  }
+
+  .login-page:not(.register-page) .login-field,
+  .login-page:not(.register-page) .login-form__submit,
+  .login-page:not(.register-page) .login-form__google {
+    min-height: 52px;
+  }
+
+  .login-page:not(.register-page) .login-field input {
+    height: 50px;
+    font-size: 14px;
+  }
+}
+
 /* Header + footer edge safety
    Keep controls and footer content comfortably inside every viewport. */
 @media (min-width: 981px) {
@@ -10668,4 +10788,119 @@ a.contact-card__title:focus-visible {
   .site-shell {
     padding-bottom: calc(82px + env(safe-area-inset-bottom, 0px));
   }
+}
+
+/* Final compact login sizing — last so legacy responsive rules cannot override it. */
+.login-page:not(.register-page) { padding: clamp(68px, 9vh, 92px) 20px 46px; }
+.login-page:not(.register-page) .login-card { width: min(100%, 480px); }
+.login-page:not(.register-page) .login-card h1 { font-size: clamp(42px, 4vw, 54px); }
+.login-page:not(.register-page) .login-card__ornament { width: 96px; height: 14px; margin: 12px auto 24px; }
+.login-page:not(.register-page) .login-card__ornament span { width: 10px; height: 10px; }
+.login-page:not(.register-page) .login-form { gap: 18px; }
+.login-page:not(.register-page) .login-field { min-height: 62px; border-radius: 12px; }
+.login-page:not(.register-page) .login-field input { height: 60px; padding-left: 20px; font-size: 15px; }
+.login-page:not(.register-page) .login-field__icon { width: 21px; height: 21px; margin-left: 19px; }
+.login-page:not(.register-page) .login-field__visibility { width: 50px; height: 50px; flex-basis: 50px; }
+.login-page:not(.register-page) .login-field__visibility svg { width: 21px; height: 21px; }
+.login-page:not(.register-page) .login-form__forgot { margin-top: -6px; font-size: 14px; }
+.login-page:not(.register-page) .login-form__submit,
+.login-page:not(.register-page) .login-form__google { min-height: 60px; border-radius: 12px; }
+.login-page:not(.register-page) .login-form__submit { font-size: 16px; }
+.login-page:not(.register-page) .login-form__google,
+.login-page:not(.register-page) .login-form__signup { font-size: 14px; }
+.login-page:not(.register-page) .login-form__signup { margin-top: 4px; }
+.login-page:not(.register-page) .login-form__divider span { width: 30px; height: 30px; }
+
+@media (max-width: 600px) {
+  .login-page:not(.register-page) { min-height: calc(100svh - 76px); padding: 42px 18px 34px; }
+  .login-page:not(.register-page) .login-card { width: min(100%, 430px); }
+  .login-page:not(.register-page) .login-card h1 { font-size: 32px; }
+  .login-page:not(.register-page) .login-card__ornament { margin: 10px auto 18px; }
+  .login-page:not(.register-page) .login-form { gap: 14px; }
+  .login-page:not(.register-page) .login-field,
+  .login-page:not(.register-page) .login-form__submit,
+  .login-page:not(.register-page) .login-form__google { min-height: 52px; }
+  .login-page:not(.register-page) .login-field input { height: 50px; font-size: 14px; }
+}
+
+/* Desktop login fits completely inside the available viewport without scrolling. */
+@media (min-width: 701px) {
+  .login-page:not(.register-page) {
+    min-height: calc(100dvh - 118px);
+    padding: 22px 20px 24px;
+    align-items: center;
+  }
+
+  .login-page:not(.register-page) .login-card {
+    width: min(100%, 440px);
+  }
+
+  .login-page:not(.register-page) .login-card h1 {
+    font-size: clamp(38px, 3.4vw, 46px);
+    line-height: .95;
+  }
+
+  .login-page:not(.register-page) .login-card__ornament {
+    width: 86px;
+    height: 12px;
+    margin: 9px auto 16px;
+  }
+
+  .login-page:not(.register-page) .login-form {
+    gap: 12px;
+  }
+
+  .login-page:not(.register-page) .login-field {
+    min-height: 54px;
+    border-radius: 11px;
+  }
+
+  .login-page:not(.register-page) .login-field input {
+    height: 52px;
+    font-size: 14px;
+  }
+
+  .login-page:not(.register-page) .login-field__icon {
+    width: 19px;
+    height: 19px;
+    margin-left: 17px;
+  }
+
+  .login-page:not(.register-page) .login-field__visibility {
+    width: 44px;
+    height: 44px;
+    flex-basis: 44px;
+  }
+
+  .login-page:not(.register-page) .login-form__forgot {
+    margin-top: -3px;
+    font-size: 13px;
+  }
+
+  .login-page:not(.register-page) .login-form__submit,
+  .login-page:not(.register-page) .login-form__google {
+    min-height: 54px;
+    border-radius: 11px;
+  }
+
+  .login-page:not(.register-page) .login-form__divider span {
+    width: 27px;
+    height: 27px;
+  }
+
+  .login-page:not(.register-page) .login-form__signup {
+    margin-top: 1px;
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 701px) and (max-height: 700px) {
+  .login-page:not(.register-page) { padding-block: 12px; }
+  .login-page:not(.register-page) .login-card h1 { font-size: 36px; }
+  .login-page:not(.register-page) .login-card__ornament { margin: 7px auto 12px; }
+  .login-page:not(.register-page) .login-form { gap: 9px; }
+  .login-page:not(.register-page) .login-field,
+  .login-page:not(.register-page) .login-form__submit,
+  .login-page:not(.register-page) .login-form__google { min-height: 48px; }
+  .login-page:not(.register-page) .login-field input { height: 46px; }
 }

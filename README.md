@@ -1,16 +1,50 @@
-# React + Vite
+# Ayush Kursela
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+## Structure
 
-Currently, two official plugins are available:
+- `frontend/user` — customer website (port 5173)
+- `frontend/admin` — protected admin application (port 5174)
+- `backend` — shared backend scaffold (port 5000)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+The existing user and admin interfaces are preserved as separate Vite applications. Both frontends use the same static Ayush assets from `frontend/user/public`.
 
-## React Compiler
+## Install
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+npm install
+npm run install:all
+```
 
-## Expanding the Oxlint configuration
+Environment files are located at:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+- `frontend/user/.env`
+- `frontend/admin/.env`
+- `backend/.env`
+
+## Development
+
+Run all applications:
+
+```bash
+npm run dev
+```
+
+Or run them separately:
+
+```bash
+npm run dev:user
+npm run dev:admin
+npm run dev:backend
+```
+
+URLs:
+
+- User: `http://localhost:5173`
+- Admin: `http://localhost:5174`
+- Backend health: `http://localhost:5000/api/health`
+
+## Production builds
+
+```bash
+npm run build
+```

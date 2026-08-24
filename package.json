@@ -1,23 +1,17 @@
 {
-  "name": "ayuss",
+  "name": "ayush-kursela",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "oxlint",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8"
-  },
-  "devDependencies": {
-    "@types/react": "^19.2.17",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^6.0.4",
-    "oxlint": "^1.75.0",
-    "vite": "^8.2.0"
+    "dev": "node scripts/dev.js",
+    "dev:user": "npm run dev --prefix frontend/user",
+    "dev:admin": "npm run dev --prefix frontend/admin",
+    "dev:backend": "npm run dev --prefix backend",
+    "install:all": "npm install --prefix frontend/user && npm install --prefix frontend/admin && npm install --prefix backend",
+    "build": "npm run build:user && npm run build:admin",
+    "build:user": "npm run build --prefix frontend/user",
+    "build:admin": "npm run build --prefix frontend/admin",
+    "start:backend": "npm run start --prefix backend"
   }
 }

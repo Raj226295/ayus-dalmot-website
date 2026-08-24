@@ -20,6 +20,7 @@ const defaultNavHref = menuLinks[0].href
 const accountStorageKey = 'ayush-kursela-account'
 const addressStorageKey = 'ayush-kursela-addresses'
 const wishlistStorageKey = 'ayush-kursela-wishlist'
+const catalogApiUrl = (()=>{const url=new URL(import.meta.env.VITE_API_URL);if(['localhost','127.0.0.1'].includes(url.hostname))url.hostname=window.location.hostname;return url.toString().replace(/\/$/,'')})()
 const defaultAccountAddresses = [
   { id: 'home', label: 'Home', addressLine: '85 P, Barauni – Purnea Hwy', cityLine: 'Maranga, Purnia, Bihar 854301', phone: '+91 91234 56789', isDefault: true, icon: 'home' },
   { id: 'office', label: 'Office', addressLine: '2nd Floor, Sagar Building', cityLine: 'Naya Tola, Purnia, Bihar 854301', phone: '+91 98765 43210', isDefault: false, icon: 'building' },
@@ -2588,7 +2589,8 @@ function AccountPage({ user, onLogout, onAddToCart, onBuyNow, onUpdateAccount })
 
 function ProductCard({ cardContext = 'catalog', onAddToCart, onBuyNow, onShareProduct, onToggleWishlist, wishlistIds = [], product, sectionId = 'products', shoppingMode = 'retail' }) {
   const [quantity, setQuantity] = useState('1')
-  const [bagQuantity, setBagQuantity] = useState(5)
+  const minimumBags = product.wholesale?.minimumBags || 5
+  const [bagQuantity, setBagQuantity] = useState(minimumBags)
   const isWishlisted = wishlistIds.includes(product.id)
   const pieceCount = Math.max(1, Number.parseInt(quantity, 10) || 1)
   const wholesale = product.wholesale
@@ -2669,12 +2671,12 @@ function ProductCard({ cardContext = 'catalog', onAddToCart, onBuyNow, onSharePr
           <label className="product-card__variant-label product-card__variant-label--wholesale">
             <span className="sr-only">Select bags for {product.name}</span>
             <select className="product-card__variant product-card__wholesale-select" value={bagQuantity} onChange={(event) => setBagQuantity(Number(event.target.value))} aria-label={`Select bags for ${product.name}`}>
-              {[5, 6, 7, 8, 9, 10, 15, 20].map((bags) => (
-                <option key={bags} value={bags}>{bags === 5 ? '5 Bags (Minimum)' : `${bags} Bags`} • {wholesale.pcsPerBag * bags} PCS • {formatBagWeight(wholesale.weightKgPerBag * bags)} KG</option>
+              {[minimumBags, minimumBags + 1, minimumBags + 2, minimumBags + 3, minimumBags + 5, minimumBags + 10].map((bags) => (
+                <option key={bags} value={bags}>{bags === minimumBags ? `${minimumBags} Bags (Minimum)` : `${bags} Bags`} • {wholesale.pcsPerBag * bags} PCS • {formatBagWeight(wholesale.weightKgPerBag * bags)} KG</option>
               ))}
             </select>
             <span className="product-card__wholesale-value" aria-hidden="true">
-              <span>{bagQuantity === 5 ? '5 Bags (Minimum)' : `${bagQuantity} Bags`}</span>
+              <span>{bagQuantity === minimumBags ? `${minimumBags} Bags (Minimum)` : `${bagQuantity} Bags`}</span>
               <span className="product-card__wholesale-separator">•</span>
               <span>{totalPcs} PCS</span>
               <span className="product-card__wholesale-separator">•</span>
@@ -2715,7 +2717,7 @@ function ProductCard({ cardContext = 'catalog', onAddToCart, onBuyNow, onSharePr
           <p className="product-card__price">₹{salePrice}</p>
         </div>
         <p className="product-card__unit-price">{isWholesale ? `₹${wholesale.ratePerBag} × ${bagQuantity} Bags` : `₹5 per piece · ${pieceCount} ${pieceCount === 1 ? 'piece' : 'pieces'}`}</p>
-        {isWholesale ? <p className="product-card__minimum-order"><Icon name="package" /> Minimum order: 5 Bags</p> : null}
+        {isWholesale ? <p className="product-card__minimum-order"><Icon name="package" /> Minimum order: {minimumBags} Bags</p> : null}
       </div>
 
       <button
@@ -3751,6 +3753,28 @@ function App() {
   const [checkoutProduct, setCheckoutProduct] = useState(null)
   const [currentHash, setCurrentHash] = useState(getCurrentPageHash)
   const [account, setAccount] = useState(readStoredAccount)
+  const [, setCatalogVersion] = useState(0)
+
+  useEffect(() => {
+    let active = true
+    fetch(`${catalogApiUrl}/products`).then(response => response.ok ? response.json() : Promise.reject()).then(({ products = [] }) => {
+      if (!active || !products.length) return
+      const existingIds = new Set(productCatalog.map(product => product.id))
+      const managed = products.filter(product => !existingIds.has(product.id)).map(product => ({
+        id: product.id,
+        name: product.name,
+        weight: product.weight || `${product.wholesale?.weightKgPerBag || 1}kg`,
+        price: Number(String(product.price).replace(/\D/g, '')) || product.wholesale?.ratePerBag || 0,
+        wholesale: product.wholesale || { minimumBags: 5, pcsPerBag: 1, weightKgPerBag: 1, ratePerBag: 0 },
+        image: product.image || '/ayush/product-katarr-matar.png',
+        alt: `${product.name} product pack`,
+        offerLabel: `${product.discount || 5}% OFF`,
+      }))
+      productCatalog.push(...managed)
+      setCatalogVersion(version => version + 1)
+    }).catch(() => undefined)
+    return () => { active = false }
+  }, [])
 
   useEffect(() => {
     if (!toastMessage) {

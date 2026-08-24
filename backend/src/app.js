@@ -1,7 +1,14 @@
 import { createServer } from 'node:http'
 import { randomUUID } from 'node:crypto'
+import { readFileSync, writeFileSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const adminTickets = new Map()
+const productsFile = join(dirname(fileURLToPath(import.meta.url)), '../data/products.json')
+let storedProducts = []
+try { storedProducts = JSON.parse(readFileSync(productsFile, 'utf8')) } catch { storedProducts = [] }
+const managedProducts = new Map(storedProducts.map(product => [product.id, product]))
 const adminEmail = process.env.ADMIN_EMAIL || 'admin@ayushkursela.com'
 const adminPassword = process.env.ADMIN_PASSWORD || 'Admin@123'
 
@@ -29,7 +36,7 @@ export function createApp() {
     response.setHeader('Access-Control-Allow-Origin', '*')
     response.setHeader('Content-Type', 'application/json')
     response.setHeader('Access-Control-Allow-Headers', 'Content-Type')
-    response.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+    response.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
 
     if (request.method === 'OPTIONS') {
       response.writeHead(204)
@@ -39,6 +46,26 @@ export function createApp() {
 
     if (request.url === '/api/health') {
       sendJson(response, 200, { status: 'ok', service: 'ayush-kursela-backend' })
+      return
+    }
+
+    if (request.method === 'GET' && request.url === '/api/products') {
+      sendJson(response, 200, { products: [...managedProducts.values()].filter(product => product.status !== 'Draft') })
+      return
+    }
+
+    if (request.method === 'POST' && request.url === '/api/products') {
+      readJson(request).then(product => {
+        if (!product.name || !product.sku) {
+          sendJson(response, 400, { message: 'Product name aur SKU required hai.' })
+          return
+        }
+        const id = product.id || String(product.name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || randomUUID()
+        const saved = { ...product, id, updatedAt: new Date().toISOString() }
+        managedProducts.set(id, saved)
+        writeFileSync(productsFile, JSON.stringify([...managedProducts.values()], null, 2))
+        sendJson(response, 201, { product: saved })
+      }).catch(() => sendJson(response, 400, { message: 'Invalid product data.' }))
       return
     }
 

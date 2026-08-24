@@ -1,4 +1,5 @@
 ﻿import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import './App.css'
 
 const menuLinks = [
@@ -3638,6 +3639,35 @@ function SiteToast({ message }) {
 }
 
 function MobileBottomNav({ pageHash, currentHash, cartCount = 0, wishlistCount = 0, isAuthenticated = false }) {
+  const [viewportBottomOffset, setViewportBottomOffset] = useState(0)
+
+  useEffect(() => {
+    const viewport = window.visualViewport
+    const updateViewportOffset = () => {
+      if (!viewport) {
+        setViewportBottomOffset(0)
+        return
+      }
+
+      const coveredBottom = Math.max(
+        0,
+        Math.round(window.innerHeight - viewport.height - viewport.offsetTop),
+      )
+      setViewportBottomOffset(coveredBottom)
+    }
+
+    updateViewportOffset()
+    viewport?.addEventListener('resize', updateViewportOffset)
+    viewport?.addEventListener('scroll', updateViewportOffset)
+    window.addEventListener('orientationchange', updateViewportOffset)
+
+    return () => {
+      viewport?.removeEventListener('resize', updateViewportOffset)
+      viewport?.removeEventListener('scroll', updateViewportOffset)
+      window.removeEventListener('orientationchange', updateViewportOffset)
+    }
+  }, [])
+
   const items = [
     { label: 'Home', href: '#home', icon: 'home', active: pageHash === '#home' },
     { label: 'Categories', href: '#products', icon: 'grid', active: pageHash === '#products' },
@@ -3651,8 +3681,12 @@ function MobileBottomNav({ pageHash, currentHash, cartCount = 0, wishlistCount =
     },
   ]
 
-  return (
-    <nav className="mobile-bottom-nav" aria-label="Mobile quick navigation">
+  const navigation = (
+    <nav
+      className="mobile-bottom-nav"
+      aria-label="Mobile quick navigation"
+      style={{ '--mobile-nav-viewport-offset': `${viewportBottomOffset}px` }}
+    >
       {items.map((item) => (
         <a
           key={item.label}
@@ -3673,6 +3707,8 @@ function MobileBottomNav({ pageHash, currentHash, cartCount = 0, wishlistCount =
       ))}
     </nav>
   )
+
+  return typeof document === 'undefined' ? navigation : createPortal(navigation, document.body)
 }
 
 function App() {
@@ -3796,7 +3832,7 @@ function App() {
   }
 
   return (
-    <div className={['site-shell', isProductsPage ? 'site-shell--products' : ''].filter(Boolean).join(' ')}>
+    <div className={['site-shell', isProductsPage ? 'site-shell--products' : '', isAuthPage ? 'site-shell--auth' : ''].filter(Boolean).join(' ')}>
       <TopBar />
       <Navbar activePageHref={pageHash} cartItemCount={cartItemCount} wishlistCount={wishlistIds.length} isAuthenticated={Boolean(account)} />
 

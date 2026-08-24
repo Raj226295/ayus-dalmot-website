@@ -5509,6 +5509,201 @@ a.contact-card__title:focus-visible {
   }
 }
 
+/* Header + footer edge safety
+   Keep controls and footer content comfortably inside every viewport. */
+@media (min-width: 981px) {
+  .site-header .shell-content,
+  .page-footer .footer-shell {
+    width: min(calc(100% - 64px), 1760px);
+    margin-inline: auto;
+  }
+
+  .site-header__desktop {
+    min-width: 0;
+    grid-template-columns: minmax(112px, auto) minmax(300px, 1fr) minmax(0, auto);
+  }
+
+  .site-header__actions--desktop {
+    min-width: 0;
+    padding-right: 2px;
+  }
+
+  .footer-main-grid,
+  .footer-links-grid,
+  .footer-meta-row,
+  .footer-meta-row__items {
+    min-width: 0;
+  }
+
+  .footer-contact-item__content,
+  .footer-contact-item__title,
+  .footer-contact-item__body {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (min-width: 701px) and (max-width: 1180px) {
+  .site-header .shell-content,
+  .page-footer .footer-shell {
+    width: calc(100% - 48px);
+    margin-inline: auto;
+  }
+}
+
+@media (max-width: 700px) {
+  .site-header .shell-content,
+  .page-footer .footer-shell {
+    width: calc(100% - 32px);
+    max-width: none;
+    margin-inline: auto;
+  }
+
+  .site-header__inner {
+    width: 100%;
+    padding-inline: 0;
+  }
+
+  .site-header__mobile {
+    min-width: 0;
+    grid-template-columns: 48px minmax(92px, 1fr) minmax(96px, 1fr);
+    gap: 8px;
+  }
+
+  .site-header__mobile-start,
+  .site-header__actions--mobile {
+    min-width: 0;
+  }
+
+  .site-header__actions--mobile {
+    justify-content: flex-end;
+    padding-right: 1px;
+  }
+
+  .menu-toggle,
+  .site-header__actions--mobile .icon-button {
+    flex: 0 0 auto;
+  }
+
+  .page-footer {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .page-footer .footer-usp-bar,
+  .page-footer .footer-main-grid,
+  .page-footer .footer-links-grid,
+  .page-footer .footer-meta-row,
+  .page-footer .footer-payments {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .page-footer .footer-brand-panel,
+  .page-footer .footer-section-panel,
+  .page-footer .footer-section-panel__toggle,
+  .page-footer .footer-section-panel__body-inner {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .page-footer .footer-brand-panel__copy {
+    max-width: min(34ch, 100%);
+  }
+
+  .page-footer .footer-meta-row__items {
+    padding-inline: 2px;
+  }
+
+  .page-footer .footer-meta-highlight {
+    overflow: hidden;
+  }
+
+  .page-footer .footer-meta-highlight__copy {
+    overflow: hidden;
+  }
+
+  .page-footer .footer-meta-highlight__title,
+  .page-footer .footer-meta-highlight__emphasis {
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+
+  .mobile-bottom-nav {
+    right: 8px;
+    bottom: 8px;
+    left: 8px;
+    width: auto;
+    padding-inline: 7px;
+    padding-bottom: calc(7px + env(safe-area-inset-bottom, 0px));
+    border: 1px solid rgba(50, 50, 50, 0.08);
+    border-radius: 18px;
+  }
+
+  /* Auth pages must not inherit the storefront's black footer gradient. */
+  .site-shell--auth {
+    min-height: 100svh;
+    background: #f6f1e7;
+  }
+
+  .site-shell--auth .login-page {
+    min-height: calc(100svh - 76px);
+    background-color: #f6f1e7;
+  }
+
+  /* Lock the mobile logo to the physical viewport centre. */
+  .site-header__mobile {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .brand-mark--mobile {
+    position: absolute;
+    z-index: 2;
+    top: 50%;
+    left: 50%;
+    margin: 0;
+    transform: translate(-50%, -50%);
+  }
+
+  .brand-mark--mobile:hover,
+  .brand-mark--mobile:focus-visible {
+    transform: translate(-50%, -50%);
+  }
+
+  .site-header__mobile-start {
+    position: relative;
+    z-index: 3;
+    flex: 0 0 auto;
+  }
+
+  .site-header__actions--mobile {
+    position: relative;
+    z-index: 3;
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 380px) {
+  .site-header .shell-content,
+  .page-footer .footer-shell {
+    width: calc(100% - 24px);
+  }
+
+  .site-header__mobile {
+    grid-template-columns: 44px minmax(82px, 1fr) minmax(90px, 1fr);
+    gap: 5px;
+  }
+
+  .site-header__actions--mobile {
+    gap: 4px;
+  }
+}
+
 @media (max-width: 420px) {
   .contact-page__location-section > .shell-content {
     width: calc(100% - 16px);
@@ -10341,5 +10536,136 @@ a.contact-card__title:focus-visible {
     margin-top: 3px;
     font-size: clamp(6px, 1.65vw, 7px);
     letter-spacing: .08em;
+  }
+}
+
+/* Final responsive gutter guard — intentionally last in the cascade. */
+@media (min-width: 981px) {
+  .site-header .shell-content,
+  .page-footer .footer-shell {
+    width: min(calc(100% - 64px), 1760px);
+    margin-inline: auto;
+  }
+}
+
+@media (min-width: 701px) and (max-width: 980px) {
+  .site-header .shell-content,
+  .page-footer .footer-shell {
+    width: calc(100% - 48px);
+    margin-inline: auto;
+  }
+}
+
+@media (max-width: 700px) {
+  .site-header .shell-content,
+  .page-footer .footer-shell {
+    width: calc(100% - 32px);
+    max-width: none;
+    margin-inline: auto;
+  }
+
+  .site-header__mobile {
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: 48px minmax(88px, 1fr) minmax(96px, 1fr);
+    gap: 8px;
+  }
+
+  .site-header__actions--mobile {
+    min-width: 0;
+    justify-content: flex-end;
+    padding-right: 1px;
+  }
+
+  .page-footer,
+  .page-footer .footer-main-grid,
+  .page-footer .footer-links-grid,
+  .page-footer .footer-meta-row,
+  .page-footer .footer-payments {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .mobile-bottom-nav {
+    right: 8px;
+    bottom: 8px;
+    left: 8px;
+    width: auto;
+    border: 1px solid rgba(50, 50, 50, .08);
+    border-radius: 18px;
+  }
+}
+
+/* Mobile auth background and mathematically centred brand mark. */
+@media (max-width: 700px) {
+  .site-shell--auth {
+    min-height: 100svh;
+    background: #f6f1e7;
+  }
+
+  .site-shell--auth .login-page,
+  .site-shell--auth .register-page {
+    min-height: calc(100svh - 76px);
+    background-color: #f6f1e7;
+  }
+
+  .site-header__mobile {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .brand-mark--mobile {
+    position: absolute;
+    z-index: 2;
+    top: 50%;
+    left: 50%;
+    margin: 0;
+    transform: translate(-50%, -50%);
+  }
+
+  .brand-mark--mobile:hover,
+  .brand-mark--mobile:focus-visible {
+    transform: translate(-50%, -50%);
+  }
+
+  .site-header__mobile-start,
+  .site-header__actions--mobile {
+    position: relative;
+    z-index: 3;
+    flex: 0 0 auto;
+  }
+
+  .site-header__actions--mobile {
+    margin-left: auto;
+  }
+}
+
+/* Mobile bottom navigation: flush to the dynamic viewport edge. */
+@media (max-width: 700px) {
+  .mobile-bottom-nav {
+    position: fixed !important;
+    z-index: 2147483000;
+    right: 0;
+    bottom: var(--mobile-nav-viewport-offset, 0px);
+    left: 0;
+    display: grid !important;
+    width: 100vw;
+    max-width: none;
+    margin: 0;
+    padding-bottom: calc(7px + env(safe-area-inset-bottom, 0px));
+    visibility: visible !important;
+    opacity: 1 !important;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  .site-shell {
+    padding-bottom: calc(82px + env(safe-area-inset-bottom, 0px));
   }
 }

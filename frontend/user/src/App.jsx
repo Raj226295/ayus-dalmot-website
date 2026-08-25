@@ -1,6 +1,8 @@
 ﻿import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import './App.css'
+import './desktop-nav-polish.css'
+import './checkout-polish.css'
 
 const menuLinks = [
   { label: 'Home', href: '#home' },
@@ -2601,6 +2603,7 @@ function ProductCard({ cardContext = 'catalog', onAddToCart, onBuyNow, onSharePr
   const offerLabel = product.offerLabel ?? '5% OFF'
   const selectedProduct = {
     ...product,
+    packWeight: product.weight,
     price: salePrice,
     weight: isWholesale ? `${bagQuantity} Bags` : `${pieceCount} ${pieceCount === 1 ? 'piece' : 'pieces'}`,
     quantity: isWholesale ? bagQuantity : pieceCount,
@@ -2803,17 +2806,32 @@ function BuyNowPage({ product, user, onComplete }) {
   const placeOrder = (event) => {
     event.preventDefault()
     if (Object.values(address).some((value) => !String(value).trim())) { setMessage('Please complete the delivery address.'); return }
+    if (!/^\d{10}$/.test(address.phone.replace(/\D/g, ''))) { setMessage('Please enter a valid 10-digit phone number.'); return }
+    if (!/^\d{6}$/.test(address.pincode)) { setMessage('Please enter a valid 6-digit pincode.'); return }
+    if (saveAddress) {
+      const nextAddress = {
+        id: `checkout-${Date.now()}`,
+        label: 'Saved Address',
+        addressLine: `${address.building}, ${address.street}`,
+        cityLine: `${address.city}, ${address.state} ${address.pincode}`,
+        phone: address.phone,
+        isDefault: savedAddresses.length === 0,
+        icon: 'home',
+      }
+      window.localStorage.setItem(addressStorageKey, JSON.stringify([...savedAddresses, nextAddress]))
+    }
     setMessage('Order placed successfully! Your confirmation number is AK-' + String(Date.now()).slice(-6) + '.')
     onComplete?.()
   }
   return <main className="buy-now-page" id="buy-now"><form className="shell-content buy-now-page__inner" onSubmit={placeOrder}>
     <nav className="buy-now-breadcrumb"><a href="#home">Home</a><span>›</span><span>Buy Now</span></nav>
     <header className="buy-now-heading"><div><h1>Buy Now</h1><p>You&apos;re almost there! Just a few details to place your order.</p></div><span><Icon name="shield" /> 100% Secure Checkout</span></header>
-    <section className="buy-now-product"><img src={product.image} alt={product.alt} /><div><h2>{product.name}</h2><p>{product.weight}</p>{isWholesale ? <><span>{quantity} Bags (Minimum)</span><span>{wholesale.pcsPerBag * quantity} PCS</span><span>{formatBagWeight(wholesale.weightKgPerBag * quantity)} KG</span><aside><Icon name="bag" /> 1 Bag&nbsp; • &nbsp;{wholesale.pcsPerBag} PCS&nbsp; • &nbsp;{formatBagWeight(wholesale.weightKgPerBag)} KG<br /><strong>₹{wholesale.ratePerBag} / Bag</strong></aside></> : null}</div><div className="buy-now-product__price"><strong>₹{subtotal.toLocaleString('en-IN')}</strong><small>₹{unitPrice} × {quantity} {isWholesale ? 'Bags' : 'Pieces'}</small></div><div className="buy-now-quantity"><button type="button" disabled={quantity <= minimum} onClick={() => setQuantity((value) => Math.max(minimum, value - 1))}>−</button><strong>{quantity}</strong><button type="button" onClick={() => setQuantity((value) => value + 1)}>＋</button></div></section>
+    <section className="buy-now-product"><img src={product.image} alt={product.alt} /><div className="buy-now-product__details"><h2>{product.name}</h2><p>{product.packWeight || product.weight}</p><div className="buy-now-product__badges"><span>Premium Quality</span><span>100% Pure</span><span>No Preservatives</span></div>{isWholesale ? <aside><Icon name="bag" /> 1 Bag&nbsp; • &nbsp;{wholesale.pcsPerBag} PCS&nbsp; • &nbsp;{formatBagWeight(wholesale.weightKgPerBag)} KG<br /><strong>₹{wholesale.ratePerBag} / Bag</strong></aside> : null}<p className="buy-now-product__description">Carefully selected for authentic taste and consistent quality. Hygienically packed to retain freshness, nutrition and natural flavour.</p><div className="buy-now-product__features"><span><Icon name="leaf" />Naturally Nutritious</span><span><Icon name="shield" />Quality Assured</span><span><Icon name="flask" />No Preservatives</span></div></div><div className="buy-now-product__price"><strong>₹{subtotal.toLocaleString('en-IN')}</strong><small>Total ({quantity} {isWholesale ? 'Bags' : 'Pieces'})</small></div><div className="buy-now-quantity"><button type="button" aria-label="Decrease quantity" disabled={quantity <= minimum} onClick={() => setQuantity((value) => Math.max(minimum, value - 1))}>−</button><strong>{quantity}</strong><button type="button" aria-label="Increase quantity" onClick={() => setQuantity((value) => value + 1)}>＋</button></div></section>
     <section className="checkout-section"><div className="checkout-section__heading"><h2><Icon name="pin" /> Delivery Address</h2><select aria-label="Use a saved address" defaultValue="" onChange={(e) => { const saved = savedAddresses.find((item) => item.id === e.target.value); if (saved) setAddress({ name: user?.name || '', phone: saved.phone, building: saved.addressLine, street: '', city: saved.cityLine, state: 'Bihar', pincode: saved.cityLine.match(/\d{6}/)?.[0] || '' }) }}><option value="">Saved Addresses</option>{savedAddresses.map((item) => <option key={item.id} value={item.id}>{item.label}{item.isDefault ? ' (Default)' : ''}</option>)}</select></div><div className="checkout-address-grid"><input placeholder="Full Name*" value={address.name} onChange={(e) => setAddress({ ...address, name: e.target.value })} /><input placeholder="Phone Number*" value={address.phone} onChange={(e) => setAddress({ ...address, phone: e.target.value })} /><input placeholder="House / Flat / Building*" value={address.building} onChange={(e) => setAddress({ ...address, building: e.target.value })} /><input placeholder="Area / Street / Landmark*" value={address.street} onChange={(e) => setAddress({ ...address, street: e.target.value })} /><input placeholder="City*" value={address.city} onChange={(e) => setAddress({ ...address, city: e.target.value })} /><input placeholder="State*" value={address.state} onChange={(e) => setAddress({ ...address, state: e.target.value })} /><input placeholder="Pincode*" value={address.pincode} onChange={(e) => setAddress({ ...address, pincode: e.target.value.replace(/\D/g, '').slice(0, 6) })} /></div><label className="checkout-save-address"><input type="checkbox" checked={saveAddress} onChange={(e) => setSaveAddress(e.target.checked)} /> Save this address for future orders</label></section>
     <section className="checkout-section"><h2><Icon name="truck" /> Delivery Options</h2><div className="checkout-options"><label className={delivery === 'standard' ? 'is-active' : ''}><input type="radio" name="delivery" checked={delivery === 'standard'} onChange={() => setDelivery('standard')} /><span><strong>Standard Delivery</strong><small>3 – 5 Business Days</small></span><em>FREE</em></label><label className={delivery === 'express' ? 'is-active' : ''}><input type="radio" name="delivery" checked={delivery === 'express'} onChange={() => setDelivery('express')} /><span><strong>Express Delivery</strong><small>1 – 2 Business Days</small></span><em>₹120</em></label></div></section>
     <section className="checkout-section"><h2><Icon name="card" /> Payment Method</h2><div className="checkout-payments">{[['upi','UPI / QR','qr'],['card','Card','card'],['netbanking','Net Banking','building'],['cod','COD','truck']].map(([id,label,icon]) => <label key={id} className={payment === id ? 'is-active' : ''}><input type="radio" name="payment" checked={payment === id} onChange={() => setPayment(id)} /><Icon name={icon} /><span><strong>{label}</strong><small>{id === 'cod' ? 'Cash on Delivery' : id === 'card' ? 'Debit / Credit Card' : '100% secure payment'}</small></span></label>)}</div><aside className="checkout-secure-strip"><Icon name="shield" /> Secure Payments <b>•</b> 100% Safe &amp; Secure <b>•</b> Easy Returns</aside></section>
     <section className="checkout-final"><div><h2><Icon name="bag" /> Order Summary</h2><article><img src={product.image} alt="" /><span><strong>{product.name}</strong><small>{quantity} {isWholesale ? 'Bags' : 'Pieces'} · ₹{unitPrice} / {isWholesale ? 'Bag' : 'Piece'}</small></span><b>₹{subtotal.toLocaleString('en-IN')}</b></article></div><aside><p><span>Subtotal</span><strong>₹{subtotal.toLocaleString('en-IN')}</strong></p><p><span>Shipping Charges</span><strong>{shipping ? `₹${shipping}` : 'FREE'}</strong></p><p><span>Tax (5%)</span><strong>₹{tax.toLocaleString('en-IN')}</strong></p><div><span>Total Amount</span><strong>₹{total.toLocaleString('en-IN')}</strong></div><small><Icon name="truck" /> Estimated Delivery: {delivery === 'express' ? '1 – 2' : '3 – 5'} Business Days</small><button type="submit"><Icon name="lock" /> PLACE ORDER</button>{message ? <p className="checkout-message" role="status">{message}</p> : null}</aside></section>
+    <section className="checkout-why"><h2>Why Shop with Ayush?</h2><div><span><Icon name="leaf" /><b>Farm Fresh Goodness</b><small>Carefully sourced for the best quality and taste.</small></span><span><Icon name="bag" /><b>Hygienically Packed</b><small>Packed with care to retain freshness and purity.</small></span><span><Icon name="heart" /><b>Rich in Nutrition</b><small>A wholesome choice for your everyday meals.</small></span><span><Icon name="shield" /><b>Quality Assured</b><small>Tested and trusted for your family.</small></span></div></section>
     <section className="checkout-trust"><span><Icon name="shield" /><b>Quality Assured</b><small>Premium Quality Products</small></span><span><Icon name="truck" /><b>Fast Delivery</b><small>Across India</small></span><span><Icon name="return" /><b>Easy Returns</b><small>Hassle Free Returns</small></span><span><Icon name="headset" /><b>24/7 Support</b><small>We&apos;re here to help</small></span></section>
   </form></main>
 }

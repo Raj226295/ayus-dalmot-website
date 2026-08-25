@@ -1,0 +1,55 @@
+/* Desktop navigation links only. Header layout and controls remain unchanged. */
+@media (min-width: 981px) {
+  .site-nav--desktop > a {
+    position: relative;
+    padding-bottom: 0.38rem;
+    font-family: Manrope, Inter, "Segoe UI", system-ui, sans-serif;
+    font-weight: 600;
+    color: #2f2a27;
+    text-decoration: none;
+    transform: none;
+    transition: color 0.25s ease;
+  }
+
+  .site-nav--desktop > a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 2px;
+    border-radius: 999px;
+    background: #ef6545;
+    box-shadow: none;
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.25s ease;
+  }
+
+  .site-nav--desktop > a:hover,
+  .site-nav--desktop > a:focus-visible,
+  .site-nav--desktop > a.is-active {
+    color: #ef5d42;
+    transform: none;
+  }
+
+  .site-nav--desktop > a:hover::after,
+  .site-nav--desktop > a:focus-visible::after,
+  .site-nav--desktop > a.is-active::after {
+    width: 100%;
+    transform: scaleX(1);
+  }
+
+  .site-nav--desktop > a:focus-visible {
+    outline: 2px solid rgba(239, 93, 66, 0.38);
+    outline-offset: 4px;
+    border-radius: 3px;
+  }
+}
+
+@media (min-width: 981px) and (prefers-reduced-motion: reduce) {
+  .site-nav--desktop > a,
+  .site-nav--desktop > a::after {
+    transition-duration: 0.01ms;
+  }
+}

@@ -34,6 +34,58 @@
 @media(max-width:1100px){.product-filters{grid-template-columns:1fr 1fr 1fr}.product-filters .search{grid-column:span 2}.product-filters .filter-reset{justify-content:center}}
 @media(max-width:620px){.product-filters{grid-template-columns:1fr 1fr}.product-filters .search{grid-column:1/-1}.product-filters .filter-reset{grid-column:1/-1}.products-page .page-title .primary{padding:0 11px}.products-page .page-title .primary svg{width:17px}.modal-grid{grid-template-columns:1fr}.product-modal{max-height:calc(100dvh - 24px);padding:17px;overflow-y:auto}.modal-backdrop{padding:12px}}
 
+/* Responsive, user-toggleable admin navigation. */
+.admin-shell{overflow-x:hidden}
+.sidebar{overflow:visible}
+.sidebar nav{overflow-x:hidden;overflow-y:auto}
+.sidebar,.main-shell{transition:width .25s ease,margin-left .25s ease,transform .25s ease}
+.sidebar.collapsed{width:76px;overflow-x:hidden}
+.sidebar.collapsed .brand{height:76px;padding:10px}
+.sidebar.collapsed .brand img{width:48px}
+.sidebar.collapsed nav{padding-inline:10px}
+.sidebar.collapsed .nav-item{padding:0;justify-content:center;gap:0}
+.sidebar.collapsed .nav-item>span,.sidebar.collapsed .nav-item>.count,.sidebar.collapsed .nav-item>i,.sidebar.collapsed .submenu,.sidebar.collapsed .side-art{display:none}
+.sidebar.collapsed .nav-item svg{width:21px;height:21px}
+.sidebar.collapsed .nav-item:hover{transform:none}
+.main-shell.sidebar-collapsed{margin-left:76px}
+.sidebar-toggle{transition:background .2s ease,transform .2s ease}
+.sidebar-toggle:active{transform:scale(.94)}
+.sidebar-collapse-toggle{position:absolute;z-index:4;top:25px;right:12px;width:36px;height:36px;padding:0;display:grid;place-items:center;border:1px solid #e2dbd0;border-radius:50%;background:#fffefa;color:#646b66;box-shadow:0 5px 15px rgba(48,38,24,.13);transition:transform .25s ease,background .2s ease,color .2s ease,box-shadow .2s ease}
+.sidebar-collapse-toggle svg{width:16px;height:16px;display:block;transform:rotate(180deg);transition:transform .25s ease}
+.sidebar.collapsed .sidebar-collapse-toggle svg{transform:rotate(0)}
+.sidebar .brand img{transition:opacity .18s ease,transform .25s ease}
+.sidebar.collapsed .brand img{opacity:0;transform:scale(.8)}
+.sidebar-collapse-toggle:hover{background:#fff4f4;color:var(--red);box-shadow:0 7px 17px rgba(48,38,24,.18)}
+
+@media(max-width:900px){
+  .sidebar-collapse-toggle{display:none}
+  .sidebar-toggle{display:grid}
+  .sidebar,.sidebar.collapsed{width:min(286px,86vw);transform:translateX(-102%);box-shadow:12px 0 36px rgba(30,25,18,.16)}
+  .sidebar.open,.sidebar.collapsed.open{transform:translateX(0)}
+  .sidebar.collapsed .brand{height:86px;padding:10px 22px}
+  .sidebar.collapsed .brand img{width:108px}
+  .sidebar.collapsed .brand img{opacity:1;transform:none}
+  .sidebar.collapsed nav{padding:7px 14px}
+  .sidebar.collapsed .nav-item{padding:0 12px;justify-content:flex-start;gap:13px}
+  .sidebar.collapsed .nav-item>span,.sidebar.collapsed .nav-item>.count,.sidebar.collapsed .nav-item>i{display:flex}
+  .sidebar.collapsed .submenu.open{display:grid}
+  .sidebar.collapsed .side-art{display:flex}
+  .main-shell.sidebar-collapsed{margin-left:0}
+  .backdrop.show{background:rgba(20,20,14,.48);backdrop-filter:blur(2px)}
+}
+
+@media(min-width:901px){.topbar .sidebar-toggle{display:none}}
+.table-show-more{min-width:104px;height:34px;padding:0 15px;border:1px solid #d8d1c7;border-radius:8px;background:#fff;color:#c9232d;font-size:10px;font-weight:750;white-space:nowrap;box-shadow:0 3px 9px rgba(52,40,23,.06)}
+.table-show-more:hover{border-color:#d52a33;background:#fff4f4}
+
+/* Keep order actions inside the table footer instead of floating over the page. */
+.expanded-orders{padding-bottom:0}
+.expanded-order-footer{min-height:64px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.expanded-order-footer>span{margin-right:auto}
+.expanded-order-footer .order-excel-fixed{position:static;right:auto;bottom:auto;width:auto;min-width:118px;height:36px;padding:0 14px;display:flex;flex:0 0 auto;align-items:center;gap:7px;border:1px solid #269245;border-radius:8px;background:#fff;color:#168137;font-size:10px;font-weight:800;box-shadow:0 4px 12px rgba(24,82,42,.1)}
+.expanded-order-footer .order-excel-fixed:hover{transform:none;background:#f3fbf5}
+@media(max-width:800px){.expanded-order-footer{align-items:stretch}.expanded-order-footer>span{width:100%;margin-right:0}.expanded-order-footer .order-excel-fixed{justify-content:center}}
+
 /* Reference-matched product catalog */
 .product-heading{margin-bottom:18px}.product-heading p{display:flex;align-items:center;gap:12px;color:#65748a}.product-heading p b{color:#9aa2ad}.products-page .data-card{padding:18px}.product-add-row{margin-bottom:16px;display:flex;justify-content:flex-end}.product-filters{grid-template-columns:minmax(270px,1.55fr) repeat(3,minmax(135px,.72fr)) auto auto;padding-bottom:16px;border-bottom:1px solid #eee9df}.product-filters .search,.product-filters select,.product-filters .filter-reset{height:42px}.filter-apply{color:#303430}.products-table{min-width:1160px;font-size:9px}.products-table th{height:39px;padding:8px 9px;color:#303432}.products-table td{height:59px;padding:7px 9px}.products-table .product-name.detailed{gap:11px}.products-table .product-name.detailed img{width:43px;height:43px;border-radius:8px}.product-name.detailed>span{display:grid;justify-items:start;gap:4px}.product-name.detailed small{padding:3px 6px;border-radius:5px;font-size:7px;font-weight:700}.product-name.detailed small.active{background:#e4f5e3;color:#16832b}.product-name.detailed small.draft{background:#ededf0;color:#62666b}.stock-number{color:#168339;font-weight:800}.products-table .low-number{color:#ef6c00;font-weight:800}.products-table tbody tr:last-child .low-number{color:#e21c27}.product-actions{gap:6px}.product-actions button{width:34px;height:34px}.pagination{min-height:57px;padding:12px 0 0}.page-controls{gap:0}.page-controls select{height:34px;margin-right:14px;padding:0 28px 0 10px;border:1px solid var(--border);border-radius:7px;background:#fff;font-size:8px}.page-controls button{height:34px;width:34px}.products-page .primary{height:40px}.products-page .primary svg{stroke-width:2}.products-page .page-title h1{font-size:22px}
 @media(max-width:1400px){.product-filters{grid-template-columns:minmax(250px,1.5fr) repeat(3,1fr);}.product-filters .filter-reset{justify-content:center}.products-page .data-card{padding:15px}}

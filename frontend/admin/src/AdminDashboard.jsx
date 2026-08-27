@@ -10,6 +10,7 @@ import ReviewsPage from './ReviewsPage.jsx'
 import ShippingPage from './ShippingPage.jsx'
 
 const apiUrl = (()=>{const url=new URL(import.meta.env.VITE_API_URL);if(['localhost','127.0.0.1'].includes(url.hostname))url.hostname=window.location.hostname;return url.toString().replace(/\/$/,'')})()
+const sidebarStateKey = 'ayush-admin-sidebar-collapsed'
 
 const nav = [
   ['dashboard','Dashboard','grid'], ['products','Products','box'],
@@ -60,10 +61,44 @@ function Icon({name,size=20}) {
 
 function Sidebar({open,setOpen,page,setPage,onLogout}) {
   const [expanded,setExpanded]=useState('')
-  return <><div className={`backdrop ${open?'show':''}`} onClick={()=>setOpen(false)}/><aside className={`sidebar ${open?'open':''}`}>
-    <div className="brand"><img src="/ayush/logo-navbar-clean.png"/><button onClick={()=>setOpen(false)}><Icon name="close"/></button></div>
+  const [isCollapsed,setIsCollapsed]=useState(()=>window.localStorage.getItem(sidebarStateKey)==='true')
+  useEffect(()=>{
+    const closeOnEscape=event=>event.key==='Escape'&&setOpen(false)
+    document.addEventListener('keydown',closeOnEscape)
+    return()=>document.removeEventListener('keydown',closeOnEscape)
+  },[setOpen])
+  useEffect(()=>{
+    window.localStorage.setItem(sidebarStateKey,String(isCollapsed))
+    document.querySelector('.admin-shell .main-shell')?.classList.toggle('sidebar-collapsed',isCollapsed)
+  },[isCollapsed])
+  useEffect(()=>{
+    const paginateOrders=()=>{
+      const root=document.querySelector('.expanded-orders'),body=root?.querySelector('.expanded-order-table tbody'),footer=root?.querySelector('.expanded-order-footer')
+      if(!body||!footer)return
+      const rows=[...body.querySelectorAll('tr')],shown=Math.max(6,Number(root.dataset.visibleRows)||6)
+      root.dataset.visibleRows=String(shown)
+      rows.forEach((row,index)=>{row.style.display=index<shown?'':'none'})
+      const summary=footer.querySelector(':scope>span')
+      const summaryText=`Showing ${Math.min(shown,rows.length)} of ${rows.length} orders`
+      if(summary&&summary.textContent!==summaryText)summary.textContent=summaryText
+      let more=footer.querySelector('.table-show-more')
+      if(shown<rows.length&&!more){more=document.createElement('button');more.type='button';more.className='table-show-more';more.textContent='Show More';more.onclick=()=>{root.dataset.visibleRows=String(shown+6);paginateOrders()};footer.appendChild(more)}
+      if(shown>=rows.length)more?.remove()
+      const exportButton=root.querySelector('.order-excel-fixed')
+      if(exportButton&&exportButton.parentElement!==footer)footer.appendChild(exportButton)
+    }
+    const observer=new MutationObserver(paginateOrders)
+    const main=document.querySelector('.admin-shell .main-shell main')
+    if(main)observer.observe(main,{childList:true,subtree:true})
+    paginateOrders()
+    return()=>observer.disconnect()
+  },[])
+  const toggleCollapsed=()=>setIsCollapsed(value=>!value)
+  return <><div className={`backdrop ${open?'show':''}`} onClick={()=>setOpen(false)}/><aside className={`sidebar ${open?'open':''} ${isCollapsed?'collapsed':''}`} aria-label="Admin navigation">
+    <button type="button" className="sidebar-collapse-toggle" aria-label={isCollapsed?'Expand sidebar':'Collapse sidebar'} aria-expanded={!isCollapsed} onClick={toggleCollapsed}><Icon name="chevron" size={17}/></button>
+    <div className="brand"><img src="/ayush/logo-navbar-clean.png" alt="Ayush Admin"/><button type="button" aria-label="Close sidebar" onClick={()=>setOpen(false)}><Icon name="close"/></button></div>
     <nav>{nav.map(([id,label,icon,subs],i)=><div key={id}>
-      {i===11&&<div className="nav-rule"/>}<button className={`nav-item ${page===id?'active':''}`} onClick={()=>{if(id==='logout'){onLogout?.();return} if(subs)setExpanded(expanded===id?'':id); else {setPage(id);setOpen(false)}}}>
+      {i===11&&<div className="nav-rule"/>}<button title={isCollapsed?label:undefined} aria-label={label} className={`nav-item ${page===id?'active':''}`} onClick={()=>{if(id==='logout'){onLogout?.();return} if(subs)setExpanded(expanded===id?'':id); else {setPage(id);setOpen(false)}}}>
         <Icon name={icon}/><span>{label}</span>{id==='messages'&&<b className="count">12</b>}{subs&&<i className={expanded===id?'up':''}><Icon name="chevron" size={15}/></i>}
       </button>{subs&&<div className={`submenu ${expanded===id?'open':''}`}>{subs.map(x=><button key={x} onClick={()=>{setPage(id);setOpen(false)}}>{x}</button>)}</div>}
     </div>)}</nav>
@@ -72,8 +107,17 @@ function Sidebar({open,setOpen,page,setPage,onLogout}) {
 }
 
 function Header({setOpen,page,setPage,onLogout}){
-  const [profile,setProfile]=useState(false),[notifications,setNotifications]=useState(false)
-  return <header className="topbar"><div className="top-left"><button className="icon-btn" onClick={()=>setOpen(true)}><Icon name="menu"/></button><div className="crumb"><span>Admin</span><b>/</b><strong>{page[0].toUpperCase()+page.slice(1)}</strong></div></div>
+  const [profile,setProfile]=useState(false),[notifications,setNotifications]=useState(false),[collapsed,setCollapsed]=useState(false)
+  const toggleSidebar=()=>{
+    if(window.matchMedia('(max-width: 900px)').matches){setOpen(value=>!value);return}
+    setCollapsed(value=>{
+      const next=!value
+      document.querySelector('.admin-shell .sidebar')?.classList.toggle('collapsed',next)
+      document.querySelector('.admin-shell .main-shell')?.classList.toggle('sidebar-collapsed',next)
+      return next
+    })
+  }
+  return <header className="topbar"><div className="top-left"><button type="button" className="icon-btn sidebar-toggle" aria-label={collapsed?'Expand sidebar':'Collapse sidebar'} aria-expanded={!collapsed} onClick={toggleSidebar}><Icon name="menu"/></button><div className="crumb"><span>Admin</span><b>/</b><strong>{page[0].toUpperCase()+page.slice(1)}</strong></div></div>
     <div className="top-actions"><label className="search"><Icon name="search" size={17}/><input placeholder="Search anything..."/></label><button className="date-chip"><Icon name="calendar" size={17}/>21 May – 28 May <Icon name="chevron" size={13}/></button>
       <div className="pop-wrap"><button className="icon-btn notification" onClick={()=>setNotifications(!notifications)}><Icon name="bell"/><b>8</b></button>{notifications&&<div className="dropdown notifications"><strong>Notifications</strong><p>6 new orders received</p><p>3 products are low in stock</p><button>Mark all as read</button></div>}</div>
       <div className="pop-wrap"><button className="profile" onClick={()=>setProfile(!profile)}><span className="avatar">A</span><span><b>Admin</b><small>Super Admin</small></span><Icon name="chevron" size={14}/></button>{profile&&<div className="dropdown"><button onClick={()=>setPage('settings')}>Admin profile</button><button onClick={()=>setPage('settings')}>Settings</button><button className="danger" onClick={onLogout}>Logout</button></div>}</div>
@@ -149,6 +193,23 @@ function ProductsPage({toast}){
   const seed=products.map((p,i)=>({name:p[0],category:p[1],sku:p[2],price:p[3],stock:p[4],image:p[5],status:i===4?'Draft':'Active',minimum:i===4?'1 Set':i===5?'5 Bags':i===9?'1 Tin':'1 Bag',unit:i===4?'Sets':i===9?'Tins':'Bags',created:['20 May 2025','20 May 2025','19 May 2025','18 May 2025','18 May 2025','21 May 2025','21 May 2025','21 May 2025','20 May 2025','19 May 2025'][i]}))
   const [items,setItems]=useState(seed),[search,setSearch]=useState(''),[category,setCategory]=useState('All Categories'),[stock,setStock]=useState('All Stock Status'),[status,setStatus]=useState('All Status'),[selected,setSelected]=useState([]),[productPage,setProductPage]=useState(1),[editing,setEditing]=useState(null)
   const filtered=useMemo(()=>items.filter(p=>(p.name+p.sku).toLowerCase().includes(search.toLowerCase())&&(category==='All Categories'||p.category===category)&&(stock.startsWith('All Stock')||(stock==='Low Stock'?+p.stock<400:+p.stock>=400))&&(status==='All Status'||p.status===status)),[items,search,category,stock,status])
+  useEffect(()=>{
+    const pageSize=6,totalPages=Math.max(1,Math.ceil(filtered.length/pageSize)),safePage=Math.min(productPage,totalPages),start=(safePage-1)*pageSize
+    if(safePage!==productPage){setProductPage(safePage);return}
+    const root=document.querySelector('.products-page'),rows=root?.querySelectorAll('.products-table tbody tr')||[]
+    rows.forEach((row,index)=>{row.style.display=index>=start&&index<start+pageSize?'':'none'})
+    const summary=root?.querySelector('.pagination>span')
+    if(summary)summary.textContent=filtered.length?`Showing ${start+1} to ${Math.min(start+pageSize,filtered.length)} of ${filtered.length} products`:'Showing 0 products'
+    const controls=root?.querySelectorAll('.page-controls button')||[]
+    controls.forEach((button,index)=>{if(index>0&&index<controls.length-1)button.style.display=index<=totalPages?'':'none'})
+    const pageSizeSelect=root?.querySelector('.page-controls select')
+    if(pageSizeSelect?.options[0])pageSizeSelect.options[0].textContent='6 per page'
+    if(pageSizeSelect)Array.from(pageSizeSelect.options).slice(1).forEach(option=>{option.hidden=true;option.disabled=true})
+    const footer=root?.querySelector('.pagination')
+    footer?.querySelector('.table-show-more')?.remove()
+    if(safePage<totalPages&&footer){const button=document.createElement('button');button.type='button';button.className='table-show-more';button.textContent='Show More';button.onclick=()=>setProductPage(page=>Math.min(totalPages,page+1));footer.appendChild(button)}
+    return()=>footer?.querySelector('.table-show-more')?.remove()
+  },[filtered,productPage])
   const toggle=name=>setSelected(x=>x.includes(name)?x.filter(v=>v!==name):[...x,name])
   const remove=name=>{setItems(x=>x.filter(p=>p.name!==name));setSelected(x=>x.filter(v=>v!==name));toast('Product removed successfully')}
   const save=async e=>{e.preventDefault();const data=new FormData(e.currentTarget),rate=Number(data.get('price')),minimum=data.get('minimum')||'1 Bag',next={id:editing?.id,name:data.get('name'),category:data.get('category'),sku:data.get('sku'),price:`₹${rate}`,stock:data.get('stock'),status:data.get('status'),image:editing?.image||'/ayush/product-katarr-matar.png',minimum,unit:data.get('unit')||'Bags',created:editing?.created||'21 May 2025',description:data.get('description'),weight:`${data.get('variantWeight')||data.get('weight')||'1'}kg`,discount:Number(data.get('discount')||5),wholesale:{minimumBags:parseInt(minimum)||1,pcsPerBag:Number(data.get('variantPieces')||1),weightKgPerBag:Number(data.get('variantWeight')||1),ratePerBag:rate}};try{const response=await fetch(`${apiUrl}/products`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(next)});if(!response.ok)throw new Error();const {product}=await response.json();setItems(x=>editing?.name?x.map(p=>p.name===editing.name?{...next,id:product.id}:p):[{...next,id:product.id},...x]);setEditing(null);toast(next.status==='Draft'?'Product saved as draft':'Product published to user panel')}catch{toast('Product save nahi hua. Backend start karein.') }}

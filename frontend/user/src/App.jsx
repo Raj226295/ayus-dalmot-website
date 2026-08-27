@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import './App.css'
 import './desktop-nav-polish.css'
 import './checkout-polish.css'
+import './user-theme.css'
 
 const menuLinks = [
   { label: 'Home', href: '#home' },
@@ -3927,6 +3928,18 @@ function App() {
       }))
       productCatalog.push(...managed)
       setCatalogVersion(version => version + 1)
+    }).catch(() => undefined)
+    return () => { active = false }
+  }, [])
+
+  useEffect(() => {
+    let active = true
+    fetch(`${catalogApiUrl}/theme`).then(response => response.ok ? response.json() : Promise.reject()).then(({ theme = {} }) => {
+      if (!active) return
+      const root = document.documentElement
+      root.style.setProperty('--admin-product-card-colour', theme.productCard || '#ffffff')
+      root.style.setProperty('--admin-buy-now-colour', theme.buyNow || '#087331')
+      root.style.setProperty('--admin-footer-colour', theme.footer || '#050505')
     }).catch(() => undefined)
     return () => { active = false }
   }, [])

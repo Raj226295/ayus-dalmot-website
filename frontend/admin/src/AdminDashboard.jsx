@@ -17,7 +17,7 @@ const nav = [
   ['orders','Orders','cart'],
   ['customers','Customers','users'], ['categories','Categories','layers'],
   ['payments','Payments','card'], ['analytics','Analytics & Reports','analytics'],
-  ['content','Website Content','image',['Homepage','Hero Banners','Promotional Banners','About Us','Testimonials','FAQ']],
+  ['content','Website Content','image',['Homepage','Hero Banners','Promotional Banners','About Us','Testimonials','FAQ','User Panel Theme Colour']],
   ['messages','Messages','mail'], ['reviews','Reviews & Ratings','reviews'], ['shipping','Shipping','truck'],
   ['settings','Settings','settings',['General Settings','Admin Profile','Admin Users','Roles & Permissions']], ['logout','Logout','logout']
 ]
@@ -100,7 +100,7 @@ function Sidebar({open,setOpen,page,setPage,onLogout}) {
     <nav>{nav.map(([id,label,icon,subs],i)=><div key={id}>
       {i===11&&<div className="nav-rule"/>}<button title={isCollapsed?label:undefined} aria-label={label} className={`nav-item ${page===id?'active':''}`} onClick={()=>{if(id==='logout'){onLogout?.();return} if(subs)setExpanded(expanded===id?'':id); else {setPage(id);setOpen(false)}}}>
         <Icon name={icon}/><span>{label}</span>{id==='messages'&&<b className="count">12</b>}{subs&&<i className={expanded===id?'up':''}><Icon name="chevron" size={15}/></i>}
-      </button>{subs&&<div className={`submenu ${expanded===id?'open':''}`}>{subs.map(x=><button key={x} onClick={()=>{setPage(id);setOpen(false)}}>{x}</button>)}</div>}
+      </button>{subs&&<div className={`submenu ${expanded===id?'open':''}`}>{subs.map(x=><button key={x} onClick={()=>{setPage(id);setOpen(false);if(x==='User Panel Theme Colour')window.setTimeout(()=>document.getElementById('user-panel-theme-colour')?.scrollIntoView({behavior:'smooth',block:'start'}),80)}}>{x}</button>)}</div>}
     </div>)}</nav>
     <div className="side-art"><span>Pure traditions.<br/><b>Thoughtfully managed.</b></span></div>
   </aside></>

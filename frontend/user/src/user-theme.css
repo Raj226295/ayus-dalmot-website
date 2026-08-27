@@ -1,0 +1,5 @@
+/* Values are populated from the admin-published storefront theme. */
+.product-card,.bestseller-card,.products-catalog-grid .product-card{background:var(--admin-product-card-colour,#fff)}
+.product-card__button,.buy-now-btn,.checkout-final button[type="submit"]{background:var(--admin-buy-now-colour,#087331);border-color:var(--admin-buy-now-colour,#087331)}
+.product-card__button:hover,.product-card__button:focus-visible,.buy-now-btn:hover,.buy-now-btn:focus-visible,.checkout-final button[type="submit"]:hover{background:var(--admin-buy-now-colour,#087331);filter:brightness(.92)}
+.page-footer{background:var(--admin-footer-colour,#050505)}

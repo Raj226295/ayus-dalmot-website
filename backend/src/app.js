@@ -6,6 +6,10 @@ import { fileURLToPath } from 'node:url'
 
 const adminTickets = new Map()
 const productsFile = join(dirname(fileURLToPath(import.meta.url)), '../data/products.json')
+const themeFile = join(dirname(fileURLToPath(import.meta.url)), '../data/theme.json')
+const defaultTheme = { productCard: '#ffffff', buyNow: '#087331', footer: '#050505' }
+let storefrontTheme = defaultTheme
+try { storefrontTheme = { ...defaultTheme, ...JSON.parse(readFileSync(themeFile, 'utf8')) } } catch { storefrontTheme = defaultTheme }
 let storedProducts = []
 try { storedProducts = JSON.parse(readFileSync(productsFile, 'utf8')) } catch { storedProducts = [] }
 const managedProducts = new Map(storedProducts.map(product => [product.id, product]))
@@ -51,6 +55,26 @@ export function createApp() {
 
     if (request.method === 'GET' && request.url === '/api/products') {
       sendJson(response, 200, { products: [...managedProducts.values()].filter(product => product.status !== 'Draft') })
+      return
+    }
+
+    if (request.method === 'GET' && request.url === '/api/theme') {
+      sendJson(response, 200, { theme: storefrontTheme })
+      return
+    }
+
+    if (request.method === 'POST' && request.url === '/api/theme') {
+      readJson(request).then(theme => {
+        const isColour = value => /^#[0-9a-f]{6}$/i.test(String(value))
+        const next = {
+          productCard: isColour(theme.productCard) ? theme.productCard : storefrontTheme.productCard,
+          buyNow: isColour(theme.buyNow) ? theme.buyNow : storefrontTheme.buyNow,
+          footer: isColour(theme.footer) ? theme.footer : storefrontTheme.footer,
+        }
+        storefrontTheme = next
+        writeFileSync(themeFile, JSON.stringify(next, null, 2))
+        sendJson(response, 200, { theme: next })
+      }).catch(() => sendJson(response, 400, { message: 'Invalid theme data.' }))
       return
     }
 

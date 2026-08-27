@@ -2736,7 +2736,7 @@ a.contact-card__title:focus-visible {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .bestsellers-section {
     padding-bottom: 3.75rem;
   }
@@ -2893,7 +2893,7 @@ a.contact-card__title:focus-visible {
   background: #f7f3ea;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .factory-banner__image {
     max-height: none;
   }
@@ -3913,7 +3913,7 @@ a.contact-card__title:focus-visible {
   }
 }
 
-@media (max-width: 767px) {
+@media (max-width: 1024px) {
   html {
     font-size: 12.5px;
   }
@@ -3973,7 +3973,7 @@ a.contact-card__title:focus-visible {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .page-footer {
     padding: 1.6rem 0 1rem;
   }
@@ -4607,7 +4607,7 @@ a.contact-card__title:focus-visible {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .page-footer {
     padding: 1.1rem 0 0.75rem;
   }
@@ -4993,7 +4993,7 @@ a.contact-card__title:focus-visible {
   }
 }
 
-@media (max-width: 980px) {
+@media (max-width: 1024px) {
   .brand-story-stage__carousel {
     bottom: 12.2%;
   }
@@ -5385,7 +5385,7 @@ a.contact-card__title:focus-visible {
   }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 1024px) {
   .contact-page__location-section {
     padding: 64px 0 42px;
   }
@@ -5631,7 +5631,7 @@ a.contact-card__title:focus-visible {
 
 /* Header + footer edge safety
    Keep controls and footer content comfortably inside every viewport. */
-@media (min-width: 981px) {
+@media (min-width: 1025px) {
   .site-header .shell-content,
   .page-footer .footer-shell {
     width: min(calc(100% - 64px), 1760px);
@@ -5663,7 +5663,7 @@ a.contact-card__title:focus-visible {
   }
 }
 
-@media (min-width: 701px) and (max-width: 1180px) {
+@media (min-width: 1025px) and (max-width: 1180px) {
   .site-header .shell-content,
   .page-footer .footer-shell {
     width: calc(100% - 48px);
@@ -5671,7 +5671,7 @@ a.contact-card__title:focus-visible {
   }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 1024px) {
   .site-header .shell-content,
   .page-footer .footer-shell {
     width: calc(100% - 32px);
@@ -5935,7 +5935,7 @@ a.contact-card__title:focus-visible {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .mode-section {
     padding: 1.35rem 0 2.65rem;
   }
@@ -5972,7 +5972,7 @@ a.contact-card__title:focus-visible {
   }
 }
 
-@media (max-width: 980px) {
+@media (max-width: 1024px) {
   .site-header .shell-content {
     width: min(calc(100% - 1.5rem), var(--page-max));
   }
@@ -6449,7 +6449,7 @@ a.contact-card__title:focus-visible {
   }
 }
 
-@media (max-width: 980px) {
+@media (max-width: 1024px) {
   .about-page {
     gap: 0.7rem;
   }
@@ -7642,7 +7642,7 @@ a.contact-card__title:focus-visible {
   }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 1024px) {
   .contact-page__faq-section {
     min-height: 620px;
     padding: 52px 16px 80px;
@@ -8042,7 +8042,7 @@ a.contact-card__title:focus-visible {
   .bestseller-grid .product-card { flex-basis: calc((100% - 32px) / 3); width: calc((100% - 32px) / 3); }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 1024px) {
   .bestseller-grid { gap: 10px; padding-bottom: 12px; }
   .bestseller-grid .product-card { flex-basis: min(82vw, 260px); width: min(82vw, 260px); min-width: min(82vw, 260px); }
   .bestsellers-explore-wrap { margin-top: 16px; }
@@ -8050,7 +8050,7 @@ a.contact-card__title:focus-visible {
 }
 
 /* Mobile-only home composition. Desktop layout remains unchanged. */
-@media (max-width: 700px) {
+@media (max-width: 1024px) {
   .site-shell--products {
     background-color: #57cbb8;
     background-image: url('/ayush/products-mobile-background.png');
@@ -8546,7 +8546,7 @@ a.contact-card__title:focus-visible {
   .home-main .factory-banner { border-radius: 0; }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 1024px) {
   .product-card { padding: 9px; border-radius: 14px; }
   .product-card__image-shell { height: 145px; min-height: 145px; padding: 12px 5px 5px; }
   .product-card__share { width: 30px; height: 30px; top: 8px; right: 8px; }
@@ -8656,7 +8656,7 @@ a.contact-card__title:focus-visible {
   .products-sort { margin-left: 0; }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 1024px) {
   .products-page-main {
     background-color: #57cbb8;
     background-image: url('/ayush/products-mobile-background.png');
@@ -8857,7 +8857,7 @@ a.contact-card__title:focus-visible {
   padding-bottom: clamp(56px, 6vw, 84px);
 }
 
-@media (max-width: 700px) {
+@media (max-width: 1024px) {
   .contact-page__faq-section {
     min-height: auto;
     padding-bottom: 52px;
@@ -9508,7 +9508,7 @@ a.contact-card__title:focus-visible {
   border-radius: 4px;
 }
 
-@media (max-width: 980px) {
+@media (max-width: 1024px) {
   .site-nav--mobile a {
     width: 100%;
     padding: 0.62rem 0.35rem;
@@ -9656,7 +9656,7 @@ a.contact-card__title:focus-visible {
   }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 1024px) {
   .contact-page__location-section {
     margin-top: 0;
     padding: 58px 0 48px;
@@ -9728,7 +9728,9 @@ a.contact-card__title:focus-visible {
 .buy-now-page { padding: 34px 0 72px; background: #fff; }
 .buy-now-page__inner { width: min(92%, 1320px); }
 .buy-now-breadcrumb { margin-bottom: 22px; display: flex; gap: 10px; color: #66716a; font-size: 13px; }
-.buy-now-breadcrumb a { color: #375044; text-decoration: none; }
+.buy-now-breadcrumb button { padding: 0; display: inline-flex; align-items: center; gap: 4px; border: 0; background: transparent; color: #375044; font: inherit; cursor: pointer; }
+.buy-now-breadcrumb button:hover, .buy-now-breadcrumb button:focus-visible { color: #075f39; }
+.buy-now-breadcrumb button svg { width: 14px; height: 14px; }
 .buy-now-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .buy-now-heading h1 { margin: 0; color: #075f39; font-size: 34px; }
 .buy-now-heading p { color: #647069; }
@@ -9794,7 +9796,7 @@ a.contact-card__title:focus-visible {
 @media (max-width: 650px) { .buy-now-heading { align-items: flex-start; flex-direction: column; } .buy-now-product { grid-template-columns: 1fr; } .buy-now-product > img { width: 100%; } .buy-now-product__price, .buy-now-quantity { grid-column: 1; } .checkout-section__heading { flex-direction: column; } .checkout-address-grid, .checkout-options, .checkout-payments, .checkout-final, .checkout-trust { grid-template-columns: 1fr; } .checkout-address-grid input, .checkout-address-grid input:nth-last-child(-n+3) { grid-column: 1; } .checkout-secure-strip { flex-wrap: wrap; } }
 
 /* Keep the footer quality benefits in one compact horizontal row on mobile. */
-@media (max-width: 700px) {
+@media (max-width: 1024px) {
   .page-footer .footer-usp-bar {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -9948,7 +9950,7 @@ a.contact-card__title:focus-visible {
 .cart-empty a { display: inline-flex; margin-top: 12px; padding: 13px 22px; border-radius: 8px; background: #ff6112; color: #fff; text-decoration: none; font-weight: 700; }
 
 /* Final mobile responsiveness for the About and Contact pages. */
-@media (max-width: 700px) {
+@media (max-width: 1024px) {
   .about-page,
   .contact-page { width: 100%; max-width: 100%; overflow-x: clip; }
 
@@ -10042,7 +10044,7 @@ a.contact-card__title:focus-visible {
 }
 
 /* Keep the moving announcement ribbon visible above the navbar on phones. */
-@media (max-width: 700px) {
+@media (max-width: 1024px) {
   .announcement-bar {
     position: sticky;
     z-index: 1102;
@@ -10077,7 +10079,7 @@ a.contact-card__title:focus-visible {
 }
 
 /* About page product range: mobile cards remain visible and swipeable. */
-@media (max-width: 700px) {
+@media (max-width: 1024px) {
   .about-page__product-range .product-carousel-shell {
     --about-mobile-card-width: calc((100vw - 54px) / 2);
     width: 100%;
@@ -10180,7 +10182,7 @@ a.contact-card__title:focus-visible {
 }
 
 /* Supplied purple food pattern on the Contact page, mobile only. */
-@media (max-width: 700px) {
+@media (max-width: 1024px) {
   .contact-page {
     background-color: #deeffb;
     background-image: url('/ayush/contact-mobile-pattern.png');
@@ -10201,7 +10203,7 @@ a.contact-card__title:focus-visible {
 }
 
 /* Reference-led Contact experience for phones; desktop Contact remains intact. */
-@media (max-width: 700px) {
+@media (max-width: 1024px) {
   .contact-page > .contact-page__hero,
   .contact-page > .contact-page__message-section,
   .contact-page > .contact-page__location-section { display: none; }
@@ -10573,14 +10575,14 @@ a.contact-card__title:focus-visible {
 .product-card__variant, .product-card__wholesale-select { font-family: var(--body-font); font-size: 14px; font-weight: 600; }
 .product-card__bag-detail { font-family: var(--body-font); font-size: 14px; font-weight: 600; }
 
-@media (max-width: 700px) {
+@media (max-width: 1024px) {
   .product-card__title { font-size: 20px; }
   .product-card__price { font-size: 22px; }
   .product-card__variant, .product-card__wholesale-select, .product-card__bag-detail { font-size: 11px; }
 }
 
 /* Mobile footer newsletter: compact horizontal form with product artwork visible. */
-@media (max-width: 700px) {
+@media (max-width: 1024px) {
   .page-footer .footer-newsletter-card {
     aspect-ratio: auto;
     min-height: 98px;
@@ -10685,7 +10687,7 @@ a.contact-card__title:focus-visible {
 }
 
 /* Mobile footer cleanup: hide newsletter and keep trust highlights aligned. */
-@media (max-width: 700px) {
+@media (max-width: 1024px) {
   .page-footer .footer-newsletter-card {
     display: none;
   }
@@ -10749,7 +10751,7 @@ a.contact-card__title:focus-visible {
 }
 
 /* Final responsive gutter guard — intentionally last in the cascade. */
-@media (min-width: 981px) {
+@media (min-width: 1025px) {
   .site-header .shell-content,
   .page-footer .footer-shell {
     width: min(calc(100% - 64px), 1760px);
@@ -10757,7 +10759,7 @@ a.contact-card__title:focus-visible {
   }
 }
 
-@media (min-width: 701px) and (max-width: 980px) {
+@media (min-width: 1025px) and (max-width: 1180px) {
   .site-header .shell-content,
   .page-footer .footer-shell {
     width: calc(100% - 48px);
@@ -10767,7 +10769,7 @@ a.contact-card__title:focus-visible {
 
 /* Small laptops and landscape tablets keep the desktop navigation pattern.
    The controls scale down instead of switching to the mobile header. */
-@media (min-width: 769px) and (max-width: 980px) {
+@media (min-width: 1025px) and (max-width: 1180px) {
   .site-header .shell-content {
     width: calc(100% - 32px);
   }
@@ -10825,7 +10827,7 @@ a.contact-card__title:focus-visible {
 
 /* Tablet carousel: preserve the desktop card proportions and show three
    comfortably sized products instead of squeezing four narrow cards in. */
-@media (min-width: 701px) and (max-width: 980px) {
+@media (min-width: 1025px) and (max-width: 1180px) {
   .home-main .product-carousel-shell {
     --carousel-visible-cards: 3;
     --carousel-card-width: 14.5rem;
@@ -10856,7 +10858,7 @@ a.contact-card__title:focus-visible {
   }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 1024px) {
   .site-header .shell-content,
   .page-footer .footer-shell {
     width: calc(100% - 32px);
@@ -10898,7 +10900,7 @@ a.contact-card__title:focus-visible {
 }
 
 /* Mobile auth background and mathematically centred brand mark. */
-@media (max-width: 700px) {
+@media (max-width: 1024px) {
   .site-shell--auth {
     min-height: 100svh;
     background: #f6f1e7;
@@ -10944,7 +10946,7 @@ a.contact-card__title:focus-visible {
 }
 
 /* Mobile bottom navigation: flush to the dynamic viewport edge. */
-@media (max-width: 700px) {
+@media (max-width: 1024px) {
   .mobile-bottom-nav {
     position: fixed !important;
     z-index: 2147483000;
@@ -11004,7 +11006,7 @@ a.contact-card__title:focus-visible {
 }
 
 /* Desktop login fits completely inside the available viewport without scrolling. */
-@media (min-width: 701px) {
+@media (min-width: 1025px) {
   .login-page:not(.register-page) {
     min-height: calc(100dvh - 118px);
     padding: 22px 20px 24px;
@@ -11074,7 +11076,7 @@ a.contact-card__title:focus-visible {
   }
 }
 
-@media (min-width: 701px) and (max-height: 700px) {
+@media (min-width: 1025px) and (max-height: 700px) {
   .login-page:not(.register-page) { padding-block: 12px; }
   .login-page:not(.register-page) .login-card h1 { font-size: 36px; }
   .login-page:not(.register-page) .login-card__ornament { margin: 7px auto 12px; }

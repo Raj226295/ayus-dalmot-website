@@ -2820,6 +2820,14 @@ function BuyNowPage({ product, user, onComplete }) {
   const shipping = delivery === 'express' ? 120 : 0
   const tax = Math.round(subtotal * .05)
   const total = subtotal + shipping + tax
+  const goBack = () => {
+    if (window.history.length > 1) {
+      window.history.back()
+      return
+    }
+
+    window.location.hash = '#products'
+  }
   const placeOrder = (event) => {
     event.preventDefault()
     if (Object.values(address).some((value) => !String(value).trim())) { setMessage('Please complete the delivery address.'); return }
@@ -2841,8 +2849,8 @@ function BuyNowPage({ product, user, onComplete }) {
     onComplete?.()
   }
   return <main className="buy-now-page" id="buy-now"><form className="shell-content buy-now-page__inner" onSubmit={placeOrder}>
-    <nav className="buy-now-breadcrumb"><a href="#home">Home</a><span>›</span><span>Buy Now</span></nav>
-    <header className="buy-now-heading"><div><h1>Buy Now</h1><p>You&apos;re almost there! Just a few details to place your order.</p></div><span><Icon name="shield" /> 100% Secure Checkout</span></header>
+    <nav className="buy-now-breadcrumb" aria-label="Checkout navigation"><button type="button" onClick={goBack}><Icon name="chevron-left" /> Back</button></nav>
+    <header className="buy-now-heading"><div><h1>Buy Now</h1></div></header>
     <section className="buy-now-product"><img src={product.image} alt={product.alt} /><div className="buy-now-product__details"><h2>{product.name}</h2><p>{product.packWeight || product.weight}</p><div className="buy-now-product__badges"><span>Premium Quality</span><span>100% Pure</span><span>No Preservatives</span></div>{isWholesale ? <aside><Icon name="bag" /> 1 Bag&nbsp; • &nbsp;{wholesale.pcsPerBag} PCS&nbsp; • &nbsp;{formatBagWeight(wholesale.weightKgPerBag)} KG<br /><strong>₹{wholesale.ratePerBag} / Bag</strong></aside> : null}<p className="buy-now-product__description">Carefully selected for authentic taste and consistent quality. Hygienically packed to retain freshness, nutrition and natural flavour.</p><div className="buy-now-product__features"><span><Icon name="leaf" />Naturally Nutritious</span><span><Icon name="shield" />Quality Assured</span><span><Icon name="flask" />No Preservatives</span></div></div><div className="buy-now-product__price"><strong>₹{subtotal.toLocaleString('en-IN')}</strong><small>Total ({quantity} {isWholesale ? 'Bags' : 'Pieces'})</small></div><div className="buy-now-quantity"><button type="button" aria-label="Decrease quantity" disabled={quantity <= minimum} onClick={() => setQuantity((value) => Math.max(minimum, value - 1))}>−</button><strong>{quantity}</strong><button type="button" aria-label="Increase quantity" onClick={() => setQuantity((value) => value + 1)}>＋</button></div></section>
     <section className="checkout-section"><div className="checkout-section__heading"><h2><Icon name="pin" /> Delivery Address</h2><select aria-label="Use a saved address" defaultValue="" onChange={(e) => { const saved = savedAddresses.find((item) => item.id === e.target.value); if (saved) setAddress({ name: user?.name || '', phone: saved.phone, building: saved.addressLine, street: '', city: saved.cityLine, state: 'Bihar', pincode: saved.cityLine.match(/\d{6}/)?.[0] || '' }) }}><option value="">Saved Addresses</option>{savedAddresses.map((item) => <option key={item.id} value={item.id}>{item.label}{item.isDefault ? ' (Default)' : ''}</option>)}</select></div><div className="checkout-address-grid"><input placeholder="Full Name*" value={address.name} onChange={(e) => setAddress({ ...address, name: e.target.value })} /><input placeholder="Phone Number*" value={address.phone} onChange={(e) => setAddress({ ...address, phone: e.target.value })} /><input placeholder="House / Flat / Building*" value={address.building} onChange={(e) => setAddress({ ...address, building: e.target.value })} /><input placeholder="Area / Street / Landmark*" value={address.street} onChange={(e) => setAddress({ ...address, street: e.target.value })} /><input placeholder="City*" value={address.city} onChange={(e) => setAddress({ ...address, city: e.target.value })} /><input placeholder="State*" value={address.state} onChange={(e) => setAddress({ ...address, state: e.target.value })} /><input placeholder="Pincode*" value={address.pincode} onChange={(e) => setAddress({ ...address, pincode: e.target.value.replace(/\D/g, '').slice(0, 6) })} /></div><label className="checkout-save-address"><input type="checkbox" checked={saveAddress} onChange={(e) => setSaveAddress(e.target.checked)} /> Save this address for future orders</label></section>
     <section className="checkout-section"><h2><Icon name="truck" /> Delivery Options</h2><div className="checkout-options"><label className={delivery === 'standard' ? 'is-active' : ''}><input type="radio" name="delivery" checked={delivery === 'standard'} onChange={() => setDelivery('standard')} /><span><strong>Standard Delivery</strong><small>3 – 5 Business Days</small></span><em>FREE</em></label><label className={delivery === 'express' ? 'is-active' : ''}><input type="radio" name="delivery" checked={delivery === 'express'} onChange={() => setDelivery('express')} /><span><strong>Express Delivery</strong><small>1 – 2 Business Days</small></span><em>₹120</em></label></div></section>
@@ -3489,7 +3497,7 @@ function TermsPage() {
 function Footer() {
   const [openPanel, setOpenPanel] = useState(null)
   const [isMobileFooter, setIsMobileFooter] = useState(
-    () => typeof window !== 'undefined' && window.innerWidth <= 768,
+    () => typeof window !== 'undefined' && window.innerWidth <= 1024,
   )
   const currentYear = new Date().getFullYear()
   const footerPanels = [
@@ -3551,7 +3559,7 @@ function Footer() {
       return undefined
     }
 
-    const mediaQuery = window.matchMedia('(max-width: 768px)')
+    const mediaQuery = window.matchMedia('(max-width: 1024px)')
     const syncMobileFooter = (event) => {
       setIsMobileFooter(event.matches)
     }

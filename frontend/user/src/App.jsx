@@ -813,8 +813,8 @@ function Icon({ name, className = '' }) {
       )
     case 'reset':
       return (
-        <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M5 8V4m0 0h4M5 4l3.1 3.1A7 7 0 1 1 5.5 14" />
+        <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M5.2 8.4V4.7m0 0h3.7M5.2 4.7l3 3A7.5 7.5 0 1 1 4.9 14" />
         </svg>
       )
     case 'list':
@@ -1043,6 +1043,12 @@ async function shareCurrentProduct(product, sectionId = 'products') {
 
 function FooterLinkItem({ item }) {
   const handleClick = (event) => {
+    if (item.href === '#terms') {
+      event.preventDefault()
+      window.location.assign('#terms')
+      return
+    }
+
     if (!item.href.startsWith('#')) {
       return
     }
@@ -1295,6 +1301,12 @@ function Navbar({ activePageHref, cartItemCount = baseCartItemCount, wishlistCou
     setMenuOpen(false)
   }
 
+  const handleLogoClick = (event) => {
+    event.preventDefault()
+    window.location.hash = '#home'
+    window.location.reload()
+  }
+
   return (
     <header
       className={['site-header', isScrolled ? 'is-scrolled' : '']
@@ -1307,7 +1319,7 @@ function Navbar({ activePageHref, cartItemCount = baseCartItemCount, wishlistCou
             className="brand-mark"
             href="#home"
             aria-label="Ayush Kursela home"
-            onClick={(event) => handleNavLinkClick(event, '#home')}
+            onClick={handleLogoClick}
           >
             <img src="/ayush/logo-navbar-clean.png" alt="Ayush Kursela logo" />
           </a>
@@ -1385,7 +1397,7 @@ function Navbar({ activePageHref, cartItemCount = baseCartItemCount, wishlistCou
             className="brand-mark brand-mark--mobile"
             href="#home"
             aria-label="Ayush Kursela home"
-            onClick={(event) => handleNavLinkClick(event, '#home')}
+            onClick={handleLogoClick}
           >
             <img src="/ayush/logo-navbar-clean.png" alt="Ayush Kursela logo" />
           </a>
@@ -2647,14 +2659,19 @@ function ProductCard({ cardContext = 'catalog', onAddToCart, onBuyNow, onSharePr
         <Icon name="heart" className="product-card__wishlist-icon" />
       </button>
 
-      <div className="product-card__image-shell">
+      <button
+        type="button"
+        className="product-card__image-shell product-card__image-link"
+        aria-label={`Buy ${product.name}`}
+        onClick={handleBuyNowClick}
+      >
         <img
           src={product.image}
           alt={product.alt}
           className="product-card__image"
           loading="lazy"
         />
-      </div>
+      </button>
 
       <div className="product-card__details">
         <div className="product-card__title-row">
@@ -2729,7 +2746,7 @@ function ProductCard({ cardContext = 'catalog', onAddToCart, onBuyNow, onSharePr
         aria-label={`Buy ${product.name}`}
         onClick={handleBuyNowClick}
       >
-        <Icon name="cart" /> BUY NOW
+        BUY NOW
       </button>
     </article>
   )
@@ -2929,7 +2946,7 @@ function ProductsPage({ initialShoppingMode = 'wholesale', initialProductFilter 
             <label><span className="sr-only">Price</span><span className="products-mobile-toolbar__rupee" aria-hidden="true">₹</span><select value={priceFilter} onChange={(event) => setPriceFilter(event.target.value)}><option value="all">Price</option>{shoppingMode === 'wholesale' ? <><option value="wholesale-under-4000">Under ₹4,000</option><option value="wholesale-4000-5000">₹4,000–₹5,000</option><option value="wholesale-over-5000">Above ₹5,000</option></> : <><option value="under-30">Under ₹30</option><option value="30-50">₹30–₹50</option><option value="over-50">Above ₹50</option></>}</select></label>
             <label><span className="sr-only">Pack size</span><Icon name="package" /><select value={sizeFilter} onChange={(event) => setSizeFilter(event.target.value)}><option value="all">Pack Size</option>{availableMobilePackSizes.map((size) => <option key={`pack-${size}`} value={shoppingMode === 'wholesale' ? `pcs-${size}` : size}>{shoppingMode === 'wholesale' ? `${size} PCS / Bag` : size}</option>)}</select></label>
             <label><span className="sr-only">Weight</span><Icon name="weight" /><select value={weightFilter} onChange={(event) => setWeightFilter(event.target.value)}><option value="all">Weight</option>{availableMobileWeights.map((weight) => <option key={`weight-${weight}`} value={weight}>{weight}</option>)}</select></label>
-            <button type="button" onClick={() => { setProductFilter('all'); setSizeFilter('all'); setWeightFilter('all'); setPriceFilter('all'); setSortBy('popular') }}>Reset <Icon name="reset" /></button>
+            <button className="products-mobile-toolbar__reset" type="button" aria-label="Reset product filters" onClick={() => { setProductFilter('all'); setSizeFilter('all'); setWeightFilter('all'); setPriceFilter('all'); setSortBy('popular') }}><img src="/ayush/reset-refresh-green.png" alt="" aria-hidden="true" /><span>Reset</span></button>
           </div>
         </section>
 
@@ -3434,6 +3451,41 @@ function ContactRow({ icon, title, body, note }) {
   )
 }
 
+function TermsPage() {
+  const cardIcons = ['shield', 'package', 'leaf', 'drop', 'bag', 'cart', 'truck', 'badge', 'lock', 'user']
+
+  return (
+    <main className="terms-page" id="terms">
+      <section className="terms-page__content shell-content">
+        <aside className="terms-page__aside">
+          <strong><Icon name="package" /> Table of Contents</strong>
+          <nav className="terms-page__nav" aria-label="Terms sections">
+            {detailedTermsSections.map(([title], index) => <a key={title} href={`#terms-section-${index + 1}`}><b>{index + 1}</b>{title}</a>)}
+          </nav>
+        </aside>
+        <div className="terms-page__body">
+          <div className="terms-page__intro">
+            <span className="terms-page__intro-icon"><Icon name="shield" /></span>
+            <div><p className="terms-page__intro-label">Terms &amp; Conditions · Effective August 2026</p><h1>Welcome to Ayush Kursela</h1><p>These Terms govern browsing, accounts, retail and wholesale orders, payments, reviews, and the other services available through this website. By using the website, you agree to these Terms.</p></div>
+          </div>
+          <div className="terms-page__sections">
+            {detailedTermsSections.map(([title, paragraph], index) => (
+              <article className="terms-page__section" id={`terms-section-${index + 1}`} key={title}>
+                <span className="terms-page__number"><Icon name={cardIcons[index % cardIcons.length]} /></span>
+                <div><h2>{index + 1}. {title}</h2><p>{paragraph}</p></div>
+              </article>
+            ))}
+          </div>
+          <section className="terms-page__contact" id="terms-contact">
+            <span className="terms-page__contact-icon"><Icon name="mail" /></span>
+            <div><p className="terms-page__contact-label">Your trust matters</p><h2>A simple, secure shopping experience</h2><p>For questions or order support, please contact our official customer care team with your Order ID.</p><a href={`mailto:${footerContactInfo.email}`}>{footerContactInfo.email}</a><span>{footerContactInfo.phone} · {footerContactInfo.addressTitle}, {footerContactInfo.addressBody}</span></div>
+          </section>
+        </div>
+      </section>
+    </main>
+  )
+}
+
 function Footer() {
   const [openPanel, setOpenPanel] = useState(null)
   const [isMobileFooter, setIsMobileFooter] = useState(
@@ -3465,7 +3517,7 @@ function Footer() {
       type: 'links',
       items: footerLinks.customerCare.map((label) => ({
         label,
-        href: `mailto:${footerContactInfo.email}?subject=${encodeURIComponent(`Ayush Kursela - ${label}`)}`,
+        href: customerCareLinkTargets[label] ?? `mailto:${footerContactInfo.email}?subject=${encodeURIComponent(`Ayush Kursela - ${label}`)}`,
       })),
     },
     {
@@ -3764,6 +3816,78 @@ function MobileBottomNav({ pageHash, currentHash, cartCount = 0, wishlistCount =
   return typeof document === 'undefined' ? navigation : createPortal(navigation, document.body)
 }
 
+const customerCareLinkTargets = {
+  'Terms & Conditions': '#terms',
+}
+
+const detailedTermsSections = [
+  ['Eligibility & Acceptance of Terms', 'By using this website, you confirm that you are legally capable of entering into a binding agreement under applicable law. If you act for a company, shop, distributor, reseller, or other organization, you confirm that you have authority to act for it. Your use is also subject to our Privacy, Shipping, Cancellation, and Return & Refund Policies.'],
+  ['General Conditions', 'We provide this website for customers to discover, purchase, and obtain information about Ayush Kursela products. Where reasonably necessary, we may refuse or restrict service, limit quantities, cancel suspicious orders, modify or suspend features, correct inaccurate information, and restrict accounts that violate these Terms. You may not copy, reproduce, resell, distribute, exploit, or commercially use substantial portions of our content without authorization.'],
+  ['Product Information', 'We aim to provide clear information on product names, images, net quantity, variants, prices, descriptions, ingredients, packaging, availability, and offers. Images are primarily representative; packaging, labels, colour, size, or appearance can reasonably differ. Always check the physical label for current information before consumption.'],
+  ['Food Products & Allergen Information', 'Customers must review the label, ingredients, allergen and nutritional information, manufacturing and expiry/best-before dates, and storage instructions before consumption. If you have an allergy, intolerance, dietary restriction, or concern, review information carefully before purchase. Do not consume products that appear materially damaged, tampered with, or unsafe; contact support.'],
+  ['Product Availability', 'All displayed products are subject to availability. Adding an item to your cart does not reserve it. If an item becomes unavailable after ordering, we may contact you with an appropriate solution, including agreed replacement, cancellation, or applicable refund.'],
+  ['Pricing', 'Prices may vary by variant, pack size, quantity, retail or wholesale selection, offer, tax, delivery location, and shipping charges. We may change prices and offers from time to time. The applicable amount is shown at checkout before confirmation, subject to correction of obvious technical or pricing errors.'],
+  ['Retail Orders', 'Retail customers may purchase quantities and variants shown on the website. Retail pricing, offers, delivery charges, and availability may differ from wholesale orders. Review product, variant, quantity, price, delivery address, and payment method before confirmation. Cancellation may be restricted once an order enters processing or dispatch.'],
+  ['Wholesale Orders', 'Wholesale purchases may have minimum order quantities, bags/cartons, order values, distinct prices, packaging, shipping charges, timelines, and product availability. Minimum quantities appear on relevant product or ordering interfaces where applicable. A wholesale request is not accepted until the order, stock, price, and payment are confirmed.'],
+  ['Order Placement & Confirmation', 'Provide accurate and complete information. Orders may progress through Order Placed, Payment Confirmation, Processing, Packed, Shipped, and Delivered; displayed stages may vary. We may cancel or restrict orders for unavailability, obvious pricing errors, failed payment, incomplete or invalid delivery information, suspected fraud, unusual activity, wholesale requirement violations, or technical errors. Applicable refunds follow our Refund Policy.'],
+  ['Customer Information', 'During registration and checkout, provide accurate details including full name, mobile number, email, delivery address, city, state, PIN code, and any information required to complete an order. We are not responsible for avoidable delivery problems caused by materially incorrect or incomplete details.'],
+  ['User Accounts', 'Keep login credentials confidential. Do not share credentials fraudulently, access another account, create false accounts, manipulate offers through multiple accounts, or attempt access to administrative features. Report suspected unauthorized use promptly. We may restrict accounts where suspicious activity is detected.'],
+  ['Payment', 'Available options are displayed at checkout and may be processed by authorised third-party providers. Ayush Kursela does not ask customers to provide payment credentials through unofficial communication channels. Verify payment details carefully before payment.'],
+  ['Payment Failure', 'Payments may fail due to bank issues, gateway errors, network interruptions, incorrect information, limits, or technical problems. If money appears deducted without confirmation, do not repeatedly pay for the same order before checking its status. Failed or reversed transactions follow the relevant bank or provider timelines.'],
+  ['Shipping & Delivery', 'We aim to process and dispatch confirmed orders within reasonable timelines. Delivery estimates depend on location, availability, quantity, courier availability, order type, holidays, weather, transport disruptions, and other factors beyond our reasonable control; estimates are not guaranteed unless expressly stated.'],
+  ['Shipping Charges', 'Shipping charges may vary by order value, weight, quantity, delivery location, retail or wholesale status, and courier charges. Applicable charges are shown at checkout or communicated before final confirmation where practicable.'],
+  ['Delivery Responsibility', 'Provide an address where an order can reasonably be received. If delivery fails because of an incorrect address, unavailable recipient, invalid contact details, repeated failed attempts, or refusal of a conforming order, additional shipping charges may apply where permitted.'],
+  ['Damaged, Missing or Incorrect Products', 'Inspect packages after delivery and contact support promptly for wrong, missing, materially damaged, defective, or tampered products. We may request the order number, photographs, and reasonable evidence to assess the claim. Eligible cases follow our Return & Refund Policy.'],
+  ['Cancellations', 'Orders may be eligible for cancellation before certain processing or shipping stages. Once packed, dispatched, or shipped, cancellation may not be possible. If we cancel an order after payment, an applicable refund will be initiated. See the Cancellation Policy for complete conditions.'],
+  ['Returns & Replacements', 'Food or consumable products may have restricted returns for hygiene, safety, quality-control, and regulatory reasons. Eligible damaged, incorrect, missing, or materially defective products may be considered under our policy. Change-of-mind returns may not qualify where permitted by law. Statutory consumer rights remain unaffected.'],
+  ['Refunds', 'Approved refunds are generally processed using the applicable available method. Timing depends on the payment provider, bank, or payment method and is subject to third-party processing timelines.'],
+  ['Offers, Coupons & Promotions', 'Promotional discounts, coupon codes, limited-time offers, product and quantity discounts, and retail or wholesale offers may have separate eligibility requirements, expiry dates, quantity limits, and conditions. Unless expressly allowed, offers may not be combined. Fraudulent or abusive use may be rejected.'],
+  ['Reviews, Ratings & Feedback', 'Reviews, ratings, comments, suggestions, and feedback must not contain abusive, threatening, illegal, fraudulent, spam, malicious, obscene, or rights-infringing content. We may moderate or remove content that violates these requirements.'],
+  ['Third-Party Services', 'We may use third-party payment, logistics, hosting, analytics, authentication, communication, mapping, and location services. They operate under their own terms and privacy policies; we are not responsible for their independent operation outside our reasonable control.'],
+  ['Third-Party Links', 'External links may be provided for convenience or information. We do not control third-party sites and are not responsible for their independent content, security, privacy practices, availability, or transactions. Review their policies before use.'],
+  ['Personal Information & Privacy', 'Personal information may be collected for account creation, order processing, payment support, shipping, customer service, fraud prevention, improvement, and legal compliance. Its collection and use are governed by our Privacy Policy.'],
+  ['Website Security', 'Do not hack the website, access restricted systems, circumvent controls, introduce malicious software, scrape without authorisation, disrupt servers, manipulate prices or orders, access another user’s data, or exploit vulnerabilities. We may block access and take appropriate action.'],
+  ['Prohibited Uses', 'You may not use Ayush Kursela unlawfully or fraudulently, including for fraudulent purchases, fake payment confirmations, coupon misuse, false information, unauthorized resale, intellectual-property infringement, harassment, spam, phishing, malicious software, automated attacks, or unauthorized access. Violations can lead to restriction, termination, or other appropriate action.'],
+  ['Intellectual Property Rights', 'Unless otherwise stated, brand elements, logos, product graphics, website design, text, banners, icons, images owned by us, and promotional materials are owned by or licensed to Ayush Kursela and protected by law. They may not be copied, modified, distributed, reproduced, or commercially exploited without permission.'],
+  ['Errors, Inaccuracies & Omissions', 'Website information can occasionally contain errors about descriptions, pricing, offers, availability, shipping, specifications, or promotions. We may correct and update it. Where legally permitted, orders materially affected by an obvious pricing or technical error may be cancelled with an appropriate refund where payment was received.'],
+  ['Service Availability', 'We aim to keep the website reliable, but interruptions may occur due to maintenance, servers, networks, updates, security incidents, third-party outages, or circumstances beyond our reasonable control. Continuous availability cannot be guaranteed.'],
+  ['Disclaimer of Warranties', 'We aim to provide accurate information and quality products. Except for rights or warranties that cannot legally be excluded, website services are provided subject to availability and applicable law. Statutory consumer rights are not removed.'],
+  ['Limitation of Liability', 'To the extent permitted by law, Ayush Kursela is not responsible for indirect or consequential losses arising solely from circumstances outside our reasonable control. Nothing excludes liability or consumer rights that cannot legally be excluded.'],
+  ['Indemnification', 'To the extent permitted by law, users are responsible for claims or losses resulting from unlawful website use, intentional violation of these Terms, or infringement of another person’s rights.'],
+  ['Termination of Access', 'We may suspend or terminate access where a user materially violates these Terms, acts fraudulently, attempts unauthorized access, misuses services, or creates a security risk. Termination does not affect rights or obligations arising earlier.'],
+  ['Severability', 'If a provision is invalid, illegal, or unenforceable, the remaining provisions continue to apply to the extent permitted by law.'],
+  ['Entire Agreement', 'These Terms together with applicable policies referenced on the website constitute the agreement governing use of the website services. Failure to immediately enforce a provision is not a waiver.'],
+  ['Changes to Terms', 'We may revise these Terms for changes in functionality, products, payment systems, shipping, business operations, or law. The latest version is displayed here with an updated Last Updated date. Please review these Terms periodically.'],
+  ['Governing Law', 'These Terms are governed by the laws of India. Consumer disputes and other matters follow applicable Indian law and mandatory jurisdictional requirements. Statutory consumer rights and remedies remain available.'],
+  ['Customer Support', 'For assistance with orders, payments, shipping, returns, refunds, products, accounts, or wholesale orders, contact Ayush Kursela using the official details on this website. Keep your Order ID available for order-related support.'],
+]
+
+const termsSections = [
+  ['Online Store Terms', ['By using this website, you confirm that you are legally capable of entering into a binding agreement.', 'You agree not to use our products, website, or services for any unlawful, fraudulent, or unauthorized purpose.', 'You must not attempt to introduce viruses, malicious code, or other technology intended to damage, interrupt, or interfere with the website.', 'Any violation of these Terms may result in suspension or termination of access to our services.']],
+  ['General Conditions', ['We reserve the right to refuse service where reasonably necessary, including in cases of suspected fraud, misuse, payment issues, or violation of these Terms.', 'You agree not to reproduce, duplicate, copy, sell, resell, or exploit any portion of our website or services without prior written permission.', 'Product images, descriptions, graphics, logos, branding, and other website content remain the property of their respective owners and may not be used without authorization.']],
+  ['Accuracy of Information', ['We make reasonable efforts to ensure that product information, prices, descriptions, availability, and other information displayed on our website are accurate. However, occasional errors, omissions, or outdated information may occur. We reserve the right to correct errors and update information whenever necessary.']],
+  ['Modifications to Services and Prices', ['Product prices may change without prior notice. We may modify, discontinue, replace, or temporarily suspend any product, feature, offer, or website service.', 'Prices applicable to an order will generally be those displayed and confirmed during checkout, subject to correction of obvious pricing or technical errors.']],
+  ['Products or Services', ['Certain products may be available exclusively online and may have limited quantities. We make reasonable efforts to display product packaging, colors, sizes, and appearance accurately; actual packaging or appearance may vary slightly.', 'Product availability is subject to stock. We reserve the right to limit quantities purchased by an individual customer or business where reasonably necessary.', 'Retail and wholesale products may have different pricing, quantity requirements, packaging, shipping terms, and eligibility conditions.']],
+  ['Orders, Billing and Account Information', ['You agree to provide current, complete, and accurate information when placing an order. We may cancel or restrict an order if incorrect information is provided, payment fails or cannot be verified, a product is unavailable, the order appears fraudulent or suspicious, a technical or pricing error occurs, or wholesale minimum quantity requirements are not satisfied.', 'Customers are responsible for reviewing their order details before confirming payment.']],
+  ['Payment', ['Available payment methods will be displayed during checkout. Payments may be processed through authorized payment gateways or other supported payment methods.', 'We do not guarantee uninterrupted availability of third-party payment services. An order is successfully placed only after the website displays appropriate confirmation or we otherwise confirm it.']],
+  ['Shipping and Delivery', ['Estimated delivery times may vary depending on delivery location, product availability, courier operations, public holidays, weather, and other circumstances outside our reasonable control.', 'Customers must provide a complete and accurate delivery address and contact information. We are not responsible for delivery issues caused by incorrect or incomplete customer information.', 'Applicable shipping charges will be communicated during checkout where possible.']],
+  ['Cancellations, Returns and Refunds', ['Order cancellation, replacement, return, and refund requests will be handled according to our applicable Cancellation, Return and Refund Policy.', 'Because some products may be food or consumable products, returns may be restricted for hygiene, safety, quality, or regulatory reasons. Please inspect delivered packages and report damaged, incorrect, missing, or materially defective products within the applicable policy period.']],
+  ['Wholesale Orders', ['Wholesale orders may be subject to separate minimum quantities, pricing, packaging, delivery charges, payment requirements, and availability. Wholesale prices may change depending on quantity, packaging, product, or applicable commercial conditions.', 'Submitting a wholesale order does not guarantee acceptance until the order and payment are confirmed.']],
+  ['User Accounts', ['Customers may be allowed to create an account to manage orders and access website features. You are responsible for maintaining the confidentiality of your login credentials and for activity performed through your account unless unauthorized use is promptly reported to us.', 'We may temporarily restrict an account where suspicious or unauthorized activity is detected.']],
+  ['Prohibited Uses', ['You must not use our website for unlawful activities; to violate laws or intellectual property rights; to submit false or misleading information; to upload malicious software; to collect personal information without authorization; to spam, phish, scrape, crawl, or interfere with website functionality; to attempt unauthorized access; or to place fraudulent orders or misuse promotional offers.', 'We may suspend or terminate access for prohibited use.']],
+  ['Third-Party Services and Links', ['Our website may contain third-party links or use payment gateways, logistics, analytics, social-media platforms, and other providers. These services operate under their own terms and privacy practices.', 'We are not responsible for the independent content, policies, availability, or practices of third-party websites and services.']],
+  ['Reviews, Comments and Feedback', ['Customers may submit ratings, reviews, suggestions, comments, or other feedback where available. Do not submit content that is unlawful, abusive, misleading, defamatory, obscene, fraudulent, or infringes another person’s rights.', 'We may moderate or remove inappropriate content where reasonably necessary.']],
+  ['Personal Information', ['The collection and use of personal information through our website is governed by our Privacy Policy. Please review it to understand how personal information may be collected, used, stored, and protected.']],
+  ['Errors, Inaccuracies and Omissions', ['Occasionally, website information may contain typographical errors, inaccuracies, or omissions relating to product descriptions, prices, promotions, shipping charges, or availability. We may correct such information and, where legally permitted, cancel or amend affected orders.']],
+  ['Intellectual Property', ['Unless otherwise stated, the website design, branding, text, graphics, product presentation, logos, and original website materials are protected by applicable intellectual-property laws. Unauthorized copying, reproduction, distribution, modification, or commercial exploitation is prohibited.']],
+  ['Disclaimer and Limitation of Liability', ['We aim to provide a reliable website and quality products, but cannot guarantee uninterrupted operation or freedom from delays and technical errors.', 'To the extent permitted by applicable law, we are not responsible for indirect or consequential losses arising solely from circumstances beyond our reasonable control. Nothing in these Terms excludes rights or liabilities that cannot legally be excluded under consumer-protection law.']],
+  ['Indemnification', ['To the extent permitted by law, you agree to be responsible for losses or claims arising from unlawful misuse of the website, infringement of another person’s rights, or material violation of these Terms.']],
+  ['Severability', ['If any provision of these Terms is determined to be invalid or unenforceable, the remaining provisions will continue to remain effective to the extent permitted by law.']],
+  ['Termination', ['You may stop using our website at any time. We may suspend or terminate access where a user materially violates these Terms, misuses the website, engages in fraudulent activity, or creates security risks. Provisions intended to survive termination will continue to apply.']],
+  ['Changes to Terms of Service', ['We may update these Terms periodically to reflect changes to our website, products, business practices, or legal requirements. The latest version will be published on this page with an updated revision date.', 'Continued use of the website after updated Terms become effective constitutes acceptance to the extent permitted by applicable law.']],
+  ['Governing Law', ['These Terms are governed by the applicable laws of India. Any dispute will be handled in accordance with applicable Indian law and relevant consumer-protection requirements.']],
+]
+
 function App() {
   const [cartItems, setCartItems] = useState({})
   const [wishlistIds, setWishlistIds] = useState(readStoredWishlist)
@@ -3828,6 +3952,7 @@ function App() {
   const isLoginPage = currentHash === '#login'
   const isRegisterPage = currentHash === '#register'
   const isAccountPage = currentHash === '#account' && Boolean(account)
+  const isTermsPage = currentHash === '#terms'
   const isAuthPage = isLoginPage || isRegisterPage
 
   useEffect(() => {
@@ -3911,7 +4036,9 @@ function App() {
       <TopBar />
       <Navbar activePageHref={pageHash} cartItemCount={cartItemCount} wishlistCount={wishlistIds.length} isAuthenticated={Boolean(account)} />
 
-      {isAboutPage ? (
+      {isTermsPage ? (
+        <TermsPage />
+      ) : isAboutPage ? (
         <AboutPage
           onAddToCart={handleAddToCart}
           onBuyNow={handleBuyNow}

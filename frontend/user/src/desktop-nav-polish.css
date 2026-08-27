@@ -1,5 +1,5 @@
 /* Desktop navigation links only. Header layout and controls remain unchanged. */
-@media (min-width: 981px) {
+@media (min-width: 769px) {
   .site-nav--desktop > a {
     position: relative;
     padding-bottom: 0.38rem;
@@ -47,7 +47,7 @@
   }
 }
 
-@media (min-width: 981px) and (prefers-reduced-motion: reduce) {
+@media (min-width: 769px) and (prefers-reduced-motion: reduce) {
   .site-nav--desktop > a,
   .site-nav--desktop > a::after {
     transition-duration: 0.01ms;

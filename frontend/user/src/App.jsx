@@ -3201,12 +3201,17 @@ function BrandStorySection({ onAddToCart, onBuyNow, onShareProduct, onToggleWish
 
             <div ref={mobileRibbonRef} className="mobile-product-ribbon" aria-label="Popular Ayush products">
               {productCatalog.map((product) => (
-                <span className="mobile-product-ribbon__item" key={`mobile-ribbon-${product.id}`}>
+                <a
+                  className="mobile-product-ribbon__item"
+                  href={`#products?product=${product.id}`}
+                  aria-label={`View ${product.name} on the products page`}
+                  key={`mobile-ribbon-${product.id}`}
+                >
                   <span className="mobile-product-ribbon__circle">
                     <img src={product.image} alt={product.name} loading="lazy" />
                   </span>
                   <span className="mobile-product-ribbon__name">{product.name}</span>
-                </span>
+                </a>
               ))}
             </div>
 

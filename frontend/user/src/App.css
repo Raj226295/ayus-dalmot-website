@@ -8239,7 +8239,12 @@ a.contact-card__title:focus-visible {
     flex-direction: column;
     gap: 7px;
     scroll-snap-align: start;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
+  .home-main .mobile-product-ribbon__item:active { transform: scale(.96); }
+  .home-main .mobile-product-ribbon__item:focus-visible { outline: 2px solid #fff; outline-offset: 3px; border-radius: 12px; }
   .home-main .mobile-product-ribbon__circle {
     display: grid;
     width: 100%;

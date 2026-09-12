@@ -1,0 +1,8 @@
+.order-success-tracking i{width:42px;height:42px;border:4px solid #fff;box-shadow:0 2px 8px rgba(22,54,36,.1)}
+.order-success-tracking i svg{width:19px;height:19px;stroke-width:2}
+.order-success-tracking .is-complete i svg{stroke-width:2.35}
+.order-success-tracking article:first-child:after{border-top-style:solid;border-top-color:#078447}
+.order-success-tracking article:not(.is-complete) i{background:#c7ccca;color:#fff}
+.order-success-tracking article b{color:#202a24;font-weight:750}
+.order-success-tracking article.is-complete b{color:#07643c}
+.review-order-product p{margin:5px 0;color:#737b76}

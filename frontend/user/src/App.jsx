@@ -4,6 +4,13 @@ import './App.css'
 import './desktop-nav-polish.css'
 import './checkout-polish.css'
 import './user-theme.css'
+import './order-success.css'
+import './order-success-polish.css'
+import './order-success-mobile.css'
+import './order-success-final.css'
+import './review-order-modal.css'
+import './account-mobile-dashboard.css'
+import './account-order-details.css'
 
 const menuLinks = [
   { label: 'Home', href: '#home' },
@@ -23,6 +30,7 @@ const defaultNavHref = menuLinks[0].href
 const accountStorageKey = 'ayush-kursela-account'
 const addressStorageKey = 'ayush-kursela-addresses'
 const wishlistStorageKey = 'ayush-kursela-wishlist'
+const orderConfirmationStorageKey = 'ayush-last-order-confirmation'
 const catalogApiUrl = (()=>{const url=new URL(import.meta.env.VITE_API_URL);if(['localhost','127.0.0.1'].includes(url.hostname))url.hostname=window.location.hostname;return url.toString().replace(/\/$/,'')})()
 const defaultAccountAddresses = [
   { id: 'home', label: 'Home', addressLine: '85 P, Barauni – Purnea Hwy', cityLine: 'Maranga, Purnia, Bihar 854301', phone: '+91 91234 56789', isDefault: true, icon: 'home' },
@@ -816,6 +824,24 @@ function Icon({ name, className = '' }) {
       return (
         <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
           <path d="M5.2 8.4V4.7m0 0h3.7M5.2 4.7l3 3A7.5 7.5 0 1 1 4.9 14" />
+        </svg>
+      )
+    case 'check':
+      return (
+        <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m5 12.5 4.2 4.2L19 7" />
+        </svg>
+      )
+    case 'camera':
+      return (
+        <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4 7h3l1.5-2h7L17 7h3v13H4V7Z" /><circle cx="12" cy="13" r="4" /><path d="M18 10h.01" />
+        </svg>
+      )
+    case 'send':
+      return (
+        <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+          <path d="m22 2-7 20-4-9-9-4 20-7Z" /><path d="M22 2 11 13" />
         </svg>
       )
     case 'list':
@@ -2327,17 +2353,17 @@ function RegisterPage({ onRegister }) {
 }
 
 function OrderProgress({ status }) {
-  const isShipped = status === 'Shipped'
+  const currentStage = { Processing: 1, Shipped: 2, Delivered: 3 }[status] ?? 1
   const stages = [
-    { label: 'Ordered', date: isShipped ? '10 May' : '12 May', icon: 'bag', state: 'done' },
-    { label: 'Packed', date: isShipped ? '11 May' : '13 May', icon: 'package', state: isShipped ? 'done' : 'current' },
-    { label: 'Shipped', date: isShipped ? '12 May' : '—', icon: 'truck', state: isShipped ? 'current' : 'pending' },
-    { label: 'Delivered', date: '—', icon: 'shield', state: 'pending' },
+    { label: 'Ordered', date: status === 'Processing' ? '12 May' : status === 'Delivered' ? '05 May' : '10 May', icon: 'check', state: 'done' },
+    { label: 'Packed', date: status === 'Processing' ? '13 May' : status === 'Delivered' ? '06 May' : '11 May', icon: 'package', state: currentStage > 1 ? 'done' : 'current' },
+    { label: 'Shipped', date: currentStage >= 2 ? (status === 'Delivered' ? '07 May' : '12 May') : '—', icon: 'truck', state: currentStage > 2 ? 'done' : currentStage === 2 ? 'current' : 'pending' },
+    { label: 'Delivered', date: currentStage === 3 ? '09 May' : '—', icon: 'shield', state: currentStage === 3 ? 'current' : 'pending' },
   ]
 
   return (
     <div className="account-order__tracking">
-      <span className={['account-order__label', isShipped ? 'account-order__label--shipped' : ''].filter(Boolean).join(' ')}>{status}</span>
+      <span className={['account-order__label', status !== 'Processing' ? 'account-order__label--shipped' : ''].filter(Boolean).join(' ')}>{status}</span>
       <ol>
         {stages.map((stage) => (
           <li key={stage.label} className={`is-${stage.state}`}>
@@ -2349,6 +2375,24 @@ function OrderProgress({ status }) {
       </ol>
     </div>
   )
+}
+
+function AccountOrderDetails({ order, onClose }) {
+  if (!order) return null
+  const isProcessing = order.status === 'Processing'
+  const tax = Math.round(order.price * .05 * 100) / 100
+  return <section className="account-order-details" aria-label={`${order.id} details`}>
+    <div className="account-order-details__top"><span><Icon name="leaf"/> Pure Taste.</span><span><Icon name="truck"/> Free Delivery</span><span><Icon name="heart"/> Happy India.</span></div>
+    <header className="account-order-details__nav"><button type="button" onClick={onClose} aria-label="Back to orders"><Icon name="chevron-left"/></button><h1>Order Details</h1><img src="/ayush/logo-navbar-clean.png" alt="Ayush Kursela"/><div><Icon name="search"/><Icon name="heart"/><Icon name="cart"/></div></header>
+    <main>
+      <section className="account-detail-card account-detail-heading"><div><h2>{order.id}</h2><p>Placed on {order.date}, 10:24 AM</p></div><span className={isProcessing?'is-processing':'is-shipped'}><Icon name={isProcessing?'clock':'truck'}/>{order.status}</span><p><Icon name="calendar"/><small>Expected Delivery</small><strong>{isProcessing?'14 – 16 May 2025':'Delivered by 16 May 2025'}</strong></p></section>
+      <section className="account-detail-card account-detail-product"><img src={order.image} alt={order.name}/><div><h2>{order.name}</h2><p>{order.weight}</p><span>Premium Quality</span><span>Rich in Nutrition</span><strong>₹{order.price}</strong></div><b>Qty: {order.quantity}</b></section>
+      <section className="account-detail-card account-detail-tracking"><header><Icon name="truck"/><h2>Order Tracking</h2><span>Tracking ID: AYK123456789</span></header><OrderProgress status={order.status}/><aside><Icon name="truck"/><span><strong>Your order {isProcessing?'has been packed and is moving to the delivery partner.':'is on the way.'}</strong><small>We will notify you once it is delivered.</small></span></aside></section>
+      <section className="account-detail-card account-detail-price"><header><Icon name="list"/><h2>Price Details</h2></header><p><span>Item Total ({order.quantity} item)</span><b>₹{order.price}</b></p><p><span>Discount</span><b className="is-free">− ₹0</b></p><p><span>Shipping Charges</span><b className="is-free">FREE</b></p><p><span>Tax (5%)</span><b>₹{tax}</b></p><div><strong>Grand Total</strong><strong>₹{order.price}</strong></div></section>
+      <div className="account-detail-grid"><section className="account-detail-card"><header><Icon name="pin"/><h2>Delivery Address</h2></header><p><strong>Raj Vardhan Singh</strong><br/>H.No. 221, Shiv Nagar, Near RK University<br/>Rajkot, Gujarat – 360001, India<br/>+91 98765 43210</p></section><section className="account-detail-card"><header><Icon name="card"/><h2>Payment Method</h2></header><div className="account-detail-payment"><Icon name="card"/><span><strong>Cash on Delivery (COD)</strong><small>Pay ₹{order.price} at the time of delivery.</small></span></div></section></div>
+      <section className="account-detail-card account-detail-partner"><Icon name="truck"/><span><h2>Delivery Partner</h2><strong>Delhivery</strong><small>Tracking updates will be shared on SMS.</small></span><b>DELHIVERY</b></section>
+    </main>
+  </section>
 }
 
 function AccountPage({ user, onLogout, onAddToCart, onBuyNow, onUpdateAccount }) {
@@ -2365,15 +2409,20 @@ function AccountPage({ user, onLogout, onAddToCart, onBuyNow, onUpdateAccount })
   const [openFaq, setOpenFaq] = useState(null)
   const [supportDraft, setSupportDraft] = useState({ subject: '', message: '' })
   const [returnDraft, setReturnDraft] = useState({ orderNumber: '', reason: '', details: '' })
+  const [selectedOrder, setSelectedOrder] = useState(null)
   const initials = user.name.split(' ').map((name) => name[0]).join('').slice(0, 2).toUpperCase()
   const accountItems = [
     { id: 'orders', icon: 'bag', title: 'My Orders', description: 'View orders, order details and tracking.' },
     { id: 'addresses', icon: 'pin', title: 'Saved Addresses', description: 'Manage delivery addresses and defaults.' },
     { id: 'wishlist', icon: 'heart', title: 'Wishlist', description: 'See your saved product favourites.' },
     { id: 'settings', icon: 'user', title: 'Account Settings', description: 'Update your personal information and password.' },
-    { id: 'support', icon: 'mail', title: 'Help & Support', description: 'Contact, FAQ and returns assistance.' },
+    { id: 'support', icon: 'headset', title: 'Help & Support', description: 'Contact, FAQ and returns assistance.' },
   ]
   const showNotice = (text) => setNotice(text)
+  const viewOrder = (order) => {
+    if (window.matchMedia('(max-width: 1024px)').matches) setSelectedOrder(order)
+    else showNotice(`${order.id} details opened.`)
+  }
   const openSettingsView = (view) => { setActivePanel('settings'); setSettingsView(view); setNotice('') }
   const saveProfile = (event) => {
     event.preventDefault()
@@ -2469,10 +2518,10 @@ function AccountPage({ user, onLogout, onAddToCart, onBuyNow, onUpdateAccount })
           <div className="account-profile__details">
             <p className="account-page__eyebrow">MY ACCOUNT</p>
             <div className="account-profile__name-row"><h1 id="account-title">{user.name}</h1></div>
-            <p>{user.email}</p>
-            <p>{user.mobile || '+91 91234 56789'}</p>
+            <p className="account-profile__contact"><Icon name="mail" />{user.email}</p>
+            <p className="account-profile__contact"><Icon name="phone" />{user.mobile || '+91 91234 56789'}</p>
           </div>
-          <button type="button" className="account-button account-button--secondary" onClick={() => openSettingsView('profile')}>Edit Profile</button>
+          <button type="button" className="account-button account-button--secondary" onClick={() => openSettingsView('profile')}><Icon name="edit" /> Edit Profile</button>
         </section>
 
         <div className="account-layout">
@@ -2508,16 +2557,24 @@ function AccountPage({ user, onLogout, onAddToCart, onBuyNow, onUpdateAccount })
                 <div className="account-order__product"><strong>Order #AK-10248</strong><p>Ayush Kursela Mixture · 2110</p><small>1L Glass Jar</small><b>₹899</b></div>
                 <div className="account-order__meta"><div className="account-order__meta-item"><span className="account-order__meta-icon"><Icon name="calendar" /></span><span><strong>12 May 2025</strong><small>Order Date</small></span></div><div className="account-order__meta-item"><span className="account-order__meta-icon account-order__meta-icon--rupee">₹</span><span><strong>₹899</strong><small>Total Amount</small></span></div></div>
                 <OrderProgress status="Processing" />
-                <button type="button" className="account-order__button" onClick={() => showNotice('Order #AK-10248 details opened.')}>View Details</button>
+                <div className="account-order__actions"><button type="button" className="account-order__button" onClick={() => viewOrder({id:'Order #AK-10248',date:'12 May 2025',status:'Processing',image:'/ayush/product-sattu.png',name:'Ayush Kursela Mixture - 2110',weight:'1L Glass Jar',price:899,quantity:1})}>View Details</button><button type="button" className="account-order__button account-order__button--track" onClick={() => showNotice('Tracking for Order #AK-10248 opened.')}><Icon name="truck"/> Track Order</button></div>
               </article>
               <article className="account-order account-order--detailed">
                 <img src="/ayush/product-katarr-matar.png" alt="Ayush Katarr Matar order" />
                 <div className="account-order__product"><strong>Order #AK-10247</strong><p>Ayush Katarr Matar</p><small>500g</small><b>₹60</b></div>
                 <div className="account-order__meta"><div className="account-order__meta-item"><span className="account-order__meta-icon"><Icon name="calendar" /></span><span><strong>10 May 2025</strong><small>Order Date</small></span></div><div className="account-order__meta-item"><span className="account-order__meta-icon account-order__meta-icon--rupee">₹</span><span><strong>₹120</strong><small>Total Amount</small></span></div></div>
                 <OrderProgress status="Shipped" />
-                <button type="button" className="account-order__button" onClick={() => showNotice('Tracking for Order #AK-10247 opened.')}>Track Order</button>
+                <div className="account-order__actions"><button type="button" className="account-order__button" onClick={() => viewOrder({id:'Order #AK-10247',date:'10 May 2025',status:'Shipped',image:'/ayush/product-katarr-matar.png',name:'Ayush Katarr Matar',weight:'500g',price:120,quantity:2})}>View Details</button><button type="button" className="account-order__button account-order__button--track" onClick={() => showNotice('Tracking for Order #AK-10247 opened.')}><Icon name="truck"/> Track Order</button></div>
+              </article>
+              <article className="account-order account-order--detailed account-order--third">
+                <img src="/ayush/product-bhujia.png" alt="Ayush Bhujia order" />
+                <div className="account-order__product"><strong>Order #AK-10246</strong><p>Ayush Bhujia</p><small>400g</small><b>₹160</b></div>
+                <div className="account-order__meta"><div className="account-order__meta-item"><span className="account-order__meta-icon"><Icon name="calendar" /></span><span><strong>05 May 2025</strong><small>Order Date</small></span></div><div className="account-order__meta-item"><span className="account-order__meta-icon account-order__meta-icon--rupee">₹</span><span><strong>₹320</strong><small>Total Amount</small></span></div></div>
+                <OrderProgress status="Delivered" />
+                <div className="account-order__actions"><button type="button" className="account-order__button" onClick={() => viewOrder({id:'Order #AK-10246',date:'05 May 2025',status:'Delivered',image:'/ayush/product-bhujia.png',name:'Ayush Bhujia',weight:'400g',price:320,quantity:2})}>View Details</button><button type="button" className="account-order__button account-order__button--track" onClick={() => showNotice('Tracking for Order #AK-10246 opened.')}><Icon name="truck"/> Track Order</button></div>
               </article>
               <div className="account-statuses"><span>Processing</span><span>Shipped</span><span>Delivered</span><span>Cancelled</span></div>
+              <aside className="account-mobile-help"><Icon name="headset"/><span><strong>Need Help?</strong><small>Contact our support team for any assistance.</small></span><button type="button" onClick={() => setActivePanel('support')}>Contact Us <Icon name="chevron-right"/></button></aside>
             </> : null}
             {activePanel === 'addresses' ? <>
               <div className="account-panel__title-row"><div><h2>Saved Addresses</h2><p className="account-panel__intro">Manage your saved delivery addresses.</p></div><button type="button" className="account-button" onClick={() => openAddressEditor()}>＋&nbsp; Add New Address</button></div>
@@ -2598,6 +2655,7 @@ function AccountPage({ user, onLogout, onAddToCart, onBuyNow, onUpdateAccount })
           </section>
         </div>
       </div>
+      <AccountOrderDetails order={selectedOrder} onClose={() => setSelectedOrder(null)} />
     </main>
   )
 }
@@ -2832,7 +2890,11 @@ function BuyNowPage({ product, user, onComplete }) {
   const placeOrder = (event) => {
     event.preventDefault()
     if (Object.values(address).some((value) => !String(value).trim())) { setMessage('Please complete the delivery address.'); return }
-    if (!/^\d{10}$/.test(address.phone.replace(/\D/g, ''))) { setMessage('Please enter a valid 10-digit phone number.'); return }
+    const enteredPhoneDigits = address.phone.replace(/\D/g, '')
+    const normalizedPhoneDigits = enteredPhoneDigits.length === 12 && enteredPhoneDigits.startsWith('91')
+      ? enteredPhoneDigits.slice(2)
+      : enteredPhoneDigits
+    if (!/^\d{10}$/.test(normalizedPhoneDigits)) { setMessage('Please enter a valid 10-digit Indian phone number.'); return }
     if (!/^\d{6}$/.test(address.pincode)) { setMessage('Please enter a valid 6-digit pincode.'); return }
     if (saveAddress) {
       const nextAddress = {
@@ -2846,8 +2908,9 @@ function BuyNowPage({ product, user, onComplete }) {
       }
       window.localStorage.setItem(addressStorageKey, JSON.stringify([...savedAddresses, nextAddress]))
     }
-    setMessage('Order placed successfully! Your confirmation number is AK-' + String(Date.now()).slice(-6) + '.')
-    onComplete?.()
+    const placedAt = new Date()
+    const orderId = `AYU${placedAt.getFullYear()}${String(placedAt.getMonth()+1).padStart(2,'0')}${String(placedAt.getDate()).padStart(2,'0')}${String(placedAt.getTime()).slice(-5)}`
+    onComplete?.({orderId,placedAt:placedAt.toISOString(),product,quantity,unitPrice,subtotal,shipping,tax,total,address,payment,delivery,isWholesale})
   }
   return <main className="buy-now-page" id="buy-now"><form className="shell-content buy-now-page__inner" onSubmit={placeOrder}>
     <nav className="buy-now-breadcrumb" aria-label="Checkout navigation"><button type="button" onClick={goBack}><Icon name="chevron-left" /> Back</button></nav>
@@ -2860,6 +2923,57 @@ function BuyNowPage({ product, user, onComplete }) {
     <section className="checkout-why"><h2>Why Shop with Ayush?</h2><div><span><Icon name="leaf" /><b>Farm Fresh Goodness</b><small>Carefully sourced for the best quality and taste.</small></span><span><Icon name="bag" /><b>Hygienically Packed</b><small>Packed with care to retain freshness and purity.</small></span><span><Icon name="heart" /><b>Rich in Nutrition</b><small>A wholesome choice for your everyday meals.</small></span><span><Icon name="shield" /><b>Quality Assured</b><small>Tested and trusted for your family.</small></span></div></section>
     <section className="checkout-trust"><span><Icon name="shield" /><b>Quality Assured</b><small>Premium Quality Products</small></span><span><Icon name="truck" /><b>Fast Delivery</b><small>Across India</small></span><span><Icon name="return" /><b>Easy Returns</b><small>Hassle Free Returns</small></span><span><Icon name="headset" /><b>24/7 Support</b><small>We&apos;re here to help</small></span></section>
   </form></main>
+}
+
+function readStoredOrderConfirmation() {
+  if (typeof window === 'undefined') return null
+  try {
+    return JSON.parse(window.localStorage.getItem(orderConfirmationStorageKey) || 'null')
+  } catch {
+    return null
+  }
+}
+
+function OrderSuccessPage({order,user}) {
+  const [reviewOpen,setReviewOpen] = useState(false)
+  const [rating,setRating] = useState(4)
+  const [review,setReview] = useState('')
+  const [reviewPhotos,setReviewPhotos] = useState([])
+  const [reviewSubmitted,setReviewSubmitted] = useState(false)
+  useEffect(()=>{
+    if(!reviewOpen)return undefined
+    const close=event=>event.key==='Escape'&&setReviewOpen(false)
+    const previousOverflow=document.body.style.overflow
+    document.body.style.overflow='hidden'
+    document.addEventListener('keydown',close)
+    return()=>{document.body.style.overflow=previousOverflow;document.removeEventListener('keydown',close)}
+  },[reviewOpen])
+  if (!order) return <main className="order-success-page"><div className="shell-content order-success-empty"><h1>Order details unavailable</h1><a href="#products">Continue Shopping</a></div></main>
+  const placedAt = new Date(order.placedAt)
+  const deliveryStart = new Date(placedAt); deliveryStart.setDate(deliveryStart.getDate() + (order.delivery === 'express' ? 1 : 3))
+  const deliveryEnd = new Date(placedAt); deliveryEnd.setDate(deliveryEnd.getDate() + (order.delivery === 'express' ? 2 : 5))
+  const dateFormat = {day:'numeric',month:'short',year:'numeric'}
+  const deliveryRange = `${deliveryStart.toLocaleDateString('en-IN',dateFormat)} – ${deliveryEnd.toLocaleDateString('en-IN',dateFormat)}`
+  const paymentLabels = {upi:'UPI / QR',card:'Card',netbanking:'Net Banking',cod:'COD'}
+  const paymentLabel = paymentLabels[order.payment] || order.payment
+  const address = order.address
+  const tracking = [
+    ['Order Placed','Your order is received','check'],
+    ['Confirmed','We are preparing it','shield'],
+    ['Packed','Preparing your items','package'],
+    ['Shipped','On the way','truck'],
+    ['Delivered','At your doorstep','home'],
+  ]
+  return <main className="order-success-page" id="order-success"><div className="shell-content order-success-shell">
+    <section className="order-success-hero"><div className="order-success-check">✓</div><h1>Order Placed Successfully!</h1><strong>Thank you for shopping with Ayush Kursela.</strong><p>Your order has been received and is being processed. We&apos;ll notify you once it is shipped.</p></section>
+    <section className="order-success-facts">{[["pin","Order ID",`#${order.orderId}`,placedAt.toLocaleString('en-IN',{day:'numeric',month:'short',year:'numeric',hour:'numeric',minute:'2-digit'})],["calendar","Estimated Delivery",deliveryRange,order.delivery==='express'?'1 – 2 Business Days':'3 – 5 Business Days'],["card","Payment Method",paymentLabel,order.payment==='cod'?'Cash on Delivery':'Payment selected'],["package","Order Status","Confirmed","We’ll keep you updated"]].map(([icon,label,value,note])=><article key={label}><span><Icon name={icon}/></span><div><small>{label}</small><b>{value}</b><p>{note}</p></div></article>)}</section>
+    <div className="order-success-info-grid"><section className="order-success-panel"><header><Icon name="pin"/><h2>Delivery Address</h2><a className="order-success-edit" href="#buy-now"><Icon name="edit"/> Edit</a></header><p><strong>{address.name}</strong><br/>{address.building}, {address.street}<br/>{address.city}, {address.state} – {address.pincode}<br/>{address.phone}</p></section><section className="order-success-panel"><header><Icon name="mail"/><h2>Contact &amp; Updates</h2></header><p>Order confirmation has been sent to:</p><p className="order-success-contact"><span><Icon name="mail"/>{user?.email || 'Your registered email'}</span><span><Icon name="phone"/>{address.phone}</span></p><small>You will also receive tracking details on your email and mobile.</small></section></div>
+    <section className="order-success-panel order-success-summary"><header><Icon name="bag"/><h2>Order Summary</h2></header><div className="order-success-product-wrap"><div className="order-success-product-head"><span>Product</span><span>Price</span><span>Quantity</span><span>Total</span></div><div className="order-success-product"><img src={order.product.image} alt={order.product.alt}/><div><strong>{order.product.name}</strong><small>{order.product.packWeight || order.product.weight}</small></div><span>₹{order.unitPrice.toLocaleString('en-IN')} / {order.isWholesale?'Bag':'Piece'}</span><span>{order.quantity}</span><b>₹{order.subtotal.toLocaleString('en-IN')}</b></div></div><aside><p><span>Subtotal</span><b>₹{order.subtotal.toLocaleString('en-IN')}</b></p><p><span>Shipping Charges</span><b className="is-free">{order.shipping?`₹${order.shipping}`:'FREE'}</b></p><p><span>Tax (5%)</span><b>₹{order.tax.toLocaleString('en-IN')}</b></p><div><span>Total Paid</span><strong>₹{order.total.toLocaleString('en-IN')}</strong></div></aside></section>
+    <section className="order-success-panel order-success-tracking"><header><Icon name="truck"/><h2>Order Tracking</h2><span>Expected delivery by {deliveryRange}</span></header><div>{tracking.map(([title,note,icon],index)=><article className={index<2?'is-complete':''} key={title}><i><Icon name={icon}/></i><b>{title}</b><small>{index===0?placedAt.toLocaleString('en-IN',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}):note}</small></article>)}</div></section>
+    <div className="order-success-actions"><button type="button" onClick={()=>setReviewOpen(true)}><Icon name="package"/> Review Order</button><a href="#products"><Icon name="bag"/> Continue Shopping</a></div>
+    <section className="order-success-trust">{[['shield','Secure Payments','100% Safe & Secure'],['truck','Fast Delivery','Across India'],['headset','24/7 Support','We’re here to help'],['leaf','Quality Assured','Premium Quality Products']].map(([icon,title,note])=><span key={title}><i><Icon name={icon}/></i><b>{title}</b><small>{note}</small></span>)}</section>
+    {reviewOpen?<div className="review-order-backdrop" role="presentation" onMouseDown={event=>event.target===event.currentTarget&&setReviewOpen(false)}><section className="review-order-modal" role="dialog" aria-modal="true" aria-labelledby="review-order-title"><header><span><Icon name="chat"/></span><div><h2 id="review-order-title">Review Your Order</h2><p>Share your experience and help us serve you better!</p></div><button type="button" aria-label="Close review" onClick={()=>setReviewOpen(false)}><Icon name="close"/></button></header>{reviewSubmitted?<div className="review-order-thanks"><i><Icon name="check"/></i><h3>Thank you for your review!</h3><p>Your feedback has been submitted for moderation.</p><button type="button" onClick={()=>setReviewOpen(false)}>Done</button></div>:<><article className="review-order-product"><img src={order.product.image} alt={order.product.alt}/><div><h3>{order.product.name}</h3><p>{order.product.packWeight||order.product.weight}</p><span>Premium Quality</span></div></article><div className="review-order-form"><label>Your Rating</label><div className="review-order-rating"><div>{[1,2,3,4,5].map(star=><button type="button" className={star<=rating?'is-active':''} aria-label={`${star} star rating`} aria-pressed={star===rating} onClick={()=>setRating(star)} key={star}>★</button>)}</div><span><b>{rating}/5</b><small>{['','Poor','Fair','Good','Great!','Excellent!'][rating]}</small></span></div><label htmlFor="order-review-text">Your Review</label><div className="review-order-text"><textarea id="order-review-text" maxLength="500" value={review} onChange={event=>setReview(event.target.value)} placeholder="How was your experience with this product?"/><small>{review.length}/500</small></div><label className="review-order-upload"><Icon name="camera"/><span><b>Add Photos (Optional)</b><small>{reviewPhotos.length?`${reviewPhotos.length} photo${reviewPhotos.length===1?'':'s'} selected`:'Upload up to 5 photos (JPG, PNG)'}</small></span><input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={event=>setReviewPhotos(Array.from(event.target.files||[]).slice(0,5))}/></label></div><footer><button type="button" onClick={()=>setReviewOpen(false)}>Cancel</button><button type="button" disabled={!rating||!review.trim()} onClick={()=>setReviewSubmitted(true)}><Icon name="send"/> Submit Review</button></footer><p className="review-order-note">Your review will be visible to other customers after moderation.</p></>}</section></div>:null}
+  </div></main>
 }
 
 function ProductsPage({ initialShoppingMode = 'wholesale', initialProductFilter = 'all', onAddToCart, onBuyNow, onShareProduct, onToggleWishlist, wishlistIds }) {
@@ -3787,7 +3901,13 @@ function MobileBottomNav({ pageHash, currentHash, cartCount = 0, wishlistCount =
     }
   }, [])
 
-  const items = [
+  const items = currentHash === '#order-success' ? [
+    { label: 'Home', href: '#home', icon: 'home', active: false },
+    { label: 'Categories', href: '#products', icon: 'grid', active: false },
+    { label: 'Orders', href: '#order-success', icon: 'package', active: true },
+    { label: 'Wishlist', href: '#wishlist', icon: 'heart', active: false, count: wishlistCount },
+    { label: 'Profile', href: isAuthenticated ? '#account' : '#login', icon: 'user', active: false },
+  ] : [
     { label: 'Home', href: '#home', icon: 'home', active: pageHash === '#home' },
     { label: 'Categories', href: '#products', icon: 'grid', active: pageHash === '#products' },
     { label: 'Wishlist', href: '#wishlist', icon: 'heart', active: pageHash === '#wishlist', count: wishlistCount },
@@ -3907,6 +4027,7 @@ function App() {
   const [wishlistIds, setWishlistIds] = useState(readStoredWishlist)
   const [toastMessage, setToastMessage] = useState('')
   const [checkoutProduct, setCheckoutProduct] = useState(null)
+  const [orderConfirmation, setOrderConfirmation] = useState(readStoredOrderConfirmation)
   const [currentHash, setCurrentHash] = useState(getCurrentPageHash)
   const [account, setAccount] = useState(readStoredAccount)
   const [, setCatalogVersion] = useState(0)
@@ -3975,6 +4096,7 @@ function App() {
   const isWishlistPage = pageHash === '#wishlist'
   const isCartPage = pageHash === '#cart'
   const isBuyNowPage = pageHash === '#buy-now'
+  const isOrderSuccessPage = pageHash === '#order-success'
   const isLoginPage = currentHash === '#login'
   const isRegisterPage = currentHash === '#register'
   const isAccountPage = currentHash === '#account' && Boolean(account)
@@ -4060,7 +4182,7 @@ function App() {
   return (
     <div className={['site-shell', isProductsPage ? 'site-shell--products' : '', isAuthPage ? 'site-shell--auth' : ''].filter(Boolean).join(' ')}>
       <TopBar />
-      <Navbar activePageHref={pageHash} cartItemCount={cartItemCount} wishlistCount={wishlistIds.length} isAuthenticated={Boolean(account)} />
+      <Navbar activePageHref={isOrderSuccessPage ? '#products' : pageHash} cartItemCount={cartItemCount} wishlistCount={wishlistIds.length} isAuthenticated={Boolean(account)} />
 
       {isTermsPage ? (
         <TermsPage />
@@ -4088,7 +4210,13 @@ function App() {
       ) : isCartPage ? (
         <CartPage cartItems={cartItems} onUpdateQuantity={handleUpdateCartQuantity} onRemove={handleRemoveCartItem} onMoveToWishlist={handleMoveCartItemToWishlist} onCheckout={() => setToastMessage('Checkout is ready.')} />
       ) : isBuyNowPage ? (
-        <BuyNowPage product={checkoutProduct} user={account} onComplete={() => setToastMessage('Order placed successfully.')} />
+        <BuyNowPage product={checkoutProduct} user={account} onComplete={(order) => {
+          window.localStorage.setItem(orderConfirmationStorageKey, JSON.stringify(order))
+          setOrderConfirmation(order)
+          window.requestAnimationFrame(() => { window.location.hash = '#order-success' })
+        }} />
+      ) : isOrderSuccessPage ? (
+        <OrderSuccessPage order={orderConfirmation} user={account} />
       ) : isLoginPage ? (
         <LoginPage onLogin={handleLogin} />
       ) : isRegisterPage ? (
@@ -4121,7 +4249,7 @@ function App() {
 
       {!isAuthPage && !isAccountPage && !isWishlistPage ? <Footer /> : null}
       <MobileBottomNav
-        pageHash={pageHash}
+        pageHash={isOrderSuccessPage ? '#products' : pageHash}
         currentHash={currentHash}
         cartCount={cartItemCount}
         wishlistCount={wishlistIds.length}

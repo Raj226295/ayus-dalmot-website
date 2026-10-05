@@ -1445,7 +1445,7 @@ function Navbar({ activePageHref, cartItemCount = baseCartItemCount, wishlistCou
             aria-label="Ayush Kursela home"
             onClick={handleLogoClick}
           >
-            <img src="/ayush/logo-navbar-clean.png" alt="Ayush Kursela logo" />
+            <img src="/ayush/logo-ayush-kursela-transparent.png" alt="Ayush Kursela logo" />
           </a>
 
           <nav className="site-nav site-nav--desktop" aria-label="Primary">
@@ -1523,7 +1523,7 @@ function Navbar({ activePageHref, cartItemCount = baseCartItemCount, wishlistCou
             aria-label="Ayush Kursela home"
             onClick={handleLogoClick}
           >
-            <img src="/ayush/logo-navbar-clean.png" alt="Ayush Kursela logo" />
+            <img src="/ayush/logo-ayush-kursela-transparent.png" alt="Ayush Kursela logo" />
           </a>
 
           <div className="site-header__actions site-header__actions--mobile">
@@ -2501,7 +2501,7 @@ function AccountOrderDetails({ order, onClose }) {
   const tax = Math.round(order.price * .05 * 100) / 100
   return <section className="account-order-details" aria-label={`${order.id} details`}>
     <div className="account-order-details__top"><span><Icon name="leaf"/> Pure Taste.</span><span><Icon name="truck"/> Free Delivery</span><span><Icon name="heart"/> Happy India.</span></div>
-    <header className="account-order-details__nav"><button type="button" onClick={onClose} aria-label="Back to orders"><Icon name="chevron-left"/></button><h1>Order Details</h1><img src="/ayush/logo-navbar-clean.png" alt="Ayush Kursela"/><div><Icon name="search"/><Icon name="heart"/><Icon name="cart"/></div></header>
+    <header className="account-order-details__nav"><button type="button" onClick={onClose} aria-label="Back to orders"><Icon name="chevron-left"/></button><h1>Order Details</h1><img src="/ayush/logo-ayush-kursela-transparent.png" alt="Ayush Kursela"/><div><Icon name="search"/><Icon name="heart"/><Icon name="cart"/></div></header>
     <main>
       <section className="account-detail-card account-detail-heading"><div><h2>{order.id}</h2><p>Placed on {order.date}, 10:24 AM</p></div><span className={isProcessing?'is-processing':'is-shipped'}><Icon name={isProcessing?'clock':'truck'}/>{order.status}</span><p><Icon name="calendar"/><small>Expected Delivery</small><strong>{isProcessing?'14 – 16 May 2025':'Delivered by 16 May 2025'}</strong></p></section>
       <section className="account-detail-card account-detail-product"><img src={order.image} alt={order.name}/><div><h2>{order.name}</h2><p>{order.weight}</p><span>Premium Quality</span><span>Rich in Nutrition</span><strong>₹{order.price}</strong></div><b>Qty: {order.quantity}</b></section>
@@ -4043,7 +4043,7 @@ function Footer() {
         <div className="footer-main-grid">
           <section className="footer-brand-panel">
             <img
-              src="/ayush/logo-ayush-kursela-clean.png"
+              src="/ayush/logo-ayush-kursela-transparent.png"
               alt="Ayush Kursela logo"
               className="footer-brand-panel__logo"
             />

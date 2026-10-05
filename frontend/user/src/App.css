@@ -166,6 +166,7 @@ img {
   height: auto;
   display: block;
   object-fit: contain;
+  background: transparent;
 }
 
 .site-header__panel {
@@ -3448,6 +3449,9 @@ a.contact-card__title:focus-visible {
   height: auto;
   display: block;
   margin-bottom: 0.9rem;
+  object-fit: contain;
+  object-position: left center;
+  background: transparent;
 }
 
 .footer-brand-panel__tagline {
@@ -12489,5 +12493,72 @@ a.contact-card__title:focus-visible {
   .scroll-driven-media {
     transform: none;
     will-change: auto;
+  }
+}
+
+/* Contact page: place the existing help cards and message form inside the open teal artwork. */
+@media (min-width: 1025px) {
+  .contact-page__message-shell {
+    box-sizing: border-box;
+    min-height: 0;
+    aspect-ratio: 1728 / 1437;
+    padding: clamp(9rem, 16vw, 14rem) 28px clamp(5rem, 8vw, 7rem);
+    background: url('/ayush/contact-message-background.png') center top / 100% 100% no-repeat;
+  }
+
+  .contact-page__message-shell::before {
+    content: none;
+  }
+
+  .contact-page__stage-art {
+    display: none;
+  }
+
+  .contact-page__message-grid {
+    width: min(calc(100% - 32px), 900px);
+    margin: 0 auto;
+    grid-template-columns: minmax(0, 440px) minmax(300px, 380px);
+    justify-content: center;
+    column-gap: clamp(22px, 3vw, 36px);
+  }
+
+  .contact-page__help-column {
+    max-width: 440px;
+  }
+
+  .contact-page__help-cards {
+    gap: 7px;
+  }
+
+  .contact-page__help-cards .contact-card {
+    min-height: 4.25rem;
+    padding: 9px 11px;
+    gap: 10px;
+  }
+
+  .contact-page__help-cards .contact-card__icon {
+    width: 30px;
+    height: 30px;
+  }
+
+  .contact-page__form-column {
+    max-width: 380px;
+    padding: 16px;
+  }
+
+  .contact-form {
+    gap: 11px;
+  }
+
+  .contact-form__grid {
+    gap: 9px;
+  }
+
+  .contact-form__field input {
+    min-height: 38px;
+  }
+
+  .contact-form__field textarea {
+    min-height: 88px;
   }
 }

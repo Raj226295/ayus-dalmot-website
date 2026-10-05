@@ -1,5 +1,6 @@
 ﻿import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useLayoutEffect } from 'react'
 import './App.css'
 import './desktop-nav-polish.css'
 import './checkout-polish.css'
@@ -11,6 +12,7 @@ import './order-success-final.css'
 import './review-order-modal.css'
 import './account-mobile-dashboard.css'
 import './account-order-details.css'
+import ProductReviewModal from './ProductReviewModal.jsx'
 
 const menuLinks = [
   { label: 'Home', href: '#home' },
@@ -24,6 +26,21 @@ const announcementItems = [
   'Authentic Taste.',
   'Ayush Quality.',
   'Delivering Happiness Across India',
+]
+
+const heroDesktopSlides = [
+  {
+    src: '/ayush/hero-packshot.png',
+    alt: 'Kursela Dalmot premium hero banner with product pack and namkeen bowl',
+  },
+  {
+    src: '/ayush/hero-kursela-chanachur-01.png',
+    alt: 'Ayush Kursela Chanachur with premium ingredients and traditional taste',
+  },
+  {
+    src: '/ayush/hero-kursela-chanachur-02.png',
+    alt: 'Ayush Kursela Chanachur premium pack with a bowl of traditional namkeen',
+  },
 ]
 
 const defaultNavHref = menuLinks[0].href
@@ -83,6 +100,12 @@ function getCurrentNavHref() {
 
   const currentHash = window.location.hash.split('?')[0]
 
+  // A product detail is still part of the Products section, so keep the
+  // Products nav indicator active instead of falling back to Home.
+  if (currentHash === '#product') {
+    return '#products'
+  }
+
   return menuLinks.some((item) => item.href === currentHash) ? currentHash : defaultNavHref
 }
 
@@ -127,17 +150,17 @@ const footerLinks = {
 const socialLinks = [
   {
     label: 'Facebook',
-    href: 'https://facebook.com',
+    href: 'https://www.facebook.com/Ayushkurselapvtltd?mibextid=wwXIfr&mibextid=wwXIfr',
     icon: '/ayush/facebook.png',
   },
   {
     label: 'Instagram',
-    href: 'https://instagram.com',
+    href: 'https://www.instagram.com/ayush.kursela?stkn=MTM2cGo2OHB1N2ZiZg==',
     icon: '/ayush/instagram.png',
   },
   {
     label: 'WhatsApp',
-    href: 'https://wa.me/911234567890',
+    href: 'https://wa.me/919031685801',
     icon: '/ayush/whatsapp.png',
   },
   {
@@ -195,9 +218,9 @@ const trustItems = [
 ]
 
 const footerContactInfo = {
-  phone: '+91 12345 67890',
+  phone: '+91 90316 85801',
   phoneNote: 'Mon - Sat: 9AM to 6PM',
-  email: 'info@ayushkursela.com',
+  email: 'ayushkurselapvt@gmail.com',
   emailNote: 'We reply within 24hrs',
   addressTitle: '85 P, Barauni - Purnea Hwy',
   addressBody: 'Maranga, Purnia, Maranga, Bihar 854301',
@@ -330,6 +353,9 @@ const productCatalog = [
     name: 'Bhujia',
     weight: '150g',
     price: 25,
+    rating: 4.6,
+    reviewCount: 128,
+    reviewDistribution: { 5: 70, 4: 23, 3: 5, 2: 1, 1: 1 },
     wholesale: { pcsPerBag: 100, weightKgPerBag: 5, ratePerBag: 760 },
     image: '/ayush/product-bhujia.png',
     alt: 'Ayush Bhujia product pack',
@@ -378,6 +404,27 @@ const productCatalog = [
     wholesale: { pcsPerBag: 80, weightKgPerBag: 4.8, ratePerBag: 880 },
     image: '/ayush/product-kursela-chanachur.png',
     alt: 'Ayush Kursela Chanachur product pack',
+  },
+]
+
+const defaultProductDetailImages = [
+  {
+    url: '/ayush/product-detail-dalmoth-premium.png',
+    altText: 'Ayush Kursela Dalmoth with premium quality ingredients and authentic Bihari taste',
+    sortOrder: 1,
+    isActive: true,
+  },
+  {
+    url: '/ayush/product-detail-dalmoth-process.png',
+    altText: 'Ayush Kursela Dalmoth traditional Bihari preparation and product pack',
+    sortOrder: 2,
+    isActive: true,
+  },
+  {
+    url: '/ayush/product-detail-dalmoth-heritage.png',
+    altText: 'Ayush Kursela Bihari Dalmoth heritage and natural ingredients',
+    sortOrder: 3,
+    isActive: true,
   },
 ]
 
@@ -487,6 +534,18 @@ function Icon({ name, className = '' }) {
           strokeLinecap="round"
         >
           <path d="M6 6l12 12M18 6L6 18" />
+        </svg>
+      )
+    case 'zoom-in':
+      return (
+        <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="10.5" cy="10.5" r="6.5" /><path d="m15.3 15.3 4.2 4.2M7.5 10.5h6M10.5 7.5v6" />
+        </svg>
+      )
+    case 'zoom-out':
+      return (
+        <svg aria-hidden="true" className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="10.5" cy="10.5" r="6.5" /><path d="m15.3 15.3 4.2 4.2M7.5 10.5h6" />
         </svg>
       )
     case 'user':
@@ -1183,7 +1242,7 @@ function Reveal({ as: Tag = 'section', className = '', children, ...props }) {
           observer.unobserve(node)
         }
       },
-      { threshold: 0.18, rootMargin: '0px 0px -8% 0px' },
+      { threshold: 0.12, rootMargin: '0px 0px -7% 0px' },
     )
 
     observer.observe(node)
@@ -1200,6 +1259,44 @@ function Reveal({ as: Tag = 'section', className = '', children, ...props }) {
       {children}
     </Tag>
   )
+}
+
+function AnimatedRatingValue({ value }) {
+  const ref = useRef(null)
+  const [displayValue, setDisplayValue] = useState(0)
+
+  useEffect(() => {
+    const node = ref.current
+    if (!node) return undefined
+
+    let frameId = 0
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return
+
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        setDisplayValue(value)
+      } else {
+        const startedAt = performance.now()
+        const tick = (now) => {
+          const progress = Math.min(1, (now - startedAt) / 700)
+          const eased = 1 - ((1 - progress) ** 3)
+          setDisplayValue(value * eased)
+          if (progress < 1) frameId = window.requestAnimationFrame(tick)
+        }
+        frameId = window.requestAnimationFrame(tick)
+      }
+
+      observer.unobserve(node)
+    }, { threshold: .65 })
+
+    observer.observe(node)
+    return () => {
+      observer.disconnect()
+      window.cancelAnimationFrame(frameId)
+    }
+  }, [value])
+
+  return <strong ref={ref}>{displayValue.toFixed(1)}</strong>
 }
 
 function TopBar() {
@@ -1228,7 +1325,7 @@ function TopBar() {
   )
 }
 
-function Navbar({ activePageHref, cartItemCount = baseCartItemCount, wishlistCount = 0, isAuthenticated = false }) {
+function Navbar({ activePageHref, cartItemCount = baseCartItemCount, wishlistCount = 0, isAuthenticated = false, cartAnimationKey = 0 }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [mobileProductsOpen, setMobileProductsOpen] = useState(false)
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
@@ -1396,9 +1493,9 @@ function Navbar({ activePageHref, cartItemCount = baseCartItemCount, wishlistCou
               aria-label="Shopping cart"
               onClick={(event) => handleNavLinkClick(event, '#cart')}
             >
-              <Icon name="cart" className="icon-button__icon" />
+              <Icon key={`desktop-cart-${cartAnimationKey}`} name="cart" className="icon-button__icon cart-icon-pulse" />
               {cartItemCount > 0 ? (
-                <span className="icon-button__badge" aria-hidden="true">
+                <span key={`desktop-cart-badge-${cartAnimationKey}`} className="icon-button__badge cart-badge-pop" aria-hidden="true">
                   {cartItemCount}
                 </span>
               ) : null}
@@ -1455,9 +1552,9 @@ function Navbar({ activePageHref, cartItemCount = baseCartItemCount, wishlistCou
               aria-label="Shopping cart"
               onClick={(event) => handleNavLinkClick(event, '#cart')}
             >
-              <Icon name="cart" className="icon-button__icon" />
+              <Icon key={`mobile-cart-${cartAnimationKey}`} name="cart" className="icon-button__icon cart-icon-pulse" />
               {cartItemCount > 0 ? (
-                <span className="icon-button__badge" aria-hidden="true">
+                <span key={`mobile-cart-badge-${cartAnimationKey}`} className="icon-button__badge cart-badge-pop" aria-hidden="true">
                   {cartItemCount}
                 </span>
               ) : null}
@@ -1518,15 +1615,36 @@ function Navbar({ activePageHref, cartItemCount = baseCartItemCount, wishlistCou
 }
 
 function HeroBanner() {
+  const [activeSlide, setActiveSlide] = useState(0)
+  const [slideDirection, setSlideDirection] = useState('right')
+
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined
+
+    const intervalId = window.setInterval(() => {
+      setSlideDirection((direction) => direction === 'right' ? 'left' : 'right')
+      setActiveSlide((current) => (current + 1) % heroDesktopSlides.length)
+    }, 5200)
+
+    return () => window.clearInterval(intervalId)
+  }, [])
+
   return (
     <Reveal as="section" className="hero-section" id="home">
       <div className="shell-content shell-content--wide">
         <div className="hero-frame">
-          <img
-            src="/ayush/hero-packshot.png"
-            alt="Kursela Dalmot premium hero banner with product pack and namkeen bowl"
-            className="full-bleed-image hero-frame__desktop-banner"
-          />
+          <div className={`hero-frame__desktop-carousel hero-frame__desktop-banner is-moving-${slideDirection}`} aria-label="Featured Ayush Kursela banners">
+            {heroDesktopSlides.map((slide, index) => (
+              <img
+                key={slide.src}
+                src={slide.src}
+                alt={slide.alt}
+                className={['full-bleed-image', 'hero-frame__desktop-slide', index === activeSlide ? 'is-active' : ''].filter(Boolean).join(' ')}
+                aria-hidden={index !== activeSlide}
+                loading={index === 0 ? 'eager' : 'lazy'}
+              />
+            ))}
+          </div>
           <video
             className="hero-frame__mobile-video"
             autoPlay
@@ -1768,8 +1886,8 @@ function ContactPage() {
     <main className="contact-page">
       <div className="contact-mobile-layout">
         <section className="contact-mobile-quick" aria-label="Contact options">
-          <a href="tel:+911234567890"><span className="contact-mobile-quick__icon is-orange"><Icon name="phone" /></span><strong>Call Us</strong><small>{footerContactInfo.phone}</small><i>{footerContactInfo.phoneNote}</i></a>
-          <a href="https://wa.me/911234567890" target="_blank" rel="noreferrer"><span className="contact-mobile-quick__icon is-green"><Icon name="chat" /></span><strong>WhatsApp</strong><small>{footerContactInfo.phone}</small><i>Quick Support</i></a>
+          <a href="tel:+919031685801"><span className="contact-mobile-quick__icon is-orange"><Icon name="phone" /></span><strong>Call Us</strong><small>{footerContactInfo.phone}</small><i>{footerContactInfo.phoneNote}</i></a>
+          <a href="https://wa.me/919031685801" target="_blank" rel="noreferrer"><span className="contact-mobile-quick__icon is-green"><Icon name="chat" /></span><strong>WhatsApp</strong><small>{footerContactInfo.phone}</small><i>Quick Support</i></a>
           <a href={`mailto:${footerContactInfo.email}`}><span className="contact-mobile-quick__icon is-orange"><Icon name="mail" /></span><strong>Email Us</strong><small>{footerContactInfo.email}</small><i>{footerContactInfo.emailNote}</i></a>
           <a href={contactMapHref} target="_blank" rel="noreferrer"><span className="contact-mobile-quick__icon is-green"><Icon name="pin" /></span><strong>Visit Us</strong><small>{footerContactInfo.addressTitle}</small><i>{footerContactInfo.addressBody}</i></a>
         </section>
@@ -1847,7 +1965,7 @@ function ContactPage() {
                     title={footerContactInfo.phone}
                     note="Friendly support available during business hours"
                     body={footerContactInfo.phoneNote}
-                    href="tel:+911234567890"
+                    href="tel:+919031685801"
                   />
 
                   <ContactInfoCard
@@ -2645,9 +2763,9 @@ function AccountPage({ user, onLogout, onAddToCart, onBuyNow, onUpdateAccount })
               </form> : null}
               <aside className="account-support-note"><Icon name="shield" /><span><strong>We are here for you!</strong><small>Your satisfaction is our top priority.</small></span><Icon name="headset" /></aside>
               <div className="account-support-contact">
-                <a href="https://wa.me/919123456789?text=Hello%20Ayush%20Kursela%20Support%2C%20I%20need%20help." target="_blank" rel="noreferrer"><Icon name="chat" /><span><strong>Live Chat</strong><small>Chat on WhatsApp<br />9 AM – 9 PM</small></span></a>
-                <a href="mailto:support@ayushkursela.com"><Icon name="mail" /><span><strong>Email Support</strong><small>support@ayushkursela.com<br />Response in 24 hrs</small></span></a>
-                <a href="tel:+919123456789"><Icon name="phone" /><span><strong>Call Us</strong><small>+91 12345 67890<br />9 AM – 6 PM</small></span></a>
+                <a href="https://wa.me/919031685801?text=Hello%20Ayush%20Kursela%20Support%2C%20I%20need%20help." target="_blank" rel="noreferrer"><Icon name="chat" /><span><strong>Live Chat</strong><small>Chat on WhatsApp<br />9 AM – 9 PM</small></span></a>
+                <a href="mailto:ayushkurselapvt@gmail.com"><Icon name="mail" /><span><strong>Email Support</strong><small>ayushkurselapvt@gmail.com<br />Response in 24 hrs</small></span></a>
+                <a href="tel:+919031685801"><Icon name="phone" /><span><strong>Call Us</strong><small>+91 90316 85801<br />9 AM – 6 PM</small></span></a>
                 <span><Icon name="clock" /><span><strong>Support Hours</strong><small>Mon – Sat<br />9 AM – 6 PM</small></span></span>
               </div>
             </> : null}
@@ -2660,13 +2778,211 @@ function AccountPage({ user, onLogout, onAddToCart, onBuyNow, onUpdateAccount })
   )
 }
 
+function ProductDetailsPage({ product, account, initialShoppingMode = 'wholesale', onAddToCart, onBuyNow, onShareProduct, onToggleWishlist, wishlistIds = [] }) {
+  const galleryImages = product ? [{ url: product.image, altText: product.alt, sortOrder: 0, isActive: true }, ...(product.galleryImages || [])].filter((item, index, items) => item?.url && item.isActive !== false && items.findIndex(candidate => candidate.url === item.url) === index).sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0)) : []
+  const [quantity, setQuantity] = useState(1)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
+  const [zoom, setZoom] = useState(1)
+  const [position, setPosition] = useState({ x: 0, y: 0 })
+  const [dragStart, setDragStart] = useState(null)
+  const [activeTab, setActiveTab] = useState('description')
+  const [activeImage, setActiveImage] = useState(product?.image || '')
+  const [approvedReviews, setApprovedReviews] = useState([])
+  const [reviewOpen, setReviewOpen] = useState(false)
+  const [addedToCart, setAddedToCart] = useState(false)
+  const imageStageRef = useRef(null)
+  const productTabsRef = useRef(null)
+  const writeReviewButtonRef = useRef(null)
+  const addedFeedbackTimerRef = useRef(null)
+
+  useEffect(() => {
+    if (product?.image) {
+      setActiveImage(product.image)
+      setQuantity(1)
+      setZoom(1)
+      setPosition({ x: 0, y: 0 })
+    }
+  }, [product?.id, product?.image])
+
+  const loadApprovedReviews = () => {
+    if (!product?.id) return
+    fetch(`${catalogApiUrl}/reviews?productId=${encodeURIComponent(product.id)}`).then(response => response.ok ? response.json() : Promise.reject()).then(payload => setApprovedReviews(payload.reviews || [])).catch(() => setApprovedReviews([]))
+  }
+
+  useEffect(() => { loadApprovedReviews() }, [product?.id])
+
+  useEffect(() => () => window.clearTimeout(addedFeedbackTimerRef.current), [])
+
+  useEffect(() => {
+    if (!lightboxOpen) return undefined
+
+    const previousOverflow = document.body.style.overflow
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') setLightboxOpen(false)
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        const currentIndex = Math.max(0, galleryImages.findIndex(image => image.url === activeImage))
+        const direction = event.key === 'ArrowLeft' ? -1 : 1
+        const nextIndex = (currentIndex + direction + galleryImages.length) % galleryImages.length
+        setActiveImage(galleryImages[nextIndex]?.url || activeImage)
+        setZoom(1)
+        setPosition({ x: 0, y: 0 })
+      }
+    }
+
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [activeImage, galleryImages.length, lightboxOpen])
+
+  if (!product) return <main className="product-details-page"><div className="shell-content cart-empty"><h1>Product not found</h1><a href="#products">Explore Products</a></div></main>
+
+  const minQuantity = 1
+  const unitPrice = Number(product.price) || 0
+  const totalPrice = unitPrice * quantity
+  const discountPercent = Math.max(0, Math.min(99, Number(String(product.offerLabel || product.discount || '').match(/\d+(?:\.\d+)?/)?.[0]) || 0))
+  const compareAtPrice = Number(product.compareAtPrice || product.originalPrice || product.mrp) || (discountPercent ? Math.round(unitPrice / (1 - discountPercent / 100)) : 0)
+  const isBestSeller = Boolean(product.isBestseller || product.isBestSeller) || bestsellerProducts.some(item => item.id === product.id) || /best\s*seller/i.test(String(product.badge || ''))
+  const productTagline = [product.brand || 'Ayush Kursela', product.shortDescription || product.description || 'Premium quality, authentic taste in every bite'].filter(Boolean).join(' · ')
+  const description = product.fullDescription || product.shortDescription || product.description || `${product.name} by ${product.brand || 'Ayush Kursela'} brings authentic taste in a carefully packed ${product.weight} pack for lasting freshness.`
+  const detailImages = (product.productDetailImages?.length ? product.productDetailImages : defaultProductDetailImages).filter(item => item?.url && item.isActive !== false).sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
+  const specifications = (product.specifications || []).filter(item => item?.label && item?.value).sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
+  const nutrition = (product.nutrition || []).filter(item => item?.label && item?.value).sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
+  const benefits = (product.benefits || []).filter(Boolean)
+  const whyChoose = (product.whyChoose || []).filter(Boolean)
+  const ayushQualityPoints = ['Premium Quality Ingredients', 'Authentic Traditional Taste', 'Hygienically Packed', 'No Added Preservatives']
+  const displayedBenefits = benefits.length ? benefits : ayushQualityPoints
+  const displayedWhyChoose = whyChoose.length ? whyChoose : ayushQualityPoints
+  const tabSpecifications = specifications.length ? specifications : [
+    { label: 'Brand', value: product.brand || 'Ayush Kursela' },
+    { label: 'Net Weight', value: product.weight },
+    { label: 'Availability', value: product.status === 'Out of Stock' ? 'Out of Stock' : 'In Stock' },
+  ].filter(item => item.value)
+  const relatedProducts = ((product.relatedProductIds?.length ? product.relatedProductIds.map(id => productCatalog.find(item => item.id === id)).filter(Boolean) : productCatalog.filter((item) => item.id !== product.id)).filter(item => item.id !== product.id)).slice(0, 4)
+  const productTabs = [description && ['description', 'Product Description'], displayedBenefits.length && ['benefits', 'Key Benefits'], nutrition.length && ['nutrition', 'Nutritional Information'], tabSpecifications.length && ['information', 'Product Information'], ['reviews', 'Reviews']].filter(Boolean)
+  const resolvedTab = productTabs.some(([id]) => id === activeTab) ? activeTab : productTabs[0]?.[0]
+  const rating = approvedReviews.length ? approvedReviews.reduce((total, review) => total + Number(review.rating || 0), 0) / approvedReviews.length : Number(product.rating) || 0
+  const reviewCount = approvedReviews.length || Number(product.reviewCount) || 0
+  const reviewDistribution = product.reviewDistribution || {}
+  const stockLabel = product.status === 'Out of Stock' ? 'Out of Stock' : product.status === 'Low Stock' ? 'Low Stock' : 'In Stock'
+  const isAvailable = stockLabel !== 'Out of Stock'
+  const resetZoom = () => { setZoom(1); setPosition({ x: 0, y: 0 }) }
+  const showGalleryImage = (direction) => {
+    const currentIndex = Math.max(0, galleryImages.findIndex(image => image.url === activeImage))
+    const nextIndex = (currentIndex + direction + galleryImages.length) % galleryImages.length
+    setActiveImage(galleryImages[nextIndex]?.url || activeImage)
+    resetZoom()
+  }
+  const openLightbox = () => { resetZoom(); setLightboxOpen(true) }
+  const closeLightbox = () => { resetZoom(); setLightboxOpen(false) }
+  const activateProductTab = (tabId, tabElement) => {
+    setActiveTab(tabId)
+
+    const tabList = productTabsRef.current
+    if (tabList && tabElement) {
+      const centeredLeft = tabElement.offsetLeft - ((tabList.clientWidth - tabElement.offsetWidth) / 2)
+      tabList.scrollTo({ left: Math.max(0, centeredLeft), behavior: 'smooth' })
+    }
+
+    if (tabId === 'reviews') {
+      window.requestAnimationFrame(() => document.getElementById('product-reviews')?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+    }
+  }
+  const onProductTabKeyDown = (event, tabIndex) => {
+    const navigationKeys = ['ArrowLeft', 'ArrowRight', 'Home', 'End']
+    if (!navigationKeys.includes(event.key)) return
+
+    event.preventDefault()
+    const lastIndex = productTabs.length - 1
+    const nextIndex = event.key === 'Home' ? 0 : event.key === 'End' ? lastIndex : event.key === 'ArrowRight' ? (tabIndex + 1) % productTabs.length : (tabIndex - 1 + productTabs.length) % productTabs.length
+    const nextTabId = productTabs[nextIndex][0]
+    const nextButton = productTabsRef.current?.querySelector(`[data-product-tab="${nextTabId}"]`)
+    nextButton?.focus()
+    activateProductTab(nextTabId, nextButton)
+  }
+  const selectedProduct = { ...product, packWeight: product.weight, price: totalPrice, weight: `${quantity} ${quantity === 1 ? 'piece' : 'pieces'}`, quantity }
+  const openRelated = (item) => { window.location.hash = `#product?product=${encodeURIComponent(item.id)}&mode=retail` }
+  const updateQuantity = (delta) => setQuantity((current) => Math.max(minQuantity, current + delta))
+  const addSelectedProductToCart = () => {
+    onAddToCart(selectedProduct)
+    setAddedToCart(true)
+    window.clearTimeout(addedFeedbackTimerRef.current)
+    addedFeedbackTimerRef.current = window.setTimeout(() => setAddedToCart(false), 1400)
+  }
+  const onImageWheel = (event) => {
+    event.preventDefault()
+    setZoom((current) => Math.max(1, Math.min(4, Number((current + (event.deltaY < 0 ? .25 : -.25)).toFixed(2)))))
+  }
+  const onImagePointerMove = (event) => {
+    if (!dragStart || zoom <= 1) return
+    setPosition({ x: dragStart.x + event.clientX - dragStart.clientX, y: dragStart.y + event.clientY - dragStart.clientY })
+  }
+
+  return <>
+  <main className="product-details-page" id="product-details">
+    <div className="shell-content product-details-page__inner">
+      <nav className="product-details-breadcrumb" aria-label="Breadcrumb"><a href="#home">Home</a><span>/</span><a href="#products">Products</a><span>/</span><strong>{product.name}</strong></nav>
+      <section className="product-details-hero">
+        <div className="product-details-gallery">
+          <div className="product-details-gallery__thumbs" aria-label="Product images">{galleryImages.map((image, index) => <button type="button" key={`${image.url}-${index}`} className={activeImage === image.url ? 'is-active' : ''} onClick={() => { setActiveImage(image.url); resetZoom() }} aria-label={`View ${product.name} image ${index + 1}`}><img src={image.url} alt="" /></button>)}</div>
+          <div className="product-details-gallery__stage">
+            <button type="button" className="product-details-gallery__viewer" onClick={openLightbox} aria-label={`Open full screen image of ${product.name}`}>
+              <img key={activeImage} src={activeImage} alt={galleryImages.find(image => image.url === activeImage)?.altText || product.alt} draggable="false" />
+              <span className="product-details-gallery__zoom-cue"><Icon name="zoom-in" /> <b>Click to zoom</b></span>
+            </button>
+            <button type="button" className="product-details-gallery__arrow product-details-gallery__arrow--previous" onClick={() => showGalleryImage(-1)} disabled={galleryImages.length < 2} aria-label="Previous product image"><Icon name="chevron-left" /></button>
+            <button type="button" className="product-details-gallery__arrow product-details-gallery__arrow--next" onClick={() => showGalleryImage(1)} disabled={galleryImages.length < 2} aria-label="Next product image"><Icon name="chevron-right" /></button>
+            <button type="button" className={['product-details-gallery__wishlist', wishlistIds.includes(product.id) ? 'is-active' : ''].filter(Boolean).join(' ')} onClick={() => onToggleWishlist(product)} aria-label={`Add ${product.name} to wishlist`}><Icon name="heart" /></button>
+          </div>
+        </div>
+        <div className="product-details-summary">
+          {isBestSeller ? <span className="product-details-summary__offer">BEST SELLER</span> : null}
+          <div className="product-details-summary__title-row"><h1>{product.name}</h1><button type="button" className="product-details-summary__share" onClick={() => onShareProduct(product, 'product-details')} aria-label={`Share ${product.name}`}><Icon name="share" /> Share</button></div>
+          <p className="product-details-summary__brand">{productTagline}</p><p className="product-details-summary__rating"><span className={rating ? 'is-rated' : ''}>★★★★★</span> <strong>{rating.toFixed(1)}</strong> <a href="#product-reviews">({reviewCount} reviews)</a></p>
+          <div className="product-details-price"><strong>₹{unitPrice.toLocaleString('en-IN')}</strong>{compareAtPrice > unitPrice ? <span>₹{compareAtPrice.toLocaleString('en-IN')}</span> : null}{discountPercent ? <em>{discountPercent}% OFF</em> : null}</div><p className="product-details-price-note">₹{unitPrice.toLocaleString('en-IN')} for {product.weight}</p>
+          <div className="product-details-divider" />
+          <div className="product-details-size"><strong>Select Size</strong><div className="product-details-size__options"><button type="button" className="is-active"><span>{product.weight}</span><b>₹{unitPrice.toLocaleString('en-IN')}</b></button></div></div>
+          <div className="product-details-order-row"><div className="product-details-quantity-wrap"><strong>Quantity</strong><div className="product-details-quantity" aria-label="Quantity"><button type="button" onClick={() => updateQuantity(-1)} disabled={quantity <= minQuantity || !isAvailable}>−</button><strong>{quantity}</strong><button type="button" onClick={() => updateQuantity(1)} disabled={!isAvailable}>+</button></div></div><p className={['product-details-stock', !isAvailable ? 'is-unavailable' : ''].filter(Boolean).join(' ')}><i /> {stockLabel}</p></div>
+          <div className="product-details-purchase"><button type="button" className="product-details-buy" disabled={!isAvailable} onClick={() => onBuyNow(selectedProduct)}><Icon name="bag" /> Buy Now</button><button type="button" className={['product-details-add', addedToCart ? 'is-added' : ''].filter(Boolean).join(' ')} disabled={!isAvailable} onClick={addSelectedProductToCart}><Icon name={addedToCart ? 'check' : 'cart'} /> {addedToCart ? 'Added to Cart' : 'Add to Cart'}</button></div>
+        </div>
+      </section>
+      {productTabs.length > 1 || displayedWhyChoose.length ? <section className="product-details-info-area" aria-label="Product information and benefits"><article className="product-details-tabs-card">{productTabs.length ? <><div ref={productTabsRef} className="product-details-tabs" role="tablist" aria-label="Product information">{productTabs.map(([id, label], index) => <button key={id} id={`product-tab-${id}`} data-product-tab={id} type="button" role="tab" aria-selected={resolvedTab === id} aria-controls="product-tab-panel" tabIndex={resolvedTab === id ? 0 : -1} className={resolvedTab === id ? 'is-active' : ''} onClick={(event) => activateProductTab(id, event.currentTarget)} onKeyDown={(event) => onProductTabKeyDown(event, index)}>{label}</button>)}</div><div id="product-tab-panel" className="product-details-tab-content" role="tabpanel" aria-labelledby={`product-tab-${resolvedTab}`} tabIndex={0}>{resolvedTab === 'description' ? <p>{description}</p> : resolvedTab === 'benefits' ? <ul className="product-details-benefits">{displayedBenefits.map(item => <li key={item}><Icon name="check" />{item}</li>)}</ul> : resolvedTab === 'nutrition' ? <dl>{nutrition.map(item => <div key={item.label}><dt>{item.label}</dt><dd>{item.value}</dd></div>)}</dl> : resolvedTab === 'information' ? <dl>{tabSpecifications.map(item => <div key={item.label}><dt>{item.label}</dt><dd>{item.value}</dd></div>)}</dl> : <p className="product-details-tab-review-summary"><strong>{rating.toFixed(1)} ★</strong><span>Based on {reviewCount} {reviewCount === 1 ? 'review' : 'reviews'}. Reviews are shown below.</span></p>}</div></> : null}</article>{displayedWhyChoose.length ? <aside className="product-details-why"><h2>Why choose Ayush Kursela?</h2><ul>{displayedWhyChoose.map((item, index) => <li key={`${item}-${index}`}><Icon name="check" />{item}</li>)}</ul></aside> : null}</section> : null}
+      {detailImages.length ? <section className="product-detail-images" aria-label={`${product.name} product details`}>{detailImages.map((image, index) => <img key={`${image.url}-${index}`} src={image.url} alt={image.altText || `${product.name} product details ${index + 1}`} loading="lazy" decoding="async" />)}</section> : null}
+      {specifications.length ? <section className="product-details-facts" aria-labelledby="product-facts-title"><h2 id="product-facts-title">Product Information</h2><dl>{specifications.map(item => <div key={item.label}><dt>{item.label}</dt><dd>{item.value}</dd></div>)}</dl></section> : null}
+      <Reveal as="section" className="product-details-reviews" id="product-reviews"><div className="product-details-reviews__summary"><h2>Product<br />Reviews</h2><AnimatedRatingValue value={rating} /><span className={rating ? 'is-rated' : ''}>★★★★★</span><small>Based on {reviewCount} reviews</small></div><div className="product-details-reviews__distribution">{[5, 4, 3, 2, 1].map((value, index) => { const count = approvedReviews.filter(review => Number(review.rating) === value).length; const percentage = approvedReviews.length ? Math.round((count / approvedReviews.length) * 100) : Number(reviewDistribution[value]) || 0; return <div key={value}><span>{value} ★</span><i><b style={{ width: `${percentage}%`, animationDelay: `${index * 110}ms` }} /></i><em>{percentage}%</em></div> })}</div><div className="product-details-reviews__action"><button ref={writeReviewButtonRef} type="button" onClick={() => setReviewOpen(true)}>Write a Review</button></div><div className="product-details-reviews__toolbar"><span>Filters</span><span>Pictures First ▾</span></div>{approvedReviews.length ? <div className="product-details-review-list">{approvedReviews.map(review => <article key={review.id}><header><strong>{review.displayName}</strong>{review.verifiedPurchase ? <em>Verified Purchase</em> : null}<span>{review.rating}/5</span></header>{review.reviewTitle ? <h3>{review.reviewTitle}</h3> : null}<p>{review.reviewContent}</p>{review.reviewImages?.length ? <div>{review.reviewImages.map((image,index) => <img src={image} alt={`Review photo ${index + 1}`} key={`${image.slice(0,40)}-${index}`}/>)}</div> : null}</article>)}</div> : <p className="product-details-reviews__empty">No written reviews yet for {product.name}.</p>}</Reveal>
+      {relatedProducts.length ? <section className="product-details-related"><div className="product-details-related__heading"><h2>Explore More Products</h2><a href="#products">View All →</a></div><div className="product-details-related__grid">{relatedProducts.map((item) => <article key={item.id}><button type="button" onClick={() => openRelated(item)}><span className="product-details-related__heart"><Icon name="heart" /></span><img src={item.image} alt={item.alt} /><h3>{item.name}</h3><p>{item.reviewCount ? `★★★★★ ${Number(item.rating || 0).toFixed(1)} (${item.reviewCount})` : 'No reviews yet'}</p><strong>₹{(item.wholesale?.ratePerBag * 5 || item.price).toLocaleString('en-IN')}</strong><span className="product-details-related__add"><Icon name="cart" /> Add to Cart</span></button></article>)}</div></section> : null}
+    </div>
+    <aside className="product-details-mobile-bar"><strong>₹{totalPrice.toLocaleString('en-IN')}</strong><button type="button" className={addedToCart ? 'is-added' : ''} onClick={addSelectedProductToCart}>{addedToCart ? '✓ Added' : 'Add to Cart'}</button><button type="button" onClick={() => onBuyNow(selectedProduct)}>Buy Now</button></aside>
+  </main>
+  {lightboxOpen ? createPortal(<div className="product-lightbox" role="dialog" aria-modal="true" aria-label={`${product.name} image viewer`} onMouseDown={(event) => { if (event.target === event.currentTarget) closeLightbox() }}>
+    <div ref={imageStageRef} className={['product-lightbox__stage', zoom > 1 ? 'is-zoomed' : ''].join(' ')} onWheel={onImageWheel} onDoubleClick={() => { setZoom(value => value > 1 ? 1 : 2); setPosition({ x: 0, y: 0 }) }} onPointerDown={(event) => { if (zoom > 1) { event.currentTarget.setPointerCapture(event.pointerId); setDragStart({ clientX: event.clientX, clientY: event.clientY, ...position }) } }} onPointerMove={onImagePointerMove} onPointerUp={() => setDragStart(null)} onPointerCancel={() => setDragStart(null)}>
+      <img src={activeImage} alt={galleryImages.find(image => image.url === activeImage)?.altText || product.alt} draggable="false" style={{ transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})` }} />
+    </div>
+    <p className="product-lightbox__hint">Scroll or use the zoom buttons · Drag to move · Double-click to zoom</p>
+    <div className="product-lightbox__controls" aria-label="Full screen image controls">
+      <button type="button" onClick={() => showGalleryImage(-1)} disabled={galleryImages.length < 2} aria-label="Previous image"><Icon name="chevron-left" /></button>
+      <button type="button" onClick={() => setZoom(value => Math.max(1, Number((value - .5).toFixed(2))))} disabled={zoom <= 1} aria-label="Zoom out"><Icon name="zoom-out" /></button>
+      <button type="button" className="product-lightbox__close" onClick={closeLightbox} aria-label="Close image viewer"><Icon name="close" /></button>
+      <button type="button" onClick={() => setZoom(value => Math.min(4, Number((value + .5).toFixed(2))))} disabled={zoom >= 4} aria-label="Zoom in"><Icon name="zoom-in" /></button>
+      <button type="button" onClick={() => showGalleryImage(1)} disabled={galleryImages.length < 2} aria-label="Next image"><Icon name="chevron-right" /></button>
+    </div>
+    <span className="product-lightbox__counter">{Math.max(1, galleryImages.findIndex(image => image.url === activeImage) + 1)} / {galleryImages.length}</span>
+  </div>, document.body) : null}
+  {reviewOpen ? <ProductReviewModal product={product} account={account} apiUrl={catalogApiUrl} openerRef={writeReviewButtonRef} onClose={() => setReviewOpen(false)} onSubmitted={loadApprovedReviews} /> : null}
+  </>
+}
+
 function ProductCard({ cardContext = 'catalog', onAddToCart, onBuyNow, onShareProduct, onToggleWishlist, wishlistIds = [], product, sectionId = 'products', shoppingMode = 'retail' }) {
   const [quantity, setQuantity] = useState('1')
+  const [addedToCart, setAddedToCart] = useState(false)
   const minimumBags = product.wholesale?.minimumBags || 5
   const [bagQuantity, setBagQuantity] = useState(minimumBags)
   const isWishlisted = wishlistIds.includes(product.id)
   const pieceCount = Math.max(1, Number.parseInt(quantity, 10) || 1)
   const wholesale = product.wholesale
+  const addedFeedbackTimerRef = useRef(null)
   const isWholesale = shoppingMode === 'wholesale' && wholesale
   const totalPcs = isWholesale ? wholesale.pcsPerBag * bagQuantity : 0
   const totalWeightKg = isWholesale ? wholesale.weightKgPerBag * bagQuantity : 0
@@ -2690,11 +3006,16 @@ function ProductCard({ cardContext = 'catalog', onAddToCart, onBuyNow, onSharePr
   const handleCartClick = (event) => {
     event.stopPropagation()
     onAddToCart(selectedProduct)
+    setAddedToCart(true)
+    window.clearTimeout(addedFeedbackTimerRef.current)
+    addedFeedbackTimerRef.current = window.setTimeout(() => setAddedToCart(false), 1200)
   }
+
+  useEffect(() => () => window.clearTimeout(addedFeedbackTimerRef.current), [])
 
   const handleBuyNowClick = (event) => {
     event.stopPropagation()
-    onBuyNow(selectedProduct)
+    window.location.hash = `#product?product=${encodeURIComponent(product.id)}&mode=${isWholesale ? 'wholesale' : 'retail'}`
   }
 
   return (
@@ -2738,11 +3059,11 @@ function ProductCard({ cardContext = 'catalog', onAddToCart, onBuyNow, onSharePr
 
           <button
             type="button"
-            className="product-card__cart-action"
-            aria-label={`Add ${product.name} to cart`}
+            className={['product-card__cart-action', addedToCart ? 'is-added' : ''].filter(Boolean).join(' ')}
+            aria-label={addedToCart ? `${product.name} added to cart` : `Add ${product.name} to cart`}
             onClick={handleCartClick}
           >
-            <Icon name="cart" className="product-card__cart-icon" />
+            <Icon name={addedToCart ? 'check' : 'cart'} className="product-card__cart-icon" />
           </button>
         </div>
 
@@ -2785,12 +3106,10 @@ function ProductCard({ cardContext = 'catalog', onAddToCart, onBuyNow, onSharePr
           <span className="product-card__pieces-suffix">{pieceCount === 1 ? 'piece' : 'pieces'}</span>
         </label>}
 
-        {product.rating && product.reviewCount ? (
-          <p className="product-card__rating">
-            <span aria-label={`${product.rating} out of 5 stars`}>★★★★★</span>
-            <span>({product.reviewCount})</span>
-          </p>
-        ) : null}
+        <p className={['product-card__rating', product.rating && product.reviewCount ? '' : 'is-placeholder'].filter(Boolean).join(' ')} aria-hidden={!(product.rating && product.reviewCount)}>
+          <span aria-label={product.rating ? `${product.rating} out of 5 stars` : undefined}>★★★★★</span>
+          <span>({product.reviewCount || 0})</span>
+        </p>
 
         <div className="product-card__price-row">
           <p className="product-card__price">₹{salePrice}</p>
@@ -3657,7 +3976,7 @@ function Footer() {
           icon: 'phone',
           title: footerContactInfo.phone,
           note: footerContactInfo.phoneNote,
-          href: 'tel:+911234567890',
+          href: 'tel:+919031685801',
         },
         {
           icon: 'mail',
@@ -3772,6 +4091,8 @@ function Footer() {
         </div>
 
         <section className="footer-newsletter-card" id="footer-newsletter">
+          <picture className="footer-newsletter-card__artwork">
+            <source media="(min-width: 1025px)" srcSet="/ayush/footer-newsletter-desktop.png" />
           <img
             className="footer-newsletter-card__bg"
             src="/ayush/footer-newsletter-banner.png"
@@ -3779,6 +4100,7 @@ function Footer() {
             loading="lazy"
             aria-hidden="true"
           />
+          </picture>
 
           <div className="footer-newsletter-card__content">
             <div className="footer-newsletter-card__intro">
@@ -3871,7 +4193,7 @@ function SiteToast({ message }) {
   )
 }
 
-function MobileBottomNav({ pageHash, currentHash, cartCount = 0, wishlistCount = 0, isAuthenticated = false }) {
+function MobileBottomNav({ pageHash, currentHash, cartCount = 0, wishlistCount = 0, isAuthenticated = false, cartAnimationKey = 0 }) {
   const [viewportBottomOffset, setViewportBottomOffset] = useState(0)
 
   useEffect(() => {
@@ -3934,9 +4256,9 @@ function MobileBottomNav({ pageHash, currentHash, cartCount = 0, wishlistCount =
           aria-current={item.active ? 'page' : undefined}
         >
           <span className="mobile-bottom-nav__icon-wrap">
-            <Icon name={item.icon} className="mobile-bottom-nav__icon" />
+            <Icon key={item.label === 'Cart' ? `bottom-cart-${cartAnimationKey}` : item.label} name={item.icon} className={['mobile-bottom-nav__icon', item.label === 'Cart' ? 'cart-icon-pulse' : ''].filter(Boolean).join(' ')} />
             {item.count > 0 ? (
-              <span className="mobile-bottom-nav__badge" aria-label={`${item.count} items`}>
+              <span key={item.label === 'Cart' ? `bottom-cart-badge-${cartAnimationKey}` : `${item.label}-badge`} className={['mobile-bottom-nav__badge', item.label === 'Cart' ? 'cart-badge-pop' : ''].filter(Boolean).join(' ')} aria-label={`${item.count} items`}>
                 {item.count > 99 ? '99+' : item.count}
               </span>
             ) : null}
@@ -4031,13 +4353,14 @@ function App() {
   const [currentHash, setCurrentHash] = useState(getCurrentPageHash)
   const [account, setAccount] = useState(readStoredAccount)
   const [, setCatalogVersion] = useState(0)
+  const [cartAnimationKey, setCartAnimationKey] = useState(0)
 
   useEffect(() => {
     let active = true
     fetch(`${catalogApiUrl}/products`).then(response => response.ok ? response.json() : Promise.reject()).then(({ products = [] }) => {
       if (!active || !products.length) return
       const existingIds = new Set(productCatalog.map(product => product.id))
-      const managed = products.filter(product => !existingIds.has(product.id)).map(product => ({
+      const managed = products.map(product => ({
         id: product.id,
         name: product.name,
         weight: product.weight || `${product.wholesale?.weightKgPerBag || 1}kg`,
@@ -4046,8 +4369,24 @@ function App() {
         image: product.image || '/ayush/product-katarr-matar.png',
         alt: `${product.name} product pack`,
         offerLabel: `${product.discount || 5}% OFF`,
+        galleryImages: product.galleryImages || [],
+        productDetailImages: product.productDetailImages || [],
+        shortDescription: product.shortDescription || '',
+        fullDescription: product.fullDescription || product.description || '',
+        benefits: product.benefits || [],
+        whyChoose: product.whyChoose || [],
+        specifications: product.specifications || [],
+        nutrition: product.nutrition || [],
+        ingredients: product.ingredients || '',
+        badge: product.badge || '',
+        relatedProductIds: product.relatedProductIds || [],
+        status: product.status || 'Active',
       }))
-      productCatalog.push(...managed)
+      managed.forEach(product => {
+        const index = productCatalog.findIndex(existing => existing.id === product.id)
+        if (index >= 0) productCatalog[index] = { ...productCatalog[index], ...product }
+        else if (!existingIds.has(product.id)) productCatalog.push(product)
+      })
       setCatalogVersion(version => version + 1)
     }).catch(() => undefined)
     return () => { active = false }
@@ -4093,6 +4432,7 @@ function App() {
   const isContactPage = currentHash === '#contact'
   const pageHash = currentHash.split('?')[0]
   const isProductsPage = pageHash === '#products'
+  const isProductDetailsPage = pageHash === '#product'
   const isWishlistPage = pageHash === '#wishlist'
   const isCartPage = pageHash === '#cart'
   const isBuyNowPage = pageHash === '#buy-now'
@@ -4102,6 +4442,122 @@ function App() {
   const isAccountPage = currentHash === '#account' && Boolean(account)
   const isTermsPage = currentHash === '#terms'
   const isAuthPage = isLoginPage || isRegisterPage
+
+  useLayoutEffect(() => {
+    const sections = [...document.querySelectorAll('.site-shell main section, .site-shell .page-footer')]
+      .filter((section) => !section.classList.contains('reveal') && !section.closest('[role="dialog"]'))
+    const staggerSelector = [
+      '.product-card',
+      '.mode-card',
+      '.mobile-home-feature',
+      '.contact-card',
+      '.wishlist-card',
+      '.wishlist-recommendation-card',
+      '.product-details-related__grid > article',
+      '.product-details-review-list > article',
+      '.products-mobile-categories__track > button',
+      '.footer-meta-highlight',
+      '.account-detail-card',
+    ].join(', ')
+    const items = [...document.querySelectorAll(staggerSelector)]
+      .filter((item) => !item.closest('[role="dialog"]') && !item.closest('.reveal'))
+    const headingsAndBanners = [...document.querySelectorAll([
+      '.site-shell main section > h1',
+      '.site-shell main section > h2',
+      '.site-shell main section > header',
+      '.hero-frame',
+      '.bestsellers-heading',
+      '.contact-page__section-heading',
+      '.wishlist-heading-row',
+      '.product-details-related__heading',
+      '.checkout-section__heading',
+      '.factory-banner',
+      '.footer-newsletter-card__content',
+    ].join(', '))]
+      .filter((item) => !item.closest('[role="dialog"]') && !item.closest('.reveal'))
+    const targets = [...new Set([...sections, ...items, ...headingsAndBanners])]
+
+    if (!targets.length) return undefined
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    sections.forEach((section) => section.classList.add('scroll-reveal'))
+    headingsAndBanners.forEach((item) => item.classList.add('scroll-reveal-item'))
+    items.forEach((item) => {
+      item.classList.add('scroll-reveal-item')
+      const siblings = [...item.parentElement.children].filter((sibling) => sibling.matches(staggerSelector))
+      const itemIndex = Math.max(0, siblings.indexOf(item))
+      item.style.setProperty('--scroll-reveal-delay', `${Math.min(itemIndex, 6) * 90}ms`)
+    })
+
+    if (reduceMotion || !('IntersectionObserver' in window)) {
+      targets.forEach((target) => target.classList.add('is-scroll-visible'))
+      return undefined
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return
+        entry.target.classList.add('is-scroll-visible')
+        observer.unobserve(entry.target)
+      })
+    }, { threshold: .12, rootMargin: '0px 0px -7% 0px' })
+
+    targets.forEach((target) => observer.observe(target))
+    return () => observer.disconnect()
+  }, [currentHash])
+
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined
+
+    const motionTargets = [
+      ['.hero-frame__desktop-carousel', 16, 1.018],
+      ['.hero-frame__mobile-video', 10, 1.014],
+      ['.heritage-panel__image', 14, 1.018],
+      ['.factory-banner__image', 10, 1.012],
+    ].flatMap(([selector, depth, scale]) => [...document.querySelectorAll(selector)].map((element) => ({ element, depth, scale })))
+
+    if (!motionTargets.length) return undefined
+
+    motionTargets.forEach(({ element, scale }) => {
+      element.classList.add('scroll-driven-media')
+      element.style.setProperty('--scroll-driven-scale', scale)
+    })
+
+    let frameId = 0
+    const updateMotion = () => {
+      frameId = 0
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight
+      const mobileMultiplier = window.innerWidth <= 760 ? .6 : 1
+
+      motionTargets.forEach(({ element, depth }) => {
+        const rect = element.getBoundingClientRect()
+        const progress = Math.max(0, Math.min(1, (viewportHeight - rect.top) / (viewportHeight + rect.height)))
+        const offset = (0.5 - progress) * 2 * depth * mobileMultiplier
+        element.style.setProperty('--scroll-driven-progress', progress.toFixed(4))
+        element.style.setProperty('--scroll-driven-offset', `${offset.toFixed(2)}px`)
+      })
+    }
+
+    const requestMotionUpdate = () => {
+      if (!frameId) frameId = window.requestAnimationFrame(updateMotion)
+    }
+
+    updateMotion()
+    window.addEventListener('scroll', requestMotionUpdate, { passive: true })
+    window.addEventListener('resize', requestMotionUpdate, { passive: true })
+
+    return () => {
+      window.cancelAnimationFrame(frameId)
+      window.removeEventListener('scroll', requestMotionUpdate)
+      window.removeEventListener('resize', requestMotionUpdate)
+    }
+  }, [currentHash])
+
+  useEffect(() => {
+    if (pageHash !== '#product') return
+
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+  }, [currentHash, pageHash])
 
   useEffect(() => {
     window.localStorage.setItem(wishlistStorageKey, JSON.stringify(wishlistIds))
@@ -4135,6 +4591,7 @@ function App() {
         : { product, quantity, unitPrice, mode, minimum: mode === 'wholesale' ? 5 : 1 },
     }))
     setToastMessage(`${product.name} added to cart`)
+    setCartAnimationKey((value) => value + 1)
   }
 
   const handleShareProduct = async (product, sectionId) => {
@@ -4182,7 +4639,7 @@ function App() {
   return (
     <div className={['site-shell', isProductsPage ? 'site-shell--products' : '', isAuthPage ? 'site-shell--auth' : ''].filter(Boolean).join(' ')}>
       <TopBar />
-      <Navbar activePageHref={isOrderSuccessPage ? '#products' : pageHash} cartItemCount={cartItemCount} wishlistCount={wishlistIds.length} isAuthenticated={Boolean(account)} />
+      <Navbar activePageHref={isOrderSuccessPage ? '#products' : pageHash} cartItemCount={cartItemCount} wishlistCount={wishlistIds.length} isAuthenticated={Boolean(account)} cartAnimationKey={cartAnimationKey} />
 
       {isTermsPage ? (
         <TermsPage />
@@ -4199,6 +4656,18 @@ function App() {
           key={currentHash}
           initialShoppingMode={currentHash.includes('mode=retail') ? 'retail' : 'wholesale'}
           initialProductFilter={new URLSearchParams(currentHash.split('?')[1] || '').get('product') || 'all'}
+          onAddToCart={handleAddToCart}
+          onBuyNow={handleBuyNow}
+          onShareProduct={handleShareProduct}
+          onToggleWishlist={handleToggleWishlist}
+          wishlistIds={wishlistIds}
+        />
+      ) : isProductDetailsPage ? (
+        <ProductDetailsPage
+          key={currentHash}
+          product={[...productCatalog, ...bestsellerProducts].find((product) => product.id === new URLSearchParams(currentHash.split('?')[1] || '').get('product'))}
+          account={account}
+          initialShoppingMode={new URLSearchParams(currentHash.split('?')[1] || '').get('mode') === 'retail' ? 'retail' : 'wholesale'}
           onAddToCart={handleAddToCart}
           onBuyNow={handleBuyNow}
           onShareProduct={handleShareProduct}
@@ -4254,6 +4723,7 @@ function App() {
         cartCount={cartItemCount}
         wishlistCount={wishlistIds.length}
         isAuthenticated={Boolean(account)}
+        cartAnimationKey={cartAnimationKey}
       />
       <SiteToast message={toastMessage} />
     </div>

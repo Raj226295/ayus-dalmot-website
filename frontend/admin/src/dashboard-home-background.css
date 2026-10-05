@@ -1,0 +1,12 @@
+.dashboard-home-art{
+  min-height:calc(100vh - 62px);
+  margin:-18px -30px -40px;
+  padding:18px 30px 40px;
+  background-color:#25b8ab;
+  background-image:linear-gradient(rgba(255,255,255,.72),rgba(255,255,255,.57)),url('/ayush/admin-dashboard-home-bg.png');
+  background-position:center top;
+  background-repeat:no-repeat;
+  background-size:100% auto;
+}
+@media(max-width:900px){.dashboard-home-art{margin:-18px -18px -40px;padding:18px 18px 40px;background-image:linear-gradient(rgba(255,255,255,.74),rgba(255,255,255,.59)),url('/ayush/admin-dashboard-home-bg-tablet.png')}}
+@media(max-width:520px){.dashboard-home-art{background-size:auto 100%;background-position:center top}}
